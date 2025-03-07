@@ -1,5 +1,5 @@
-Package: VariableSelection
-Title: Variable Selection Methods for Survival Data with Intergration
+Package: coxkl
+Title: Estimate Survival Data with Data Intergration
 Version: 1.0.0
 URL: 
 BugReports: 
