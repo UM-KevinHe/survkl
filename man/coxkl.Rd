@@ -2,43 +2,64 @@
 % Please edit documentation in R/coxkl.R
 \name{coxkl}
 \alias{coxkl}
-\title{Cox Proportional Hazards Model with KL Divergence}
+\title{Cox Proportional Hazards Model with KL Divergence for Data Integration}
 \usage{
-coxkl(z, delta, time, RS, eta_list, tol = 1e-07, Mstop = 50, beta = NULL)
+coxkl(
+  z,
+  delta,
+  time,
+  RS = NULL,
+  beta = NULL,
+  eta_list,
+  tol = 1e-07,
+  Mstop = 50
+)
 }
 \arguments{
-\item{z}{A matrix of covariates where rows represent observations and columns represent variables.}
+\item{z}{Numeric covariate matrix with rows representing observations and columns representing predictor variables. All variables must be numeric.}
 
-\item{delta}{A vector of time-to-event outcomes, where 1 indicates an event has occurred and 0 indicates censoring.}
+\item{delta}{Numeric event indicator vector (1 = event occurred, 0 = censored).}
 
-\item{time}{A vector of event times corresponding to each observation.}
+\item{time}{Numeric vector of observed event or censoring times. No sorting is required.}
 
-\item{RS}{A vector or matrix of external risk scores corresponding to each observation, used for data integration.}
+\item{RS}{Numeric vector or matrix of precomputed external risk scores. Length (or number of rows) must match the number of observations. If not provided, \code{beta} must be specified.}
 
-\item{eta_list}{A vector of tuning parameters for data integration, allowing for adjustment in the influence of the external risk scores.}
+\item{beta}{Numeric vector of externally derived coefficients (e.g., from prior studies). Length must match the number of columns in \code{z}. Use zeros to represent absent covariates if fewer coefficients are externally available. If not provided, \code{RS} must be specified.}
 
-\item{tol}{The tolerance level for the convergence criterion of the optimization algorithm. Default is 1.0e-7.}
+\item{eta_list}{Numeric vector of tuning parameters controlling the integration strength of the external information. Higher values indicate greater reliance on external information.}
 
-\item{Mstop}{The maximum number of iteration steps for the optimization algorithm. Default is 50.}
+\item{tol}{Numeric scalar controlling convergence tolerance for optimization. Default is \code{1.0e-7}.}
+
+\item{Mstop}{Integer specifying the maximum number of iterations allowed for the optimization algorithm. Default is \code{50}.}
 }
 \value{
-A list containing three elements:
-\itemize{
-\item \code{betas}: A list of estimated coefficient matrices, one for each value of eta.
-\item \code{LPs_train}: A list of linear predictors for the training set, one for each value of eta.
-\item \code{eta}: The original list of eta values provided as input.
+A list with the following components:
+\describe{
+\item{\code{beta_list}}{List of estimated coefficient vectors corresponding to each \code{eta} value.}
+\item{\code{LP_list}}{List of linear predictor vectors computed on the training data corresponding to each \code{eta} value.}
+\item{\code{eta_list}}{Original vector of tuning parameters (\code{eta}) provided by the user.}
 }
 }
 \description{
-This function estimates the coefficients of a Cox proportional hazards model using
-Kullback-Leibler divergence for data integration, allowing for the incorporation of
-an external risk score (RS) and adjustment of the integration via a list of tuning parameters (eta).
+Estimates the coefficients of a Cox proportional hazards model incorporating external information using Kullback-Leibler (KL) divergence. External information can be integrated via precomputed external risk scores (RS) or externally derived coefficient estimates (beta). The strength of integration is controlled by tuning parameters (eta).
 }
 \examples{
-# Load example data (assuming the package is installed and loaded)
-data(simulatedData)
-# Fit the model with a single eta value
-result1 <- coxkl(z = z, delta = delta, time = time,
-                 RS = rs_external1, eta_list = c(0,1,2,3,4))
+# Example data has 6 covariates: z1, z2, z5, z6 (continuous) and z3, z4 (binary)
+# External beta is simulated from a homogeneous data distribution.
+
+# Using external beta information
+result1 <- coxkl(z = ExampleData$z,
+                 delta = ExampleData$status,
+                 time = ExampleData$time,
+                 beta = ExampleData$beta_external,
+                 eta_list = seq(0, 5, 1))
+
+# Using external risk score information
+rs <- as.matrix(ExampleData$z) \%*\% as.matrix(ExampleData$beta_external)
+result2 <- coxkl(z = ExampleData$z,
+                 delta = ExampleData$status,
+                 time = ExampleData$time,
+                 RS = rs,
+                 eta_list = seq(0, 5, 1))
 
 }

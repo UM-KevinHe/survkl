@@ -13,7 +13,7 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 
 // rev_cumsum
 arma::vec rev_cumsum(const arma::vec& X);
-RcppExport SEXP _VariableSelection_rev_cumsum(SEXP XSEXP) {
+RcppExport SEXP _coxkll_rev_cumsum(SEXP XSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -24,7 +24,7 @@ END_RCPP
 }
 // ddloglik
 List ddloglik(const arma::mat& Z, const arma::vec& delta, const arma::vec& beta);
-RcppExport SEXP _VariableSelection_ddloglik(SEXP ZSEXP, SEXP deltaSEXP, SEXP betaSEXP) {
+RcppExport SEXP _coxkll_ddloglik(SEXP ZSEXP, SEXP deltaSEXP, SEXP betaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -37,7 +37,7 @@ END_RCPP
 }
 // ddloglik_S0
 List ddloglik_S0(const arma::mat& Z, const arma::vec& delta, const arma::vec& beta);
-RcppExport SEXP _VariableSelection_ddloglik_S0(SEXP ZSEXP, SEXP deltaSEXP, SEXP betaSEXP) {
+RcppExport SEXP _coxkll_ddloglik_S0(SEXP ZSEXP, SEXP deltaSEXP, SEXP betaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -50,7 +50,7 @@ END_RCPP
 }
 // maxgrad
 double maxgrad(const arma::mat& X, const arma::vec& y, const arma::vec& K, const arma::vec& m);
-RcppExport SEXP _VariableSelection_maxgrad(SEXP XSEXP, SEXP ySEXP, SEXP KSEXP, SEXP mSEXP) {
+RcppExport SEXP _coxkll_maxgrad(SEXP XSEXP, SEXP ySEXP, SEXP KSEXP, SEXP mSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -64,7 +64,7 @@ END_RCPP
 }
 // standardize
 List standardize(const arma::mat& x);
-RcppExport SEXP _VariableSelection_standardize(SEXP xSEXP) {
+RcppExport SEXP _coxkll_standardize(SEXP xSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -75,7 +75,7 @@ END_RCPP
 }
 // gdfit_cox
 List gdfit_cox(const arma::mat& X, const arma::vec& d, const std::string& penalty, const arma::uvec& K1, const int& K0, const arma::vec& lambda, const double& alpha, const double& eps, const int& max_iter, const double& gamma, const arma::vec& group_multiplier, const int& dfmax, const int& gmax, const bool& warn, const bool& user, const int& actIter);
-RcppExport SEXP _VariableSelection_gdfit_cox(SEXP XSEXP, SEXP dSEXP, SEXP penaltySEXP, SEXP K1SEXP, SEXP K0SEXP, SEXP lambdaSEXP, SEXP alphaSEXP, SEXP epsSEXP, SEXP max_iterSEXP, SEXP gammaSEXP, SEXP group_multiplierSEXP, SEXP dfmaxSEXP, SEXP gmaxSEXP, SEXP warnSEXP, SEXP userSEXP, SEXP actIterSEXP) {
+RcppExport SEXP _coxkll_gdfit_cox(SEXP XSEXP, SEXP dSEXP, SEXP penaltySEXP, SEXP K1SEXP, SEXP K0SEXP, SEXP lambdaSEXP, SEXP alphaSEXP, SEXP epsSEXP, SEXP max_iterSEXP, SEXP gammaSEXP, SEXP group_multiplierSEXP, SEXP dfmaxSEXP, SEXP gmaxSEXP, SEXP warnSEXP, SEXP userSEXP, SEXP actIterSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -101,7 +101,7 @@ END_RCPP
 }
 // gdfit_cox_kl
 List gdfit_cox_kl(const arma::mat& X, const arma::vec& d, const std::string& penalty, const arma::vec& delta_tilde, const arma::uvec& K1, const int& K0, const arma::vec& lambda, const double& alpha, const double& eps, const double& eta_kl, const int& max_iter, const double& gamma, const arma::vec& group_multiplier, const int& dfmax, const int& gmax, const bool& warn, const bool& user, const int& actIter);
-RcppExport SEXP _VariableSelection_gdfit_cox_kl(SEXP XSEXP, SEXP dSEXP, SEXP penaltySEXP, SEXP delta_tildeSEXP, SEXP K1SEXP, SEXP K0SEXP, SEXP lambdaSEXP, SEXP alphaSEXP, SEXP epsSEXP, SEXP eta_klSEXP, SEXP max_iterSEXP, SEXP gammaSEXP, SEXP group_multiplierSEXP, SEXP dfmaxSEXP, SEXP gmaxSEXP, SEXP warnSEXP, SEXP userSEXP, SEXP actIterSEXP) {
+RcppExport SEXP _coxkll_gdfit_cox_kl(SEXP XSEXP, SEXP dSEXP, SEXP penaltySEXP, SEXP delta_tildeSEXP, SEXP K1SEXP, SEXP K0SEXP, SEXP lambdaSEXP, SEXP alphaSEXP, SEXP epsSEXP, SEXP eta_klSEXP, SEXP max_iterSEXP, SEXP gammaSEXP, SEXP group_multiplierSEXP, SEXP dfmaxSEXP, SEXP gmaxSEXP, SEXP warnSEXP, SEXP userSEXP, SEXP actIterSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -129,7 +129,7 @@ END_RCPP
 }
 // calculateDeltaTilde
 arma::vec calculateDeltaTilde(const arma::vec& event, const arma::vec& time, const arma::vec& theta_tilde);
-RcppExport SEXP _VariableSelection_calculateDeltaTilde(SEXP eventSEXP, SEXP timeSEXP, SEXP theta_tildeSEXP) {
+RcppExport SEXP _coxkll_calculateDeltaTilde(SEXP eventSEXP, SEXP timeSEXP, SEXP theta_tildeSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -142,7 +142,7 @@ END_RCPP
 }
 // calculateRiskAndUpdateLoss
 List calculateRiskAndUpdateLoss(arma::vec& eta, const arma::vec& d, double Loss, arma::vec r);
-RcppExport SEXP _VariableSelection_calculateRiskAndUpdateLoss(SEXP etaSEXP, SEXP dSEXP, SEXP LossSEXP, SEXP rSEXP) {
+RcppExport SEXP _coxkll_calculateRiskAndUpdateLoss(SEXP etaSEXP, SEXP dSEXP, SEXP LossSEXP, SEXP rSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -156,7 +156,7 @@ END_RCPP
 }
 // calculateRiskAndUpdateLoss2
 List calculateRiskAndUpdateLoss2(arma::vec& eta, arma::vec& d, arma::vec& deltaTilde, double& Loss, double& gamma);
-RcppExport SEXP _VariableSelection_calculateRiskAndUpdateLoss2(SEXP etaSEXP, SEXP dSEXP, SEXP deltaTildeSEXP, SEXP LossSEXP, SEXP gammaSEXP) {
+RcppExport SEXP _coxkll_calculateRiskAndUpdateLoss2(SEXP etaSEXP, SEXP dSEXP, SEXP deltaTildeSEXP, SEXP LossSEXP, SEXP gammaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -171,7 +171,7 @@ END_RCPP
 }
 // ddloglik_md
 List ddloglik_md(int n, arma::colvec& delta, arma::mat& z, arma::colvec& beta, arma::mat& offset);
-RcppExport SEXP _VariableSelection_ddloglik_md(SEXP nSEXP, SEXP deltaSEXP, SEXP zSEXP, SEXP betaSEXP, SEXP offsetSEXP) {
+RcppExport SEXP _coxkll_ddloglik_md(SEXP nSEXP, SEXP deltaSEXP, SEXP zSEXP, SEXP betaSEXP, SEXP offsetSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -186,7 +186,7 @@ END_RCPP
 }
 // ddloglik_md2
 List ddloglik_md2(arma::vec& delta, arma::mat& z, arma::vec& beta);
-RcppExport SEXP _VariableSelection_ddloglik_md2(SEXP deltaSEXP, SEXP zSEXP, SEXP betaSEXP) {
+RcppExport SEXP _coxkll_ddloglik_md2(SEXP deltaSEXP, SEXP zSEXP, SEXP betaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -199,7 +199,7 @@ END_RCPP
 }
 // klcox_boosting
 List klcox_boosting(const arma::mat& z, const arma::vec& delta, const arma::vec& theta_tilde, const double& eta, const double& rate, const double& tol, const int& maxit);
-RcppExport SEXP _VariableSelection_klcox_boosting(SEXP zSEXP, SEXP deltaSEXP, SEXP theta_tildeSEXP, SEXP etaSEXP, SEXP rateSEXP, SEXP tolSEXP, SEXP maxitSEXP) {
+RcppExport SEXP _coxkll_klcox_boosting(SEXP zSEXP, SEXP deltaSEXP, SEXP theta_tildeSEXP, SEXP etaSEXP, SEXP rateSEXP, SEXP tolSEXP, SEXP maxitSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -216,7 +216,7 @@ END_RCPP
 }
 // ddloglik_KL_RS_test
 double ddloglik_KL_RS_test(double z);
-RcppExport SEXP _VariableSelection_ddloglik_KL_RS_test(SEXP zSEXP) {
+RcppExport SEXP _coxkll_ddloglik_KL_RS_test(SEXP zSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -227,7 +227,7 @@ END_RCPP
 }
 // loss_fn_cpp
 List loss_fn_cpp(const arma::mat& Z, const arma::vec& delta, arma::vec& beta);
-RcppExport SEXP _VariableSelection_loss_fn_cpp(SEXP ZSEXP, SEXP deltaSEXP, SEXP betaSEXP) {
+RcppExport SEXP _coxkll_loss_fn_cpp(SEXP ZSEXP, SEXP deltaSEXP, SEXP betaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -240,7 +240,7 @@ END_RCPP
 }
 // ddloglik_KL_RS_score
 List ddloglik_KL_RS_score(const arma::mat& Z, const arma::vec& delta, arma::vec& beta, const arma::vec& theta_tilde, const double& eta);
-RcppExport SEXP _VariableSelection_ddloglik_KL_RS_score(SEXP ZSEXP, SEXP deltaSEXP, SEXP betaSEXP, SEXP theta_tildeSEXP, SEXP etaSEXP) {
+RcppExport SEXP _coxkll_ddloglik_KL_RS_score(SEXP ZSEXP, SEXP deltaSEXP, SEXP betaSEXP, SEXP theta_tildeSEXP, SEXP etaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -255,7 +255,7 @@ END_RCPP
 }
 // ddloglik_KL_RS
 List ddloglik_KL_RS(const arma::mat& Z, const arma::vec& delta, arma::vec& beta, const arma::vec& theta_tilde, double& eta);
-RcppExport SEXP _VariableSelection_ddloglik_KL_RS(SEXP ZSEXP, SEXP deltaSEXP, SEXP betaSEXP, SEXP theta_tildeSEXP, SEXP etaSEXP) {
+RcppExport SEXP _coxkll_ddloglik_KL_RS(SEXP ZSEXP, SEXP deltaSEXP, SEXP betaSEXP, SEXP theta_tildeSEXP, SEXP etaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -270,7 +270,7 @@ END_RCPP
 }
 // KL_Cox_Estimate_cpp
 arma::vec KL_Cox_Estimate_cpp(const arma::mat& z, const arma::vec& delta, const arma::vec& time, const arma::vec& RS_internal, double eta, const double tol, const bool returnBeta);
-RcppExport SEXP _VariableSelection_KL_Cox_Estimate_cpp(SEXP zSEXP, SEXP deltaSEXP, SEXP timeSEXP, SEXP RS_internalSEXP, SEXP etaSEXP, SEXP tolSEXP, SEXP returnBetaSEXP) {
+RcppExport SEXP _coxkll_KL_Cox_Estimate_cpp(SEXP zSEXP, SEXP deltaSEXP, SEXP timeSEXP, SEXP RS_internalSEXP, SEXP etaSEXP, SEXP tolSEXP, SEXP returnBetaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -287,28 +287,28 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_VariableSelection_rev_cumsum", (DL_FUNC) &_VariableSelection_rev_cumsum, 1},
-    {"_VariableSelection_ddloglik", (DL_FUNC) &_VariableSelection_ddloglik, 3},
-    {"_VariableSelection_ddloglik_S0", (DL_FUNC) &_VariableSelection_ddloglik_S0, 3},
-    {"_VariableSelection_maxgrad", (DL_FUNC) &_VariableSelection_maxgrad, 4},
-    {"_VariableSelection_standardize", (DL_FUNC) &_VariableSelection_standardize, 1},
-    {"_VariableSelection_gdfit_cox", (DL_FUNC) &_VariableSelection_gdfit_cox, 16},
-    {"_VariableSelection_gdfit_cox_kl", (DL_FUNC) &_VariableSelection_gdfit_cox_kl, 18},
-    {"_VariableSelection_calculateDeltaTilde", (DL_FUNC) &_VariableSelection_calculateDeltaTilde, 3},
-    {"_VariableSelection_calculateRiskAndUpdateLoss", (DL_FUNC) &_VariableSelection_calculateRiskAndUpdateLoss, 4},
-    {"_VariableSelection_calculateRiskAndUpdateLoss2", (DL_FUNC) &_VariableSelection_calculateRiskAndUpdateLoss2, 5},
-    {"_VariableSelection_ddloglik_md", (DL_FUNC) &_VariableSelection_ddloglik_md, 5},
-    {"_VariableSelection_ddloglik_md2", (DL_FUNC) &_VariableSelection_ddloglik_md2, 3},
-    {"_VariableSelection_klcox_boosting", (DL_FUNC) &_VariableSelection_klcox_boosting, 7},
-    {"_VariableSelection_ddloglik_KL_RS_test", (DL_FUNC) &_VariableSelection_ddloglik_KL_RS_test, 1},
-    {"_VariableSelection_loss_fn_cpp", (DL_FUNC) &_VariableSelection_loss_fn_cpp, 3},
-    {"_VariableSelection_ddloglik_KL_RS_score", (DL_FUNC) &_VariableSelection_ddloglik_KL_RS_score, 5},
-    {"_VariableSelection_ddloglik_KL_RS", (DL_FUNC) &_VariableSelection_ddloglik_KL_RS, 5},
-    {"_VariableSelection_KL_Cox_Estimate_cpp", (DL_FUNC) &_VariableSelection_KL_Cox_Estimate_cpp, 7},
+    {"_coxkll_rev_cumsum", (DL_FUNC) &_coxkll_rev_cumsum, 1},
+    {"_coxkll_ddloglik", (DL_FUNC) &_coxkll_ddloglik, 3},
+    {"_coxkll_ddloglik_S0", (DL_FUNC) &_coxkll_ddloglik_S0, 3},
+    {"_coxkll_maxgrad", (DL_FUNC) &_coxkll_maxgrad, 4},
+    {"_coxkll_standardize", (DL_FUNC) &_coxkll_standardize, 1},
+    {"_coxkll_gdfit_cox", (DL_FUNC) &_coxkll_gdfit_cox, 16},
+    {"_coxkll_gdfit_cox_kl", (DL_FUNC) &_coxkll_gdfit_cox_kl, 18},
+    {"_coxkll_calculateDeltaTilde", (DL_FUNC) &_coxkll_calculateDeltaTilde, 3},
+    {"_coxkll_calculateRiskAndUpdateLoss", (DL_FUNC) &_coxkll_calculateRiskAndUpdateLoss, 4},
+    {"_coxkll_calculateRiskAndUpdateLoss2", (DL_FUNC) &_coxkll_calculateRiskAndUpdateLoss2, 5},
+    {"_coxkll_ddloglik_md", (DL_FUNC) &_coxkll_ddloglik_md, 5},
+    {"_coxkll_ddloglik_md2", (DL_FUNC) &_coxkll_ddloglik_md2, 3},
+    {"_coxkll_klcox_boosting", (DL_FUNC) &_coxkll_klcox_boosting, 7},
+    {"_coxkll_ddloglik_KL_RS_test", (DL_FUNC) &_coxkll_ddloglik_KL_RS_test, 1},
+    {"_coxkll_loss_fn_cpp", (DL_FUNC) &_coxkll_loss_fn_cpp, 3},
+    {"_coxkll_ddloglik_KL_RS_score", (DL_FUNC) &_coxkll_ddloglik_KL_RS_score, 5},
+    {"_coxkll_ddloglik_KL_RS", (DL_FUNC) &_coxkll_ddloglik_KL_RS, 5},
+    {"_coxkll_KL_Cox_Estimate_cpp", (DL_FUNC) &_coxkll_KL_Cox_Estimate_cpp, 7},
     {NULL, NULL, 0}
 };
 
-RcppExport void R_init_VariableSelection(DllInfo *dll) {
+RcppExport void R_init_coxkll(DllInfo *dll) {
     R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
     R_useDynamicSymbols(dll, FALSE);
 }

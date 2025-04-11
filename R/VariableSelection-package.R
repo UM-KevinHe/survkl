@@ -2,7 +2,7 @@
 #' 
 #' Description
 #' 
-#' @useDynLib VariableSelection, .registration = TRUE
+#' @useDynLib coxkll, .registration = TRUE
 #' @importFrom Rcpp sourceCpp
 #' 
 "_PACKAGE"

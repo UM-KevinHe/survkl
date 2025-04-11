@@ -11,9 +11,6 @@
 #'   represent variables.
 #' @param delta A vector of event indicators (1 = event, 0 = censored).
 #' @param time A vector of survival/censoring times.
-#' @param group A vector indicating group membership for each covariate.  Used
-#'   for group penalties (not implemented in this documentation, but present in
-#'   the function signature).
 #' @param K The number of groups.
 #' @param penalty The type of penalty to apply.  Must be either "lasso" (for
 #'   L1 regularization) or "ridge" (for L2 regularization).
@@ -41,8 +38,6 @@
 #' @param max.iter The maximum number of iterations for the coordinate descent
 #'   algorithm. Default is 1000.
 #' @param dfmax Maximum number of non-zero coefficients.
-#' @param gmax Maximum number of groups with non-zero coefficients (relevant
-#'   for group penalties, but not fully described here).
 #' @param tau A parameter related to the penalty (specific meaning depends on
 #'   the penalty type, but not fully described here). Default is 1/3.
 #' @param group.multiplier An optional vector of weights for each group, used
@@ -78,13 +73,12 @@
 #'                              K = K, penalty = "lasso", theta_tilde = theta_tilde,
 #'                              eta_kl = 1)
 #'                              
-#'                            
-coxkl_highdim <-function(z, delta, time, group, K, penalty="lasso",
+coxkl_highdim <-function(z, delta, time, K, penalty="lasso",
                          theta_tilde,
                          eta_kl = 0, 
                          alpha=1, nlambda=100, lambda,
                          lambda.min=0.001, eps=.001, max.iter=1000,
-                         dfmax=p, gmax=length(unique(group)), tau=1/3, group.multiplier,
+                         dfmax=p, tau=1/3, group.multiplier,
                          warn=TRUE, returnX=FALSE, 
                          activeSet = FALSE,
                          actIter=50,
@@ -104,8 +98,10 @@ coxkl_highdim <-function(z, delta, time, group, K, penalty="lasso",
   center <- as.vector(std[[2]])
   scale <- std[[3]]
   
+  group <- c(1:p)
   K <- as.integer(table(group))
-  group.multiplier <- rep(rep(sqrt(K),2),p)
+  # group.multiplier <- rep(rep(sqrt(K),2),p)
+  group.multiplier <- rep(sqrt(K), p)
   
   if (missing(lambda)) {
     lambda <- setupLambdaCox_self(XX, time_matrix, delta_matrix, group, penalty, alpha, lambda.min, nlambda, group.multiplier)
@@ -116,7 +112,6 @@ coxkl_highdim <-function(z, delta, time, group, K, penalty="lasso",
   }
   
   # group <- c(1)
-  K <- as.integer(table(group))
   K0 <- as.integer(if (min(group)==0) K[1] else 0)          # =0 if each variable has a group index
   K1 <- as.integer(if (min(group)==0) cumsum(K) else c(0, cumsum(K))) 
   dfmax <- p
@@ -124,7 +119,7 @@ coxkl_highdim <-function(z, delta, time, group, K, penalty="lasso",
   
   delta_tilde <- calculateDeltaTilde(delta_matrix, time_matrix, theta_tilde)
   
-  res <- gdfit_cox_kl(X = z, d = delta_matrix, penalty = penalty,
+  res <- gdfit_cox_kl(X = XX, d = delta_matrix, penalty = penalty,
                       delta_tilde = delta_tilde,
                       eta_kl = eta_kl,
                       K1 = K1, K0 = K0,
@@ -135,7 +130,7 @@ coxkl_highdim <-function(z, delta, time, group, K, penalty="lasso",
                       gmax = length(unique(group)),
                       warn = as.integer(warn), user = FALSE)
   
-  b     <- matrix(t(res$beta),p*K,nlambda)
+  b     <- matrix(t(res$beta),p,nlambda)
   iter  <- as.vector(res$iter)
   df    <- as.vector(res$df)
   loss  <- -1*as.vector(res$Loss)
@@ -149,18 +144,6 @@ coxkl_highdim <-function(z, delta, time, group, K, penalty="lasso",
   loss <- loss[ind]
   #if (iter[1] == max.iter) stop("Algorithm failed to converge for any values of lambda.  This indicates a combination of (a) an ill-conditioned feature matrix X and (b) insufficient penalization.  You must fix one or the other for your model to be identifiable.", call.=FALSE)
   if (warn & any(iter==max.iter)) warning("Algorithm failed to converge for all values of lambda", call.=FALSE)
-  
-  
-  # Unstandardize
-  #print(group)
-  #print(dim(b))
-  #print(dim(XX))
-  #b <- unorthogonalize(b, XX, group, intercept=FALSE)
-  #if (XG$reorder) b <- b[XG$ord.inv,]
-  #beta <- matrix(0, nrow=length(scale), ncol=ncol(b))
-  #beta[XG$nz,] <- b / XG$scale[XG$nz]
-  
-  #dimnames(beta) <- list(XG$names, round(lambda, digits=4))
   
   # Output
   val <- structure(list(beta = b,
@@ -195,7 +178,26 @@ coxkl_highdim <-function(z, delta, time, group, K, penalty="lasso",
 #' Kullback-Leibler divergence for data integration, allowing for the incorporation of
 #' an external risk score (RS) and adjustment of the integration via a list of tuning parameters (eta).
 #' @export
-cv.coxkl_highdim <-function(z, delta, time, group,
+#' 
+
+# coxkl_highdim <-function(z, delta, time, K, penalty="lasso",
+#                          theta_tilde,
+#                          eta_kl = 0, 
+#                          alpha=1, nlambda=100, lambda,
+#                          lambda.min=0.001, eps=.001, max.iter=1000,
+#                          dfmax=p, tau=1/3, group.multiplier,
+#                          warn=TRUE, returnX=FALSE, 
+#                          activeSet = FALSE,
+#                          actIter=50,
+#                          actNum=5,
+#                          ...)
+
+# (z = X_train, delta = delta_train, time = t_train,
+#  theta_tilde = rs_external1,
+#  group = c(1:dim(X_train)[2]), K = 1, eta_kl = eta_best,
+#  cv.method = "LinPred")
+
+cv.coxkl_highdim <-function(z, delta, time,
                             theta_tilde,
                             eta_kl = 0, ..., nfolds = 10, seed, fold, se=c('quick', 'bootstrap'),
                             cv.method = c('LinPred', 'VVH'),
@@ -237,10 +239,11 @@ cv.coxkl_highdim <-function(z, delta, time, group,
   fold1[fold1==0] <- nfolds
   fold0[fold0==0] <- nfolds
   fold_sub <- integer(n/K)
-  fold <- integer(n) 
+  fold <- integer(n)
   fold_sub[fit$delta==1] <- sample(fold1)
   fold_sub[fit$delta==0] <- sample(fold0)
   fold <- rep(fold_sub, each = K)
+  
   #} else {
   #  nfolds <- max(fold)
   #}
@@ -252,10 +255,10 @@ cv.coxkl_highdim <-function(z, delta, time, group,
   #cv.args$group.multiplier <- fit$
   cv.args$warn <- FALSE
   cv.args$eta_kl <- eta_kl
-  
   if(cv.method == 'LinPred'){
     for (i in 1:nfolds) {
-      res <- cvf.surv(i, z, theta_tilde, fit$delta, fit$time, K, fold, fold_sub, cv.args)
+      res <- cvf.surv(i, X, theta_tilde, fit$delta, fit$time, K, fold, fold_sub, cv.args)
+      print(res)
       Y[fold==i, 1:res$nl] <- res$yhat
     }
     ind <- which(apply(is.finite(Y), 2, all))
@@ -267,7 +270,7 @@ cv.coxkl_highdim <-function(z, delta, time, group,
     lambda  <- cv.args$lambda
     cve     <- rep(0, length(lambda))
     for (i in 1:nfolds) {
-      res                   <- cvf.survVVH(i, z, theta_tilde, fit$delta, fit$time, K, fold, fold_sub, cv.args)
+      res                   <- cvf.survVVH(i, X, theta_tilde, fit$delta, fit$time, K, fold, fold_sub, cv.args)
       EtaAll                <- res$yhatall
       EtaK                  <- res$yhat
       L_K                   <- loss.grpsurv_self_multi(delta_matrix[fold!=i], EtaK, K, total=FALSE)
@@ -327,3 +330,9 @@ cvf.survVVH <- function(i, z, theta_tilde, delta, time, K, fold, fold_sub, cv.ar
   
   list(nl=length(fit.i$lambda), yhat=yhat, yhatall=yhatall)#, loss=loss)
 }
+
+
+
+
+
+

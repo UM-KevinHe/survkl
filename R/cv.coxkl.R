@@ -135,95 +135,95 @@ pl_cal_theta <- function(lp, delta, time){
 
 
 
-cv.coxkl_lasso <- function(z, delta, time, RS, beta, eta_list, lambda, tol=1.0e-7, Mstop = 50, nfolds = 5, 
-                           penalty="lasso",
-                           alpha=1,
-                           criteria = "V&VH"){
-  
-  if(is.null(RS) && is.null(beta)) {
-    stop("Error: No external information is provided. Either RS or beta must be provided.")
-  }  else if(is.null(RS) && !is.null(beta)) {
-    # Check if the dimension of beta matches the number of columns in z
-    if(length(beta) == ncol(z)) {
-      print("External beta information is used.")
-      RS <- as.matrix(z) %*% as.matrix(beta)
-    } else {
-      stop("Error: The dimension of beta does not match the number of columns in z.")
-    }
-  } else if(!is.null(RS)) {
-    print("External Risk Score information is used.")
-  }
-  
-  time_order <- order(time)
-  delta      <- delta[time_order]
-  z          <- z[time_order,]
-  RS <- RS[time_order]
-  time       <- time[time_order]
-  
-  likelihood_all <- NULL
-  
-  # folds <- get_fold(nfolds = nfolds, delta)
-  
-  # print(folds)
-  
-  for (eta_index in seq_along(eta_list)){
-    
-    eta = eta_list[eta_index]
-    likelihood_cv = rep(0, nfolds)
-    folds <- get_fold(nfolds, delta)
-    for(f in 1:nfolds){
-      train_idx <- sort(which(folds != f))  
-      test_idx <- sort(which(folds == f))   
-      
-      # Extract training and testing data
-      Z_train <- z[train_idx, ]
-      delta_train <- delta[train_idx]
-      time_train <- time[train_idx]
-      
-      Z_test <- z[test_idx, ]
-      delta_test <- delta[test_idx]
-      time_test <- time[test_idx]
-      
-      # cox_estimate <- coxkl_sorted(z = Z_train, delta = delta_train, time = time_train,
-      #                              RS = RS[train_idx], eta_list = eta, tol=tol, Mstop = Mstop)
-      # 
-      # beta_train <- cox_estimate$beta_list[[1]]
-      
-      res_train <- cv.coxkl_highdim(z = Z_train, delta = delta_train, time = time_train,
-                                    theta_tilde = RS[train_idx],
-                                    group = c(1:dim(Z_train)[2]), K = 1,
-                                    penalty = penalty,
-                                    eta_kl = eta,
-                                    alpha = alpha,
-                                    lambda = lambda,
-                                    cv.method = "LinPred")
-      
-      beta_train <- res_train$fit$beta[,which(res_train$lambda == res_train$lambda.min)]
-      
-      if (criteria == "V&VH")
-      {
-        LP_train <- as.matrix(Z_train)%*%as.matrix(beta_train)
-        LP_internal <- as.matrix(z)%*%as.matrix(beta_train)
-        
-        likelihood_cv[f] <- pl_cal_theta(LP_internal, delta_test, time_test) - pl_cal_theta(LP_train, delta_train, time_train)
-      }
-      
-      #C-Index
-      if (criteria == "C-Index"){
-        LP_test <- as.matrix(Z_test)%*%as.matrix(beta_train)
-        likelihood_cv[f] <- glmnet::Cindex(LP_test, Surv(time_test, delta_test))
-      }
-    }
-    
-    if (criteria == "V&VH"){
-      likelihood_all[eta_index] <- mean(likelihood_cv)
-    }
-    
-    if (criteria == "C-Index"){
-      likelihood_all <- c(likelihood_all, mean(likelihood_cv))
-    }
-    
-  }
-  results <- list(result = likelihood_all, eta_list = eta_list, criteria = criteria)
-  return(results)
-}
+# cv.coxkl_lasso <- function(z, delta, time, RS, beta, eta_list, lambda, tol=1.0e-7, Mstop = 50, nfolds = 5, 
+#                            penalty="lasso",
+#                            alpha=1,
+#                            criteria = "V&VH"){
+#   
+#   if(is.null(RS) && is.null(beta)) {
+#     stop("Error: No external information is provided. Either RS or beta must be provided.")
+#   }  else if(is.null(RS) && !is.null(beta)) {
+#     # Check if the dimension of beta matches the number of columns in z
+#     if(length(beta) == ncol(z)) {
+#       print("External beta information is used.")
+#       RS <- as.matrix(z) %*% as.matrix(beta)
+#     } else {
+#       stop("Error: The dimension of beta does not match the number of columns in z.")
+#     }
+#   } else if(!is.null(RS)) {
+#     print("External Risk Score information is used.")
+#   }
+#   
+#   time_order <- order(time)
+#   delta      <- delta[time_order]
+#   z          <- z[time_order,]
+#   RS <- RS[time_order]
+#   time       <- time[time_order]
+#   
+#   likelihood_all <- NULL
+#   
+#   # folds <- get_fold(nfolds = nfolds, delta)
+#   
+#   # print(folds)
+#   
+#   for (eta_index in seq_along(eta_list)){
+#     
+#     eta = eta_list[eta_index]
+#     likelihood_cv = rep(0, nfolds)
+#     folds <- get_fold(nfolds, delta)
+#     for(f in 1:nfolds){
+#       train_idx <- sort(which(folds != f))  
+#       test_idx <- sort(which(folds == f))   
+#       
+#       # Extract training and testing data
+#       Z_train <- z[train_idx, ]
+#       delta_train <- delta[train_idx]
+#       time_train <- time[train_idx]
+#       
+#       Z_test <- z[test_idx, ]
+#       delta_test <- delta[test_idx]
+#       time_test <- time[test_idx]
+#       
+#       # cox_estimate <- coxkl_sorted(z = Z_train, delta = delta_train, time = time_train,
+#       #                              RS = RS[train_idx], eta_list = eta, tol=tol, Mstop = Mstop)
+#       # 
+#       # beta_train <- cox_estimate$beta_list[[1]]
+#       
+#       res_train <- cv.coxkl_highdim(z = Z_train, delta = delta_train, time = time_train,
+#                                     theta_tilde = RS[train_idx],
+#                                     group = c(1:dim(Z_train)[2]), K = 1,
+#                                     penalty = penalty,
+#                                     eta_kl = eta,
+#                                     alpha = alpha,
+#                                     lambda = lambda,
+#                                     cv.method = "LinPred")
+#       
+#       beta_train <- res_train$fit$beta[,which(res_train$lambda == res_train$lambda.min)]
+#       
+#       if (criteria == "V&VH")
+#       {
+#         LP_train <- as.matrix(Z_train)%*%as.matrix(beta_train)
+#         LP_internal <- as.matrix(z)%*%as.matrix(beta_train)
+#         
+#         likelihood_cv[f] <- pl_cal_theta(LP_internal, delta_test, time_test) - pl_cal_theta(LP_train, delta_train, time_train)
+#       }
+#       
+#       #C-Index
+#       if (criteria == "C-Index"){
+#         LP_test <- as.matrix(Z_test)%*%as.matrix(beta_train)
+#         likelihood_cv[f] <- glmnet::Cindex(LP_test, Surv(time_test, delta_test))
+#       }
+#     }
+#     
+#     if (criteria == "V&VH"){
+#       likelihood_all[eta_index] <- mean(likelihood_cv)
+#     }
+#     
+#     if (criteria == "C-Index"){
+#       likelihood_all <- c(likelihood_all, mean(likelihood_cv))
+#     }
+#     
+#   }
+#   results <- list(result = likelihood_all, eta_list = eta_list, criteria = criteria)
+#   return(results)
+# }

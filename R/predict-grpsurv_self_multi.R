@@ -4,13 +4,16 @@ predict.grpsurv_self_multi <- function(object, X, K,
                                         lambda, which=1:length(object$lambda), ...) {
   type <- match.arg(type)
   m = K
-  n <- nrow(X[[1]])
-  A <- matrix(0, m*n, m*p)
-  for (i in 1:m) {
-    z = X[[i]]
-    A[m*(1:n)-i+1, m*(1:p)-i+1] <- z 
-  }
-  X <- cbind(A)
+  print(dim(X))
+  n <- nrow(X)
+  p <- ncol(X)
+  # cat("m:", m, "n:", n, "p:", p, "\n")
+  # A <- matrix(0, m*n, m*p)
+  # for (i in 1:m) {
+  #   z = X[[i]]
+  #   A[m*(1:n)-i+1, m*(1:p)-i+1] <- z 
+  # }
+  # X <- cbind(A)
   # if (!missing(lambda)) {
   #   ind <- approx(object$lambda, seq(object$lambda), lambda)$y
   #   l <- floor(ind)

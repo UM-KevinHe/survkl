@@ -2,27 +2,43 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 rev_cumsum <- function(X) {
-    .Call(`_VariableSelection_rev_cumsum`, X)
+    .Call(`_coxkll_rev_cumsum`, X)
 }
 
 ddloglik <- function(Z, delta, beta) {
-    .Call(`_VariableSelection_ddloglik`, Z, delta, beta)
+    .Call(`_coxkll_ddloglik`, Z, delta, beta)
+}
+
+ddloglik_S0 <- function(Z, delta, beta) {
+    .Call(`_coxkll_ddloglik_S0`, Z, delta, beta)
 }
 
 maxgrad <- function(X, y, K, m) {
-    .Call(`_VariableSelection_maxgrad`, X, y, K, m)
+    .Call(`_coxkll_maxgrad`, X, y, K, m)
 }
 
 standardize <- function(x) {
-    .Call(`_VariableSelection_standardize`, x)
+    .Call(`_coxkll_standardize`, x)
 }
 
 gdfit_cox <- function(X, d, penalty, K1, K0, lambda, alpha, eps, max_iter, gamma, group_multiplier, dfmax, gmax, warn, user, actIter = 50L) {
-    .Call(`_VariableSelection_gdfit_cox`, X, d, penalty, K1, K0, lambda, alpha, eps, max_iter, gamma, group_multiplier, dfmax, gmax, warn, user, actIter)
+    .Call(`_coxkll_gdfit_cox`, X, d, penalty, K1, K0, lambda, alpha, eps, max_iter, gamma, group_multiplier, dfmax, gmax, warn, user, actIter)
 }
 
 gdfit_cox_kl <- function(X, d, penalty, delta_tilde, K1, K0, lambda, alpha, eps, eta_kl, max_iter, gamma, group_multiplier, dfmax, gmax, warn, user, actIter = 20L) {
-    .Call(`_VariableSelection_gdfit_cox_kl`, X, d, penalty, delta_tilde, K1, K0, lambda, alpha, eps, eta_kl, max_iter, gamma, group_multiplier, dfmax, gmax, warn, user, actIter)
+    .Call(`_coxkll_gdfit_cox_kl`, X, d, penalty, delta_tilde, K1, K0, lambda, alpha, eps, eta_kl, max_iter, gamma, group_multiplier, dfmax, gmax, warn, user, actIter)
+}
+
+calculateDeltaTilde <- function(event, time, theta_tilde) {
+    .Call(`_coxkll_calculateDeltaTilde`, event, time, theta_tilde)
+}
+
+calculateRiskAndUpdateLoss <- function(eta, d, Loss, r) {
+    .Call(`_coxkll_calculateRiskAndUpdateLoss`, eta, d, Loss, r)
+}
+
+calculateRiskAndUpdateLoss2 <- function(eta, d, deltaTilde, Loss, gamma) {
+    .Call(`_coxkll_calculateRiskAndUpdateLoss2`, eta, d, deltaTilde, Loss, gamma)
 }
 
 #' An Rcpp function that calculates the first and second order derivate and partial likelihood function.
@@ -34,22 +50,34 @@ gdfit_cox_kl <- function(X, d, penalty, delta_tilde, K1, K0, lambda, alpha, eps,
 #' 
 #' @return the first and second derivate and partial likelihood
 ddloglik_md <- function(n, delta, z, beta, offset) {
-    .Call(`_VariableSelection_ddloglik_md`, n, delta, z, beta, offset)
+    .Call(`_coxkll_ddloglik_md`, n, delta, z, beta, offset)
 }
 
 ddloglik_md2 <- function(delta, z, beta) {
-    .Call(`_VariableSelection_ddloglik_md2`, delta, z, beta)
+    .Call(`_coxkll_ddloglik_md2`, delta, z, beta)
 }
 
 klcox_boosting <- function(z, delta, theta_tilde, eta, rate, tol, maxit) {
-    .Call(`_VariableSelection_klcox_boosting`, z, delta, theta_tilde, eta, rate, tol, maxit)
+    .Call(`_coxkll_klcox_boosting`, z, delta, theta_tilde, eta, rate, tol, maxit)
 }
 
 ddloglik_KL_RS_test <- function(z) {
-    .Call(`_VariableSelection_ddloglik_KL_RS_test`, z)
+    .Call(`_coxkll_ddloglik_KL_RS_test`, z)
+}
+
+loss_fn_cpp <- function(Z, delta, beta) {
+    .Call(`_coxkll_loss_fn_cpp`, Z, delta, beta)
+}
+
+ddloglik_KL_RS_score <- function(Z, delta, beta, theta_tilde, eta) {
+    .Call(`_coxkll_ddloglik_KL_RS_score`, Z, delta, beta, theta_tilde, eta)
 }
 
 ddloglik_KL_RS <- function(Z, delta, beta, theta_tilde, eta) {
-    .Call(`_VariableSelection_ddloglik_KL_RS`, Z, delta, beta, theta_tilde, eta)
+    .Call(`_coxkll_ddloglik_KL_RS`, Z, delta, beta, theta_tilde, eta)
+}
+
+KL_Cox_Estimate_cpp <- function(z, delta, time, RS_internal, eta, tol = 1.0e-7, returnBeta = FALSE) {
+    .Call(`_coxkll_KL_Cox_Estimate_cpp`, z, delta, time, RS_internal, eta, tol, returnBeta)
 }
 

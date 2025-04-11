@@ -1,4 +1,3 @@
-
 setupLambdaCox_self <- function(X, y, Delta, group, penalty, alpha, lambda.min, nlambda, group.multiplier) {
   n <- nrow(X)
   p <- ncol(y)
@@ -27,4 +26,9 @@ setupLambdaCox_self <- function(X, y, Delta, group, penalty, alpha, lambda.min, 
   else lambda <- exp(seq(log(lambda.max), log(lambda.min*lambda.max), len=nlambda))
   lambda
 }
+
+
+
+
+
 
