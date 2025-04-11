@@ -25,7 +25,8 @@ Imports:
     ggpubr,
     stats,
     tibble,
-    rlang
+    rlang,
+    survival
 Depends:
     R (>= 4.0)
 Suggests:

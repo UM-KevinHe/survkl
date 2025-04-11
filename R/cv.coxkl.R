@@ -23,6 +23,8 @@
 #'   \item{criteria}{The criterion used to evaluate model performance during
 #' cross-validation.}
 #' 
+#' @importFrom survival Surv
+#' 
 #' @examples
 #' data(ExampleData)
 #' library(survival)
