@@ -25,9 +25,17 @@
 #' 
 #' @examples
 #' data(ExampleData)
-#' cv_result <- cv.coxkl(z = z, delta = delta, time = time,
-#'                        RS = rs_external1, eta_list = eta_list,
-#'                        nfolds = 5, criteria = "C-Index")
+#' library(survival)
+#' # use external beta information
+#' result1 <- cv.coxkl(z = ExampleData$z, delta = ExampleData$status, 
+#'                     time = ExampleData$time, beta = ExampleData$beta_external,
+#'                     eta_list = seq(0, 5, 1))
+#' 
+#' # use external risk score information
+#' rs <- as.matrix(ExampleData$z) %*% as.matrix(ExampleData$beta_external) # this can be any risk score
+#' result2 <- cv.coxkl(z = ExampleData$z, delta = ExampleData$status, 
+#'                     time = ExampleData$time, RS = rs,
+#'                     eta_list = seq(0, 5, 1))
 #'                        
 #' @export
 cv.coxkl <- function(z, delta, time, eta_list, RS = NULL, beta = NULL, tol=1.0e-7, Mstop = 50, nfolds = 5, criteria = "C-Index"){
