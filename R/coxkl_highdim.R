@@ -11,7 +11,6 @@
 #'   represent variables.
 #' @param delta A vector of event indicators (1 = event, 0 = censored).
 #' @param time A vector of survival/censoring times.
-#' @param K The number of groups.
 #' @param penalty The type of penalty to apply.  Must be either "lasso" (for
 #'   L1 regularization) or "ridge" (for L2 regularization).
 #' @param theta_tilde A vector representing the external risk score information.
