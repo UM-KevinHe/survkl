@@ -2,24 +2,19 @@
 #'
 #' This function estimates the coefficients of a Cox proportional hazards model
 #' using Kullback-Leibler (KL) divergence for data integration in high-dimensional
-#' settings. It incorporates an external risk score (represented by `theta_tilde`)
-#' and supports regularization via lasso or ridge penalties.  It is designed for
-#' situations where the number of covariates (p) can be larger than the number
+#' settings. It incorporates an external risk score and supports regularization via lasso or ridge penalties.  
+#' It is designed for situations where the number of covariates (p) can be larger than the number
 #' of observations (n).
 #'
 #' @param z A matrix of covariates. Rows represent observations, and columns
 #'   represent variables.
 #' @param delta A vector of event indicators (1 = event, 0 = censored).
 #' @param time A vector of survival/censoring times.
-#' @param penalty The type of penalty to apply.  Must be either "lasso" (for
-#'   L1 regularization) or "ridge" (for L2 regularization).
-#' @param theta_tilde A vector representing the external risk score information.
-#'    This is *crucially* different from the `RS` parameter in the other `coxkl`
-#'    functions. Here, `theta_tilde` is used directly in the KL divergence
-#'    calculation, *not* as a pre-calculated risk score.  It's likely related
-#'    to coefficients from an external model.
-#' @param eta_kl A *single* numeric value controlling the influence of the
-#'   external risk score (`theta_tilde`). A higher `eta_kl` gives more weight
+#' @param RS Numeric vector or matrix of precomputed external risk scores. 
+#'           Length (or number of rows) must match the number of observations. 
+#'           If not provided, `beta` must be specified.
+#' @param eta_list A *single* numeric value controlling the influence of the
+#'   external risk score (`RS`). A higher `eta_list` gives more weight
 #'   to the external information. Default is 0.
 #' @param alpha The elastic net mixing parameter.  `alpha = 1` corresponds to
 #'   lasso, `alpha = 0` corresponds to ridge, and values between 0 and 1
@@ -37,10 +32,6 @@
 #' @param max.iter The maximum number of iterations for the coordinate descent
 #'   algorithm. Default is 1000.
 #' @param dfmax Maximum number of non-zero coefficients.
-#' @param tau A parameter related to the penalty (specific meaning depends on
-#'   the penalty type, but not fully described here). Default is 1/3.
-#' @param group.multiplier An optional vector of weights for each group, used
-#'  to apply different penalties to different groups (not fully described here).
 #' @param warn Logical value indicating whether to print warnings. Default is
 #'   TRUE.
 #' @param returnX Logical value. If TRUE, the design matrix `z` is included
@@ -59,30 +50,47 @@
 #'    \item{df}{The number of non-zero coefficients for each value of `lambda`.}
 #'    \item{iter}{The number of iterations taken for each value of `lambda`.}
 #'    \item{group}{The `group` vector provided as input.}
-#'   \item{penalty}{The penalty used}
 #'   \item{alpha}{The `alpha` provided as input.}
 #'    \item{X}{If `returnX = TRUE`, the design matrix `z` is returned.}
 #'
 #' @export
 #'
 #' @examples
-#' # Load example data (assuming the package is installed and loaded)
-#' data(simulatedData)
-#' result_lasso <- coxkl_highdim(z = z, delta = delta, time = time, group = group,
-#'                              K = K, penalty = "lasso", theta_tilde = theta_tilde,
-#'                              eta_kl = 1)
-#'                              
-coxkl_highdim <-function(z, delta, time, K, penalty="lasso",
-                         theta_tilde,
-                         eta_kl = 0, 
+#' data("ExampleDataHighDim")
+#' rs <- as.matrix(ExampleData$z) %*% as.matrix(ExampleData$beta_external) # this can be any risk score
+#' result2 <- coxkl_highdim(z = ExampleData$z, delta = ExampleData$status,
+#'                          time = ExampleData$time,
+#'                          RS = rs,
+#'                          group = c(1:dim(ExampleData$z)[2]), eta_list = c(1),
+#'                          cv.method = "LinPred")
+#'
+coxkl_highdim <-function(z, delta, time,
+                         RS = NULL,
+                         beta = NULL,
+                         eta_list = 0, 
                          alpha=1, nlambda=100, lambda,
                          lambda.min=0.001, eps=.001, max.iter=1000,
-                         dfmax=p, tau=1/3, group.multiplier,
+                         dfmax=p,
                          warn=TRUE, returnX=FALSE, 
                          activeSet = FALSE,
                          actIter=50,
                          actNum=5,
                          ...){
+  
+  if(is.null(RS) && is.null(beta)) {
+    stop("Error: No external information is provided. Either RS or beta must be provided.")
+  }  else if(is.null(RS) && !is.null(beta)) {
+    # Check if the dimension of beta matches the number of columns in z
+    if(length(beta) == ncol(z)) {
+      print("External beta information is used.")
+      RS <- as.matrix(z) %*% as.matrix(beta)
+    } else {
+      stop("Error: The dimension of beta does not match the number of columns in z.")
+    }
+  } else if(!is.null(RS)) {
+    print("External Risk Score information is used.")
+  }
+  
   gamma = 3
   p = ncol(z)
   n = length(delta)
@@ -103,7 +111,7 @@ coxkl_highdim <-function(z, delta, time, K, penalty="lasso",
   group.multiplier <- rep(sqrt(K), p)
   
   if (missing(lambda)) {
-    lambda <- setupLambdaCox_self(XX, time_matrix, delta_matrix, group, penalty, alpha, lambda.min, nlambda, group.multiplier)
+    lambda <- setupLambdaCox_self(XX, time_matrix, delta_matrix, group, alpha, lambda.min, nlambda, group.multiplier)
     user.lambda <- FALSE
   } else {
     nlambda <- length(lambda)
@@ -113,14 +121,13 @@ coxkl_highdim <-function(z, delta, time, K, penalty="lasso",
   # group <- c(1)
   K0 <- as.integer(if (min(group)==0) K[1] else 0)          # =0 if each variable has a group index
   K1 <- as.integer(if (min(group)==0) cumsum(K) else c(0, cumsum(K))) 
-  dfmax <- p
-  warn <- TRUE
+  dfmax <- min(dfmax, p)
+
+  delta_tilde <- calculateDeltaTilde(delta_matrix, time_matrix, RS)
   
-  delta_tilde <- calculateDeltaTilde(delta_matrix, time_matrix, theta_tilde)
-  
-  res <- gdfit_cox_kl(X = XX, d = delta_matrix, penalty = penalty,
+  res <- gdfit_cox_kl(X = XX, d = delta_matrix,
                       delta_tilde = delta_tilde,
-                      eta_kl = eta_kl,
+                      eta_kl = eta_list,
                       K1 = K1, K0 = K0,
                       lambda = lambda,
                       alpha = alpha, eps = eps, max_iter = max.iter,
@@ -148,17 +155,14 @@ coxkl_highdim <-function(z, delta, time, K, penalty="lasso",
   val <- structure(list(beta = b,
                         group = group,
                         lambda = lambda,
-                        penalty = penalty,
                         gamma = gamma,
                         alpha = alpha,
                         loss = loss,
                         n = n,
                         df = df,
                         iter = iter,
-                        group.multiplier = group.multiplier,
                         time = time,
                         delta = delta,
-                        #fail = Y$fail,
                         W = exp(Eta)),
                    class = c("grpsurv", "grpreg"))
   if (returnX) {
@@ -178,29 +182,26 @@ coxkl_highdim <-function(z, delta, time, K, penalty="lasso",
 #' an external risk score (RS) and adjustment of the integration via a list of tuning parameters (eta).
 #' @export
 #' 
-
-# coxkl_highdim <-function(z, delta, time, K, penalty="lasso",
-#                          theta_tilde,
-#                          eta_kl = 0, 
-#                          alpha=1, nlambda=100, lambda,
-#                          lambda.min=0.001, eps=.001, max.iter=1000,
-#                          dfmax=p, tau=1/3, group.multiplier,
-#                          warn=TRUE, returnX=FALSE, 
-#                          activeSet = FALSE,
-#                          actIter=50,
-#                          actNum=5,
-#                          ...)
-
-# (z = X_train, delta = delta_train, time = t_train,
-#  theta_tilde = rs_external1,
-#  group = c(1:dim(X_train)[2]), K = 1, eta_kl = eta_best,
-#  cv.method = "LinPred")
-
 cv.coxkl_highdim <-function(z, delta, time,
-                            theta_tilde,
-                            eta_kl = 0, ..., nfolds = 10, seed, fold, se=c('quick', 'bootstrap'),
+                            RS = NULL,
+                            beta = NULL,
+                            eta_list = 0, ..., nfolds = 10, seed, fold, se=c('quick', 'bootstrap'),
                             cv.method = c('LinPred', 'VVH'),
                             returnY=FALSE, trace=FALSE){
+  
+  if(is.null(RS) && is.null(beta)) {
+    stop("Error: No external information is provided. Either RS or beta must be provided.")
+  }  else if(is.null(RS) && !is.null(beta)) {
+    # Check if the dimension of beta matches the number of columns in z
+    if(length(beta) == ncol(z)) {
+      print("External beta information is used.")
+      RS <- as.matrix(z) %*% as.matrix(beta)
+    } else {
+      stop("Error: The dimension of beta does not match the number of columns in z.")
+    }
+  } else if(!is.null(RS)) {
+    print("External Risk Score information is used.")
+  }
   
   se <- match.arg(se)
   p <- ncol(z)
@@ -212,8 +213,8 @@ cv.coxkl_highdim <-function(z, delta, time,
   fit.args$time <- time
   fit.args$group <- c(1:p)
   fit.args$K <- 1
-  fit.args$theta_tilde <- theta_tilde
-  fit.args$eta_kl <- eta_kl
+  fit.args$RS <- RS
+  fit.args$eta_list <- eta_list
   
   fit.args$returnX <- TRUE
   fit <- do.call("coxkl_highdim", fit.args)
@@ -253,10 +254,10 @@ cv.coxkl_highdim <-function(z, delta, time,
   cv.args$group <- fit$group
   #cv.args$group.multiplier <- fit$
   cv.args$warn <- FALSE
-  cv.args$eta_kl <- eta_kl
+  cv.args$eta_list <- eta_list
   if(cv.method == 'LinPred'){
     for (i in 1:nfolds) {
-      res <- cvf.surv(i, X, theta_tilde, fit$delta, fit$time, K, fold, fold_sub, cv.args)
+      res <- cvf.surv(i, X, RS, fit$delta, fit$time, K, fold, fold_sub, cv.args)
       print(res)
       Y[fold==i, 1:res$nl] <- res$yhat
     }
@@ -269,7 +270,7 @@ cv.coxkl_highdim <-function(z, delta, time,
     lambda  <- cv.args$lambda
     cve     <- rep(0, length(lambda))
     for (i in 1:nfolds) {
-      res                   <- cvf.survVVH(i, X, theta_tilde, fit$delta, fit$time, K, fold, fold_sub, cv.args)
+      res                   <- cvf.survVVH(i, X, RS, fit$delta, fit$time, K, fold, fold_sub, cv.args)
       EtaAll                <- res$yhatall
       EtaK                  <- res$yhat
       L_K                   <- loss.grpsurv_self_multi(delta_matrix[fold!=i], EtaK, K, total=FALSE)
@@ -289,14 +290,14 @@ cv.coxkl_highdim <-function(z, delta, time,
 
 
 
-cvf.surv <- function(i, z, theta_tilde, delta, time, K, fold, fold_sub, cv.args) {
+cvf.surv <- function(i, z, RS, delta, time, K, fold, fold_sub, cv.args) {
   K = 1
   Xlist_temp <- z[fold_sub!=i, , drop=FALSE]
   
   cv.args$z <- Xlist_temp
   cv.args$time <- time[fold_sub!=i]
   cv.args$delta <- delta[fold_sub!=i]
-  cv.args$theta_tilde <- theta_tilde[fold_sub!=i]
+  cv.args$RS <- RS[fold_sub!=i]
   cv.args$K <- K
   fit.i <- do.call("coxkl_highdim", cv.args)
   
@@ -309,7 +310,7 @@ cvf.surv <- function(i, z, theta_tilde, delta, time, K, fold, fold_sub, cv.args)
 }
 
 
-cvf.survVVH <- function(i, z, theta_tilde, delta, time, K, fold, fold_sub, cv.args) {
+cvf.survVVH <- function(i, z, RS, delta, time, K, fold, fold_sub, cv.args) {
   Xlist_temp <- NULL
   
   Xlist_temp <- z[fold_sub!=i, , drop=FALSE]
@@ -317,7 +318,7 @@ cvf.survVVH <- function(i, z, theta_tilde, delta, time, K, fold, fold_sub, cv.ar
   cv.args$z <- Xlist_temp
   cv.args$time <- time[fold_sub!=i]
   cv.args$delta <- delta[fold_sub!=i]
-  cv.args$theta_tilde <- theta_tilde[fold_sub!=i]
+  cv.args$RS <- RS[fold_sub!=i]
   cv.args$K <- K
   fit.i <- do.call("coxkl_highdim", cv.args)
   
@@ -329,8 +330,6 @@ cvf.survVVH <- function(i, z, theta_tilde, delta, time, K, fold, fold_sub, cv.ar
   
   list(nl=length(fit.i$lambda), yhat=yhat, yhatall=yhatall)#, loss=loss)
 }
-
-
 
 
 

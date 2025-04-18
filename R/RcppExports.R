@@ -21,12 +21,8 @@ standardize <- function(x) {
     .Call(`_coxkll_standardize`, x)
 }
 
-gdfit_cox <- function(X, d, penalty, K1, K0, lambda, alpha, eps, max_iter, gamma, group_multiplier, dfmax, gmax, warn, user, actIter = 50L) {
-    .Call(`_coxkll_gdfit_cox`, X, d, penalty, K1, K0, lambda, alpha, eps, max_iter, gamma, group_multiplier, dfmax, gmax, warn, user, actIter)
-}
-
-gdfit_cox_kl <- function(X, d, penalty, delta_tilde, K1, K0, lambda, alpha, eps, eta_kl, max_iter, gamma, group_multiplier, dfmax, gmax, warn, user, actIter = 20L) {
-    .Call(`_coxkll_gdfit_cox_kl`, X, d, penalty, delta_tilde, K1, K0, lambda, alpha, eps, eta_kl, max_iter, gamma, group_multiplier, dfmax, gmax, warn, user, actIter)
+gdfit_cox_kl <- function(X, d, delta_tilde, K1, K0, lambda, alpha, eps, eta_kl, max_iter, gamma, group_multiplier, dfmax, gmax, warn, user, actIter = 20L) {
+    .Call(`_coxkll_gdfit_cox_kl`, X, d, delta_tilde, K1, K0, lambda, alpha, eps, eta_kl, max_iter, gamma, group_multiplier, dfmax, gmax, warn, user, actIter)
 }
 
 calculateDeltaTilde <- function(event, time, theta_tilde) {

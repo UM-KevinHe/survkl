@@ -73,41 +73,14 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// gdfit_cox
-List gdfit_cox(const arma::mat& X, const arma::vec& d, const std::string& penalty, const arma::uvec& K1, const int& K0, const arma::vec& lambda, const double& alpha, const double& eps, const int& max_iter, const double& gamma, const arma::vec& group_multiplier, const int& dfmax, const int& gmax, const bool& warn, const bool& user, const int& actIter);
-RcppExport SEXP _coxkll_gdfit_cox(SEXP XSEXP, SEXP dSEXP, SEXP penaltySEXP, SEXP K1SEXP, SEXP K0SEXP, SEXP lambdaSEXP, SEXP alphaSEXP, SEXP epsSEXP, SEXP max_iterSEXP, SEXP gammaSEXP, SEXP group_multiplierSEXP, SEXP dfmaxSEXP, SEXP gmaxSEXP, SEXP warnSEXP, SEXP userSEXP, SEXP actIterSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
-    Rcpp::traits::input_parameter< const arma::vec& >::type d(dSEXP);
-    Rcpp::traits::input_parameter< const std::string& >::type penalty(penaltySEXP);
-    Rcpp::traits::input_parameter< const arma::uvec& >::type K1(K1SEXP);
-    Rcpp::traits::input_parameter< const int& >::type K0(K0SEXP);
-    Rcpp::traits::input_parameter< const arma::vec& >::type lambda(lambdaSEXP);
-    Rcpp::traits::input_parameter< const double& >::type alpha(alphaSEXP);
-    Rcpp::traits::input_parameter< const double& >::type eps(epsSEXP);
-    Rcpp::traits::input_parameter< const int& >::type max_iter(max_iterSEXP);
-    Rcpp::traits::input_parameter< const double& >::type gamma(gammaSEXP);
-    Rcpp::traits::input_parameter< const arma::vec& >::type group_multiplier(group_multiplierSEXP);
-    Rcpp::traits::input_parameter< const int& >::type dfmax(dfmaxSEXP);
-    Rcpp::traits::input_parameter< const int& >::type gmax(gmaxSEXP);
-    Rcpp::traits::input_parameter< const bool& >::type warn(warnSEXP);
-    Rcpp::traits::input_parameter< const bool& >::type user(userSEXP);
-    Rcpp::traits::input_parameter< const int& >::type actIter(actIterSEXP);
-    rcpp_result_gen = Rcpp::wrap(gdfit_cox(X, d, penalty, K1, K0, lambda, alpha, eps, max_iter, gamma, group_multiplier, dfmax, gmax, warn, user, actIter));
-    return rcpp_result_gen;
-END_RCPP
-}
 // gdfit_cox_kl
-List gdfit_cox_kl(const arma::mat& X, const arma::vec& d, const std::string& penalty, const arma::vec& delta_tilde, const arma::uvec& K1, const int& K0, const arma::vec& lambda, const double& alpha, const double& eps, const double& eta_kl, const int& max_iter, const double& gamma, const arma::vec& group_multiplier, const int& dfmax, const int& gmax, const bool& warn, const bool& user, const int& actIter);
-RcppExport SEXP _coxkll_gdfit_cox_kl(SEXP XSEXP, SEXP dSEXP, SEXP penaltySEXP, SEXP delta_tildeSEXP, SEXP K1SEXP, SEXP K0SEXP, SEXP lambdaSEXP, SEXP alphaSEXP, SEXP epsSEXP, SEXP eta_klSEXP, SEXP max_iterSEXP, SEXP gammaSEXP, SEXP group_multiplierSEXP, SEXP dfmaxSEXP, SEXP gmaxSEXP, SEXP warnSEXP, SEXP userSEXP, SEXP actIterSEXP) {
+List gdfit_cox_kl(const arma::mat& X, const arma::vec& d, const arma::vec& delta_tilde, const arma::uvec& K1, const int& K0, const arma::vec& lambda, const double& alpha, const double& eps, const double& eta_kl, const int& max_iter, const double& gamma, const arma::vec& group_multiplier, const int& dfmax, const int& gmax, const bool& warn, const bool& user, const int& actIter);
+RcppExport SEXP _coxkll_gdfit_cox_kl(SEXP XSEXP, SEXP dSEXP, SEXP delta_tildeSEXP, SEXP K1SEXP, SEXP K0SEXP, SEXP lambdaSEXP, SEXP alphaSEXP, SEXP epsSEXP, SEXP eta_klSEXP, SEXP max_iterSEXP, SEXP gammaSEXP, SEXP group_multiplierSEXP, SEXP dfmaxSEXP, SEXP gmaxSEXP, SEXP warnSEXP, SEXP userSEXP, SEXP actIterSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
     Rcpp::traits::input_parameter< const arma::vec& >::type d(dSEXP);
-    Rcpp::traits::input_parameter< const std::string& >::type penalty(penaltySEXP);
     Rcpp::traits::input_parameter< const arma::vec& >::type delta_tilde(delta_tildeSEXP);
     Rcpp::traits::input_parameter< const arma::uvec& >::type K1(K1SEXP);
     Rcpp::traits::input_parameter< const int& >::type K0(K0SEXP);
@@ -123,7 +96,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const bool& >::type warn(warnSEXP);
     Rcpp::traits::input_parameter< const bool& >::type user(userSEXP);
     Rcpp::traits::input_parameter< const int& >::type actIter(actIterSEXP);
-    rcpp_result_gen = Rcpp::wrap(gdfit_cox_kl(X, d, penalty, delta_tilde, K1, K0, lambda, alpha, eps, eta_kl, max_iter, gamma, group_multiplier, dfmax, gmax, warn, user, actIter));
+    rcpp_result_gen = Rcpp::wrap(gdfit_cox_kl(X, d, delta_tilde, K1, K0, lambda, alpha, eps, eta_kl, max_iter, gamma, group_multiplier, dfmax, gmax, warn, user, actIter));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -292,8 +265,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_coxkll_ddloglik_S0", (DL_FUNC) &_coxkll_ddloglik_S0, 3},
     {"_coxkll_maxgrad", (DL_FUNC) &_coxkll_maxgrad, 4},
     {"_coxkll_standardize", (DL_FUNC) &_coxkll_standardize, 1},
-    {"_coxkll_gdfit_cox", (DL_FUNC) &_coxkll_gdfit_cox, 16},
-    {"_coxkll_gdfit_cox_kl", (DL_FUNC) &_coxkll_gdfit_cox_kl, 18},
+    {"_coxkll_gdfit_cox_kl", (DL_FUNC) &_coxkll_gdfit_cox_kl, 17},
     {"_coxkll_calculateDeltaTilde", (DL_FUNC) &_coxkll_calculateDeltaTilde, 3},
     {"_coxkll_calculateRiskAndUpdateLoss", (DL_FUNC) &_coxkll_calculateRiskAndUpdateLoss, 4},
     {"_coxkll_calculateRiskAndUpdateLoss2", (DL_FUNC) &_coxkll_calculateRiskAndUpdateLoss2, 5},

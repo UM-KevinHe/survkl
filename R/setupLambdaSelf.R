@@ -1,4 +1,4 @@
-setupLambdaCox_self <- function(X, y, Delta, group, penalty, alpha, lambda.min, nlambda, group.multiplier) {
+setupLambdaCox_self <- function(X, y, Delta, group, alpha, lambda.min, nlambda, group.multiplier) {
   n <- nrow(X)
   p <- ncol(y)
   
