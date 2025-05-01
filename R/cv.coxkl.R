@@ -40,7 +40,7 @@
 #'                     eta_list = seq(0, 5, 1))
 #'                        
 #' @export
-cv.coxkl <- function(z, delta, time, eta_list, RS = NULL, beta = NULL, tol=1.0e-7, Mstop = 50, nfolds = 5, criteria = "C-Index"){
+cv.coxkl <- function(z, delta, time, eta_list, RS = NULL, beta = NULL, tol=1.0e-7, Mstop = 50, nfolds = 5, criteria = "V&VH"){
   
   if(is.null(RS) && is.null(beta)) {
     stop("Error: No external information is provided. Either RS or beta must be provided.")
@@ -89,13 +89,13 @@ cv.coxkl <- function(z, delta, time, eta_list, RS = NULL, beta = NULL, tol=1.0e-
       
       beta_train <- cox_estimate$beta_list[[1]]
       
-      # if (criteria == "V&VH")
-      # {
-      #   LP_train <- as.matrix(Z_train)%*%as.matrix(beta_train)
-      #   LP_internal <- as.matrix(z)%*%as.matrix(beta_train)
-      #   
-      #   likelihood_cv[cv] <- pl_cal_theta(LP_internal, delta, t_internal) - pl_cal_theta(LP_train, delta_train, t_train)        
-      # }
+      if (criteria == "V&VH")
+      {
+        LP_train <- as.matrix(Z_train)%*%as.matrix(beta_train)
+        LP_internal <- as.matrix(z)%*%as.matrix(beta_train)
+
+        likelihood_cv[f] <- pl_cal_theta(LP_internal, delta, time) - pl_cal_theta(LP_train, delta_train, time_train)
+      }
       # 
       #C-Index
       if (criteria == "C-Index"){
@@ -105,7 +105,7 @@ cv.coxkl <- function(z, delta, time, eta_list, RS = NULL, beta = NULL, tol=1.0e-
     }
     
     if (criteria == "V&VH"){
-      likelihood[k] <- mean(likelihood_cv)
+      likelihood_all <- c(likelihood_all, mean(likelihood_cv))
     }
     
     if (criteria == "C-Index"){
