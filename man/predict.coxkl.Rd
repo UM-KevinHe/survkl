@@ -44,3 +44,15 @@ values on the new data (returned only if
 Computes linear predictors (and, if desired, the log partial
 likelihood) for new observations given a fitted Cox–KL model.
 }
+\examples{
+library(survival)
+data(ExampleData)
+fit <- coxkl(z = ExampleData$z, delta = ExampleData$status,
+             time = ExampleData$time, beta = ExampleData$beta_external,
+             eta_list = seq(0, 5, 1))
+
+pred <- predict.coxkl(fit,
+                      newz  = ExampleData$z,
+                      delta = ExampleData$status,
+                      time  = ExampleData$time)
+}

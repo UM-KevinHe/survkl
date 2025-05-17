@@ -30,13 +30,13 @@
 #'           \code{likelihood = TRUE}).}
 #'   }
 #'
-#' @examples
 #' 
 #' @method predict coxkl
 #' @export
 #' 
-#' data(ExampleData)
+#' @examples
 #' library(survival)
+#' data(ExampleData)
 #' fit <- coxkl(z = ExampleData$z, delta = ExampleData$status,
 #'              time = ExampleData$time, beta = ExampleData$beta_external,
 #'              eta_list = seq(0, 5, 1))
