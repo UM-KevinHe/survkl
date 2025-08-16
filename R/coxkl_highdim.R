@@ -56,13 +56,13 @@
 #' @export
 #'
 #' @examples
-#' data("ExampleDataHighDim")
-#' rs <- as.matrix(ExampleData$z) %*% as.matrix(ExampleData$beta_external) # this can be any risk score
-#' result2 <- coxkl_highdim(z = ExampleData$z, delta = ExampleData$status,
-#'                          time = ExampleData$time,
-#'                          RS = rs,
-#'                          group = c(1:dim(ExampleData$z)[2]), eta_list = c(1),
-#'                          cv.method = "LinPred")
+# data("ExampleDataHighDim")
+# rs <- as.matrix(ExampleData$z) %*% as.matrix(ExampleData$beta_external) # this can be any risk score
+# result2 <- coxkl_highdim(z = ExampleData$z, delta = ExampleData$status,
+#                          time = ExampleData$time,
+#                          RS = rs,
+#                          group = c(1:dim(ExampleData$z)[2]), eta_list = c(1),
+#                          cv.method = "LinPred")
 #'
 coxkl_highdim <-function(z, delta, time,
                          RS = NULL,

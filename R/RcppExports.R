@@ -69,12 +69,12 @@ ddloglik_KL_RS_score <- function(Z, delta, beta, theta_tilde, eta) {
     .Call(`_coxkll_ddloglik_KL_RS_score`, Z, delta, beta, theta_tilde, eta)
 }
 
-ddloglik_KL_RS <- function(Z, delta, beta, theta_tilde, eta) {
-    .Call(`_coxkll_ddloglik_KL_RS`, Z, delta, beta, theta_tilde, eta)
+KL_Cox_Estimate_cpp <- function(Z, delta, theta_tilde, eta, tol = 1.0e-7, maxit = 50L) {
+    .Call(`_coxkll_KL_Cox_Estimate_cpp`, Z, delta, theta_tilde, eta, tol, maxit)
 }
 
-KL_Cox_Estimate_cpp <- function(z, delta, time, RS_internal, eta, tol = 1.0e-7, returnBeta = FALSE) {
-    .Call(`_coxkll_KL_Cox_Estimate_cpp`, z, delta, time, RS_internal, eta, tol, returnBeta)
+KL_Cox_Estimate_cpp_ridge <- function(Z, delta, theta_tilde, eta, lambda, tol = 1.0e-7, maxit = 50L) {
+    .Call(`_coxkll_KL_Cox_Estimate_cpp_ridge`, Z, delta, theta_tilde, eta, lambda, tol, maxit)
 }
 
 cox_custom_obj <- function(theta, delta, penalty_weights, lambda) {

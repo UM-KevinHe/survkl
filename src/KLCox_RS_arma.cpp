@@ -61,232 +61,142 @@ List ddloglik_KL_RS_score(const arma::mat& Z, const arma::vec& delta, arma::vec&
   L1 = arma::sum(temp_1, 0).t();
   loglik = arma::accu(delta % (theta - arma::log(S0)));
   
-  //print L2 dimensions:
-  // Rcpp::Rcout << "L2 dimensions: " << L2.n_rows << " x " << L2.n_cols << std::endl;
   
   return List::create(Named("loglik") = loglik,
                       Named("L1") = L1);
 }
 
-// // [[Rcpp::export]]
-// List ddloglik_KL_RS_score_speed(const arma::mat& Z, const arma::vec& delta, arma::vec& beta, const arma::vec& theta_tilde, double eta) {
-//   int p = beta.n_rows;
-//   int n = delta.n_rows;
-//   double loglik = 0;
-//   
-//   arma::vec theta = Z * beta;
-//   
-//   arma::vec exp_theta = arma::exp(theta);
-//   arma::vec exp_theta_tilde = arma::exp(theta_tilde);
-//   
-//   arma::vec S0 = rev_cumsum(exp_theta);
-//   arma::vec S0_tilde = rev_cumsum(exp_theta_tilde);
-//   arma::mat S10       = Z % arma::repmat(exp_theta,1,p);
-//   arma::mat S10_tilde = Z % arma::repmat(exp_theta_tilde,1,p);
-//   
-//   arma::vec Lambda    = arma::cumsum(delta/S0);
-//   arma::mat matLambda = arma::repmat(Lambda,1,p);
-//   arma::mat matdelta  = repmat(delta,1,p);
-//   
-//   arma::mat L         = matdelta%Z - S10%matLambda;
-//   arma::vec L1        = arma::sum(L,0).t();
-//   
-//   loglik = arma::accu(delta%((theta)-log(S0)));
-//   
-// 
-//   return List::create(Named("loglik") = loglik,
-//                       Named("L1") = L1);
-// }
 
 
-// [[Rcpp::export]]
-List ddloglik_KL_RS(const arma::mat& Z, const arma::vec& delta, arma::vec& beta, const arma::vec& theta_tilde, double &eta) {
-  Rcpp::Rcout << "function started1" << std::endl;
-  int p = beta.n_rows;
-  int n = delta.n_rows;
-  double loglik = 0;
-  arma::vec L1 = arma::zeros<arma::vec>(p);
-  arma::mat L2 = arma::zeros<arma::mat>(p, p);
-  arma::vec theta = Z * beta;
-  //print theta:
-  // Rcpp::Rcout << "Theta: " << theta << std::endl;
-  arma::vec exp_theta = arma::exp(theta);
-  arma::vec S0 = rev_cumsum(exp_theta);
-  arma::mat S1 = arma::zeros<arma::mat>(n, p);
-  arma::mat S2_i = arma::zeros<arma::mat>(n, p);
+static inline void score_hess_kl(
+  const arma::mat& Z,
+  const arma::vec& delta,
+  const arma::vec& beta,
+  const arma::vec& exp_theta_tilde,   // precomputed exp(theta_tilde)
+  const arma::vec& S0_tilde,          // precomputed rev_cumsum(exp_theta_tilde)
+  const arma::mat& S1_tilde,          // precomputed rev_cumsum(Z.col(k) % exp_theta_tilde), n x p
+  const double eta,
+  arma::vec& L1,
+  arma::mat& L2
+){
+  const int n = Z.n_rows;
+  const int p = Z.n_cols;
 
-  arma::vec exp_theta_tilde = arma::exp(theta_tilde);
-  arma::vec S0_tilde = rev_cumsum(exp_theta_tilde);
-  arma::mat S1_tilde = arma::zeros<arma::mat>(n, p);
-  
-  if (Z.has_nan() || Z.has_inf()) {
-    Rcpp::Rcout << "Error: Z contains NA or Inf values." << std::endl;
-    return List();
-  }
-  
-  // Check for NA or Inf values in beta
-  if (beta.has_nan() || beta.has_inf()) {
-    Rcpp::Rcout << "Error: beta contains NA or Inf values." << std::endl;
-    return List();
-  }
-  
-  if (exp_theta.has_nan() || exp_theta.has_inf()) {
-    Rcpp::Rcout << "Error: exp_theta contains NA or Inf values." << std::endl;
-    return List();
-  }
-  
-  if (S0.has_nan() || S0.has_inf()) {
-    Rcpp::Rcout << "Error: S0 contains NA or Inf values." << std::endl;
-    return List();
-  }
-  
-  if (exp_theta_tilde.has_nan() || exp_theta_tilde.has_inf()) {
-    Rcpp::Rcout << "Error: exp_theta_tilde contains NA or Inf values." << std::endl;
-    return List();
-  }
-  
-  if (S0_tilde.has_nan() || S0_tilde.has_inf()) {
-    Rcpp::Rcout << "Error: S0_tilde contains NA or Inf values." << std::endl;
-    return List();
-  }
-  
-  
-
-  for (int i = 0; i < p; i++) {
-    arma::vec S1_pre = Z.col(i) % exp_theta;
-    S1.col(i) = rev_cumsum(S1_pre);
-    
-    if (S1.col(i).has_nan() || S1.col(i).has_inf()) {
-      Rcpp::Rcout << "Error: S1 contains NA or Inf values in column " << i << std::endl;
-      return List();
-    }
-
-    arma::vec S1_pre_tilde = Z.col(i) % exp_theta_tilde;
-    S1_tilde.col(i) = rev_cumsum(S1_pre_tilde);
-  }
-
-  // First, ensure dimensions match
-  if (delta.n_rows != Z.n_rows || S1_tilde.n_rows != Z.n_rows || S1.n_rows != Z.n_rows ||
-      S0_tilde.n_rows != Z.n_rows || S0.n_rows != Z.n_rows) {
-    stop("Dimension mismatch");
-  }
-
-  if (any(S0_tilde == 0) || any(S0 == 0)) {
-    stop("Division by zero encountered in S0_tilde or S0");
-  }
-
-  // Perform the operation in steps for clarity
-  arma::mat temp_1(n, p, arma::fill::zeros); 
-
-  for (int i = 0; i < p; i++) {
-    temp_1.col(i) = delta % (Z.col(i) + eta * (S1_tilde.col(i) / S0_tilde) - (1 + eta) * (S1.col(i) / S0));
-  }
-
-  L1 = arma::sum(temp_1, 0).t();
-  loglik = arma::accu(delta % (theta - arma::log(S0)));
-  ///
-
-  for (int i = 0; i < p; i++) {
-    for (int j = 0; j < p; j++) {
-      arma::vec S2_i1 = (Z.col(j) % exp_theta) % Z.col(i);
-      arma::vec S2_i_colj = rev_cumsum(S2_i1);
-      S2_i.col(j) = S2_i_colj;
-      
-      if (S2_i.col(j).has_nan() || S2_i.col(j).has_inf()) {
-        Rcpp::Rcout << "Error: S2_i contains NA or Inf values in column " << j << std::endl;
-        return List();
-      }
-
-      arma::vec V1_i_colj = (S2_i.col(j) / S0) - (S1.col(j) % S1.col(i) / arma::square(S0));
-      arma::vec V_i_colj = V1_i_colj % delta;
-      L2(i, j) = arma::accu(V_i_colj) * (1 + eta);
-    }
-  }
-
-  //print L2 dimensions:
-  // Rcpp::Rcout << "L2 dimensions: " << L2.n_rows << " x " << L2.n_cols << std::endl;
-
-  return List::create(Named("loglik") = loglik,
-                      Named("L1") = L1,
-                      Named("L2") = L2,
-                      Named("S0") = S0);
-}
-
-
-arma::vec BetaUpdate(const arma::mat& Z, const arma::vec& delta, arma::vec& beta, const arma::vec& theta_tilde, double &eta) {
-  int p = beta.n_rows;
-  int n = delta.n_rows;
-  double loglik = 0;
-  arma::vec L1 = arma::zeros<arma::vec>(p);
-  arma::mat L2 = arma::zeros<arma::mat>(p, p);
   arma::vec theta = Z * beta;
   arma::vec exp_theta = arma::exp(theta);
   arma::vec S0 = rev_cumsum(exp_theta);
-  arma::mat S1 = arma::zeros<arma::mat>(n, p);
-  arma::mat S2_i = arma::zeros<arma::mat>(n, p);
-  
-  arma::vec exp_theta_tilde = arma::exp(theta_tilde);
-  arma::vec S0_tilde = rev_cumsum(exp_theta_tilde);
-  arma::mat S1_tilde = arma::zeros<arma::mat>(n, p);
-  
-  for (int i = 0; i < p; i++) {
-    arma::vec S1_pre = Z.col(i) % exp_theta;
-    S1.col(i) = rev_cumsum(S1_pre);
-    
-    arma::vec S1_pre_tilde = Z.col(i) % exp_theta_tilde;
-    S1_tilde.col(i) = rev_cumsum(S1_pre_tilde);
+
+  // Build S1 (n x p): rev_cumsum(Z.col(j) % exp_theta) colwise
+  arma::mat S1(n, p, arma::fill::zeros);
+  for (int j = 0; j < p; ++j) {
+    S1.col(j) = rev_cumsum(Z.col(j) % exp_theta);
   }
-  
-  // Perform the operation in steps for clarity
-  arma::mat temp_1(n, p, arma::fill::zeros); 
-  
-  for (int i = 0; i < p; i++) {
-    temp_1.col(i) = delta % (Z.col(i) + eta * (S1_tilde.col(i) / S0_tilde) - (1 + eta) * (S1.col(i) / S0));
+
+  // Score
+  // temp_1.col(j) = delta % ( Z.col(j) + eta * (S1_tilde.col(j)/S0_tilde) - (1+eta) * (S1.col(j)/S0) )
+  arma::mat temp_1(n, p, arma::fill::zeros);
+  for (int j = 0; j < p; ++j) {
+    temp_1.col(j) = delta % ( Z.col(j) 
+                              + eta * (S1_tilde.col(j) / S0_tilde)
+                              - (1.0 + eta) * (S1.col(j) / S0) );
   }
-  
   L1 = arma::sum(temp_1, 0).t();
-  loglik = arma::accu(delta % (theta - arma::log(S0)));
-  ///
-  
-  for (int i = 0; i < p; i++) {
-    for (int j = 0; j < p; j++) {
-      arma::vec S2_i1 = (Z.col(j) % exp_theta) % Z.col(i);
-      arma::vec S2_i_colj = rev_cumsum(S2_i1);
-      S2_i.col(j) = S2_i_colj;
-      
-      arma::vec V1_i_colj = (S2_i.col(j) / S0) - (S1.col(j) % S1.col(i) / arma::square(S0));
-      arma::vec V_i_colj = V1_i_colj % delta;
-      L2(i, j) = arma::accu(V_i_colj) * (1 + eta);
+
+  L2.zeros();
+  for (int j = 0; j < p; ++j) {
+    for (int k = 0; k < p; ++k) {
+      arma::vec S2_jk = rev_cumsum( (Z.col(j) % Z.col(k)) % exp_theta );
+      arma::vec V_jk  = (S2_jk / S0) - (S1.col(j) % S1.col(k)) / arma::square(S0);
+      L2(j,k) = (1.0 + eta) * arma::accu( delta % V_jk );
     }
   }
-  
-  //print L2 dimensions:
-  // Rcpp::Rcout << "L2 dimensions: " << L2.n_rows << " x " << L2.n_cols << std::endl;
-  arma::vec temp = solve(L2, L1, arma::solve_opts::fast);
-  
-  return temp;
+
+  // Small ridge for numerical stability (doesn't change the target)
+  L2.diag() += 1e-8;
 }
 
 // [[Rcpp::export]]
-arma::vec KL_Cox_Estimate_cpp(const arma::mat& z, 
-                          const arma::vec& delta, 
-                          const arma::vec& time, 
-                          const arma::vec& RS_internal, 
-                          double eta, 
-                          const double tol = 1.0e-7,
-                          const bool returnBeta = false) {
-  int p = z.n_cols;
+arma::vec KL_Cox_Estimate_cpp(
+  const arma::mat& Z, 
+  const arma::vec& delta, 
+  const arma::vec& theta_tilde,  // external linear predictor (risk score), length n
+  const double eta,
+  const double tol = 1.0e-7,
+  const int maxit = 50
+){
+  const int p = Z.n_cols;
   arma::vec beta = arma::zeros<arma::vec>(p);
-  
-  while (true) {
-    arma::vec temp = BetaUpdate(z, delta, beta, RS_internal, eta);
-    beta += temp;
-    
-    // Rcpp::Rcout << "Beta: " << beta << std::endl;
 
-    if (max(abs(temp)) < tol) break;
+  // Precompute external part once
+  arma::vec exp_theta_tilde = arma::exp(theta_tilde);
+  arma::vec S0_tilde        = rev_cumsum(exp_theta_tilde);
+  arma::mat S1_tilde(Z.n_rows, p, arma::fill::zeros);
+  for (int j = 0; j < p; ++j) {
+    S1_tilde.col(j) = rev_cumsum(Z.col(j) % exp_theta_tilde);
   }
-  
+
+  // Newton
+  for (int it = 0; it < maxit; ++it) {
+    arma::vec L1(p, arma::fill::zeros);
+    arma::mat L2(p, p, arma::fill::zeros);
+    score_hess_kl(Z, delta, beta, exp_theta_tilde, S0_tilde, S1_tilde, eta, L1, L2);
+
+    // Solve L2 * step = L1
+    arma::vec step;
+    bool ok = arma::solve(step, L2, L1, arma::solve_opts::likely_sympd);
+    if (!ok) {
+      arma::mat L2r = L2;
+      L2r.diag() += 1e-4;
+      ok = arma::solve(step, L2r, L1, arma::solve_opts::likely_sympd);
+      if (!ok) Rcpp::stop("Hessian solve failed");
+    }
+
+    beta += step;
+    if (arma::max(arma::abs(step)) < tol) break;
+  }
+
   return beta;
 }
 
+// [[Rcpp::export]]
+arma::vec KL_Cox_Estimate_cpp_ridge(
+  const arma::mat& Z, 
+  const arma::vec& delta, 
+  const arma::vec& theta_tilde,
+  const double eta,
+  const double lambda,           // ridge strength (>=0)
+  const double tol = 1.0e-7,
+  const int maxit = 50
+){
+  const int p = Z.n_cols;
+  arma::vec beta = arma::zeros<arma::vec>(p);
+
+  arma::vec exp_theta_tilde = arma::exp(theta_tilde);
+  arma::vec S0_tilde        = rev_cumsum(exp_theta_tilde);
+  arma::mat S1_tilde(Z.n_rows, p, arma::fill::zeros);
+  for (int j = 0; j < p; ++j) {
+    S1_tilde.col(j) = rev_cumsum(Z.col(j) % exp_theta_tilde);
+  }
+
+  for (int it = 0; it < maxit; ++it) {
+    arma::vec L1(p, arma::fill::zeros);
+    arma::mat L2(p, p, arma::fill::zeros);
+    score_hess_kl(Z, delta, beta, exp_theta_tilde, S0_tilde, S1_tilde, eta, L1, L2);
+
+    arma::mat H = L2;
+    H.diag() += lambda;
+    arma::vec rhs = L1 - lambda * beta;
+
+    arma::vec step;
+    bool ok = arma::solve(step, H, rhs, arma::solve_opts::likely_sympd);
+    if (!ok) {
+      H.diag() += 1e-4;
+      ok = arma::solve(step, H, rhs, arma::solve_opts::likely_sympd);
+      if (!ok) Rcpp::stop("Hessian solve failed (even with ridge).");
+    }
+
+    beta += step;
+    if (arma::max(arma::abs(step)) < tol) break;
+  }
+  return beta;
+}

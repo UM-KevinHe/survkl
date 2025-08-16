@@ -226,35 +226,36 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// ddloglik_KL_RS
-List ddloglik_KL_RS(const arma::mat& Z, const arma::vec& delta, arma::vec& beta, const arma::vec& theta_tilde, double& eta);
-RcppExport SEXP _coxkll_ddloglik_KL_RS(SEXP ZSEXP, SEXP deltaSEXP, SEXP betaSEXP, SEXP theta_tildeSEXP, SEXP etaSEXP) {
+// KL_Cox_Estimate_cpp
+arma::vec KL_Cox_Estimate_cpp(const arma::mat& Z, const arma::vec& delta, const arma::vec& theta_tilde, const double eta, const double tol, const int maxit);
+RcppExport SEXP _coxkll_KL_Cox_Estimate_cpp(SEXP ZSEXP, SEXP deltaSEXP, SEXP theta_tildeSEXP, SEXP etaSEXP, SEXP tolSEXP, SEXP maxitSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const arma::mat& >::type Z(ZSEXP);
     Rcpp::traits::input_parameter< const arma::vec& >::type delta(deltaSEXP);
-    Rcpp::traits::input_parameter< arma::vec& >::type beta(betaSEXP);
     Rcpp::traits::input_parameter< const arma::vec& >::type theta_tilde(theta_tildeSEXP);
-    Rcpp::traits::input_parameter< double& >::type eta(etaSEXP);
-    rcpp_result_gen = Rcpp::wrap(ddloglik_KL_RS(Z, delta, beta, theta_tilde, eta));
+    Rcpp::traits::input_parameter< const double >::type eta(etaSEXP);
+    Rcpp::traits::input_parameter< const double >::type tol(tolSEXP);
+    Rcpp::traits::input_parameter< const int >::type maxit(maxitSEXP);
+    rcpp_result_gen = Rcpp::wrap(KL_Cox_Estimate_cpp(Z, delta, theta_tilde, eta, tol, maxit));
     return rcpp_result_gen;
 END_RCPP
 }
-// KL_Cox_Estimate_cpp
-arma::vec KL_Cox_Estimate_cpp(const arma::mat& z, const arma::vec& delta, const arma::vec& time, const arma::vec& RS_internal, double eta, const double tol, const bool returnBeta);
-RcppExport SEXP _coxkll_KL_Cox_Estimate_cpp(SEXP zSEXP, SEXP deltaSEXP, SEXP timeSEXP, SEXP RS_internalSEXP, SEXP etaSEXP, SEXP tolSEXP, SEXP returnBetaSEXP) {
+// KL_Cox_Estimate_cpp_ridge
+arma::vec KL_Cox_Estimate_cpp_ridge(const arma::mat& Z, const arma::vec& delta, const arma::vec& theta_tilde, const double eta, const double lambda, const double tol, const int maxit);
+RcppExport SEXP _coxkll_KL_Cox_Estimate_cpp_ridge(SEXP ZSEXP, SEXP deltaSEXP, SEXP theta_tildeSEXP, SEXP etaSEXP, SEXP lambdaSEXP, SEXP tolSEXP, SEXP maxitSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::mat& >::type z(zSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type Z(ZSEXP);
     Rcpp::traits::input_parameter< const arma::vec& >::type delta(deltaSEXP);
-    Rcpp::traits::input_parameter< const arma::vec& >::type time(timeSEXP);
-    Rcpp::traits::input_parameter< const arma::vec& >::type RS_internal(RS_internalSEXP);
-    Rcpp::traits::input_parameter< double >::type eta(etaSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type theta_tilde(theta_tildeSEXP);
+    Rcpp::traits::input_parameter< const double >::type eta(etaSEXP);
+    Rcpp::traits::input_parameter< const double >::type lambda(lambdaSEXP);
     Rcpp::traits::input_parameter< const double >::type tol(tolSEXP);
-    Rcpp::traits::input_parameter< const bool >::type returnBeta(returnBetaSEXP);
-    rcpp_result_gen = Rcpp::wrap(KL_Cox_Estimate_cpp(z, delta, time, RS_internal, eta, tol, returnBeta));
+    Rcpp::traits::input_parameter< const int >::type maxit(maxitSEXP);
+    rcpp_result_gen = Rcpp::wrap(KL_Cox_Estimate_cpp_ridge(Z, delta, theta_tilde, eta, lambda, tol, maxit));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -289,8 +290,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_coxkll_ddloglik_KL_RS_test", (DL_FUNC) &_coxkll_ddloglik_KL_RS_test, 1},
     {"_coxkll_loss_fn_cpp", (DL_FUNC) &_coxkll_loss_fn_cpp, 3},
     {"_coxkll_ddloglik_KL_RS_score", (DL_FUNC) &_coxkll_ddloglik_KL_RS_score, 5},
-    {"_coxkll_ddloglik_KL_RS", (DL_FUNC) &_coxkll_ddloglik_KL_RS, 5},
-    {"_coxkll_KL_Cox_Estimate_cpp", (DL_FUNC) &_coxkll_KL_Cox_Estimate_cpp, 7},
+    {"_coxkll_KL_Cox_Estimate_cpp", (DL_FUNC) &_coxkll_KL_Cox_Estimate_cpp, 6},
+    {"_coxkll_KL_Cox_Estimate_cpp_ridge", (DL_FUNC) &_coxkll_KL_Cox_Estimate_cpp_ridge, 7},
     {"_coxkll_cox_custom_obj", (DL_FUNC) &_coxkll_cox_custom_obj, 4},
     {NULL, NULL, 0}
 };
