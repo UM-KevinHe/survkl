@@ -5,6 +5,9 @@ URL:
 BugReports: 
 Authors@R: c(
     person("Lingfeng","Luo",role=c("aut","cre"),email="lfluo@umich.edu"),
+    person("Yubo","Shao",role=c("aut","cre"),email="ybshao@umich.edu"),
+    person("Junyi","Qiu",role=c("aut"),email="junyiqiu@umich.edu"),
+    person("Xiaohan","Liu",role=c("aut","cre"),email="xhliuu@umich.edu"),
     person("Di","Wang",role=c("aut"),email="yubos@umich.edu"),
     person("Kevin","He",role=c("aut"),email="kevinhe@umich.edu")
   )

@@ -1,158 +1,160 @@
-# KL_Cox_Estimate <- function(z, delta, time, RS_internal, eta, tol=1.0e-7){
-#   
-#   p <- ncol(z)
-#   beta = as.matrix(rep(0,p))
-#   RS_internal = as.matrix(RS_internal)
-#   
-#   repeat{
-#     diff=ddloglik_KL_RS(z,delta, beta, RS_internal, eta)
-#     G=diff$L1
-#     H=diff$L2
-#     S0=diff$S0
-#     
-#     Lambda=cumsum(delta/S0)
-#     S=exp(-Lambda)
-#     
-#     temp=solve(H)%*%G
-#     beta=beta+temp
-#     
-#     if(max(abs(temp))<tol) break
-#   }
-#   
-#   return(beta)
-# }
-
-
 #' Cox Proportional Hazards Model with KL Divergence for Data Integration
 #'
-#' Estimates the coefficients of a Cox proportional hazards model incorporating external information using Kullback-Leibler (KL) divergence. External information can be integrated via precomputed external risk scores (RS) or externally derived coefficient estimates (beta). The strength of integration is controlled by tuning parameters (eta).
+#' Fits a Cox proportional hazards model that incorporates external information
+#' using Kullback–Leibler (KL) divergence. External information can be supplied
+#' either as precomputed external risk scores (`RS`) or as externally derived
+#' coefficients (`beta`). The integration strength is controlled by the tuning
+#' parameter(s) `eta`.
 #'
-#' @param z Numeric covariate matrix with rows representing observations and columns representing predictor variables. All variables must be numeric.
-#' @param delta Numeric event indicator vector (1 = event occurred, 0 = censored).
-#' @param time Numeric vector of observed event or censoring times. No sorting is required.
-#' @param RS Numeric vector or matrix of precomputed external risk scores. Length (or number of rows) must match the number of observations. If not provided, `beta` must be specified.
-#' @param beta Numeric vector of externally derived coefficients (e.g., from prior studies). Length must match the number of columns in `z`. Use zeros to represent absent covariates if fewer coefficients are externally available. If not provided, `RS` must be specified.
-#' @param eta_list Numeric vector of tuning parameters controlling the integration strength of the external information. Higher values indicate greater reliance on external information.
-#' @param tol Numeric scalar controlling convergence tolerance for optimization. Default is `1.0e-7`.
-#' @param Mstop Integer specifying the maximum number of iterations allowed for the optimization algorithm. Default is `50`.
+#' @param z Numeric matrix of covariates with rows representing observations and
+#'   columns representing predictor variables. All covariates must be numeric.
+#' @param delta Numeric vector of event indicators (1 = event, 0 = censored).
+#' @param time Numeric vector of observed event or censoring times. No sorting
+#'   required.
+#' @param stratum Optional numeric or factor vector defining strata.
+#' @param RS Optional numeric vector or matrix of external risk scores. Length
+#'   (or number of rows) must equal the number of observations. If not supplied,
+#'   `beta` must be provided.
+#' @param beta Optional numeric vector of external coefficients (e.g., from prior
+#'   studies). Length must equal the number of columns in `z`. Use zeros to
+#'   represent covariates without external information. If not supplied, `RS`
+#'   must be provided.
+#' @param etas Numeric vector of tuning parameters controlling the reliance on
+#'   external information. Larger values place more weight on the external
+#'   source.
+#' @param tol Convergence tolerance for the optimization algorithm. Default is
+#'   `1e-4`.
+#' @param Mstop Maximum number of iterations for the optimization algorithm.
+#'   Default is `100`.
+#' @param backtrack Logical; if `TRUE`, backtracking line search is applied during
+#'   optimization. Default is `FALSE`.
+#' @param message Logical; if `TRUE`, progress messages are printed during model
+#'   fitting. Default is `FALSE`.
+#' @param data_sorted Logical; if `TRUE`, input data are assumed to be already
+#'   sorted by stratum and time. Default is `FALSE`.
 #'
-#' 
-#'
-#' @return A list with the following components:
+#' @return An object of class \code{"coxkl"}, implemented as a list with the
+#'   following components:
 #'   \describe{
-#'     \item{\code{beta_list}}{List of estimated coefficient vectors corresponding to each `eta` value.}
-#'     \item{\code{LP_list}}{List of linear predictor vectors computed on the training data corresponding to each `eta` value.}
-#'     \item{\code{eta_list}}{Original vector of tuning parameters (`eta`) provided by the user.}
+#'     \item{\code{eta}}{Numeric vector of tuning parameters used.}
+#'     \item{\code{beta}}{Numeric matrix of estimated coefficients. Columns
+#'       correspond to different values of \code{eta}, rows to covariates.}
+#'     \item{\code{linear.predictors}}{Numeric matrix of linear predictors on the
+#'       training data, aligned with rows of \code{z}. If input data were not
+#'       pre-sorted, linear predictors are re-ordered back to the original input
+#'       order.}
+#'     \item{\code{likelihood}}{Numeric vector of log-partial likelihood values,
+#'       one per fitted model (indexed by \code{eta}).}
 #'   }
 #'
 #' @examples
-#' # Example data has 6 covariates: z1, z2, z5, z6 (continuous) and z3, z4 (binary)
-#' # External beta is simulated from a homogeneous data distribution.
-#'
-#' # Using external beta information
 #' data(ExampleData)
-#' result1 <- coxkl(z = ExampleData$z,
-#'                  delta = ExampleData$status,
-#'                  time = ExampleData$time,
-#'                  beta = ExampleData$beta_external,
-#'                  eta_list = seq(0, 5, 1))
+#' etas <- generate_eta(method = "exponential", n = 5, max_eta = 5)
 #'
-#' # Using external risk score information
+#' # Example 1: use external beta information
+#' result1 <- coxkl(
+#'   z = ExampleData$z,
+#'   delta = ExampleData$status,
+#'   time = ExampleData$time,
+#'   stratum = ExampleData$stratum, 
+#'   beta = ExampleData$beta_external,
+#'   etas = etas
+#' )
+#'
+#' # Example 2: use external risk score information
 #' rs <- as.matrix(ExampleData$z) %*% as.matrix(ExampleData$beta_external)
-#' result2 <- coxkl(z = ExampleData$z,
-#'                  delta = ExampleData$status,
-#'                  time = ExampleData$time,
-#'                  RS = rs,
-#'                  eta_list = seq(0, 5, 1))
+#' result2 <- coxkl(
+#'   z = ExampleData$z,
+#'   delta = ExampleData$status,
+#'   time = ExampleData$time,
+#'   stratum = ExampleData$stratum,
+#'   RS = rs,
+#'   etas = etas
+#' )
 #'
 #' @export
-coxkl <- function(z, delta, time, RS = NULL, beta = NULL, eta_list, tol=1.0e-7, Mstop = 50){
+
+
+coxkl <- function(z, delta, time, stratum = NULL,
+                  RS = NULL, beta = NULL, 
+                  etas, tol = 1.0e-4, Mstop = 100,
+                  backtrack = FALSE,
+                  message = FALSE,
+                  data_sorted = FALSE) {
   
-  if(is.null(RS) && is.null(beta)) {
-    stop("Error: No external information is provided. Either RS or beta must be provided.")
-  }  else if(is.null(RS) && !is.null(beta)) {
-    # Check if the dimension of beta matches the number of columns in z
-    if(length(beta) == ncol(z)) {
-      print("External beta information is used.")
+  if (is.null(RS) && is.null(beta)) {
+    stop("No external information is provided. Either RS or beta must be provided.")
+  } else if (is.null(RS) && !is.null(beta)) {
+    if (length(beta) == ncol(z)) {
+      if (message) message("External beta information is used.")
       RS <- as.matrix(z) %*% as.matrix(beta)
     } else {
-      stop("Error: The dimension of beta does not match the number of columns in z.")
+      stop("The dimension of beta does not match the number of columns in z.")
     }
-  } else if(!is.null(RS)) {
-    print("External Risk Score information is used.")
+  } else if (!is.null(RS)) {
+    RS <- as.matrix(RS)
+    if (message) message("External Risk Score information is used.")
   }
   
-  ord   <- order(time)
-  z     <- as.matrix(z)[ord, , drop = FALSE]
-  delta <- as.numeric(delta[ord])
-  time  <- time[ord]
-  RS    <- as.numeric(RS[ord])
+  if (!data_sorted) {
+    ## ---- Sorting Section ----
+    if (is.null(stratum)) {
+      if (message) warning("Stratum information not provided. All data is assumed to originate from a single stratum!", call. = FALSE)
+      stratum <- rep(1, nrow(z))
+    } else {
+      stratum <- match(stratum, unique(stratum))
+    }
+    time_order <- order(stratum, time)
+    time <- as.numeric(time[time_order])
+    stratum <- as.numeric(stratum[time_order])
+    z_mat <- as.matrix(z)[time_order, , drop = FALSE]
+    delta <- as.numeric(delta[time_order])
+    RS <- as.numeric(RS[time_order, , drop = FALSE])
+  } else {
+    z_mat <- as.matrix(z)
+    time <- as.numeric(time)
+    delta <- as.numeric(delta)
+    stratum <- as.numeric(stratum)
+    RS <- as.numeric(RS)
+  }
   
-  beta_list <- vector("list", length(eta_list))
-  LP_list   <- vector("list", length(eta_list))
-  likelihood_list <- rep(NA, length(eta_list))
-  for (i in seq_along(eta_list)){
-    eta <- eta_list[i]
-    beta_train <- KL_Cox_Estimate_cpp(Z = z, delta = delta, theta_tilde = RS, eta = eta, tol = tol, maxit = Mstop)
-    LP_train <- as.matrix(z) %*% as.matrix(beta_train)
+  n_eta <- length(etas)
+  LP_mat <- matrix(NA, nrow = nrow(z_mat), ncol = n_eta)
+  beta_mat <- matrix(NA, nrow = ncol(z_mat), ncol = n_eta)
+  likelihood_mat <- rep(NA, n_eta)
+  
+  eta_names <- round(etas, 4)
+  colnames(LP_mat) <- eta_names
+  colnames(beta_mat) <- eta_names
+  names(likelihood_mat) <- eta_names
+  
+  n.each_stratum <- as.numeric(table(stratum))
+  delta_tilde <- calculateDeltaTilde(delta, time, RS, n.each_stratum)
+  
+  for (i in seq_along(etas)){
+    eta <- etas[i]
+    if (message) message("Fitting model for eta = ", eta)
     
-    beta_list[[i]] <- beta_train
-    LP_list[[i]] <- LP_train
-    likelihood_list[i] <- pl_cal_theta(LP_train, delta, time)
+    beta_train <- KL_Cox_Estimate_cpp(z_mat, delta, delta_tilde, n.each_stratum, eta, tol, Mstop,
+                                      lambda = 0, backtrack = backtrack, message = message)
+    LP <- z_mat %*% as.matrix(beta_train)
+    LP_mat[, i] <- LP
+    beta_mat[, i] <- beta_train
+    likelihood_mat[i] <- pl_cal_theta(LP, delta, n.each_stratum)
   }
   
-  structure(list(beta_list = beta_list,
-                 LP_list   = LP_list,
-                 eta_list  = eta_list,
-                 likelihood = likelihood_list),
-            class = "coxkl")
+  if (data_sorted == FALSE){
+    LinPred_original <- matrix(NA_real_, nrow = length(time_order), ncol = n_eta)
+    LinPred_original[time_order, ] <- LP_mat
+  } else {
+    LinPred_original <- LP_mat
+  }
+  
+  structure(list(
+    eta = etas,
+    beta = beta_mat,
+    linear.predictors = LinPred_original,
+    likelihood = likelihood_mat),
+    class = "coxkl")  
 }
 
-
-
-# coxkl <- function(z, delta, time, RS = NULL, beta = NULL, eta_list, tol=1.0e-7, Mstop = 50){
-#   
-#   if(is.null(RS) && is.null(beta)) {
-#     stop("Error: No external information is provided. Either RS or beta must be provided.")
-#   }  else if(is.null(RS) && !is.null(beta)) {
-#     # Check if the dimension of beta matches the number of columns in z
-#     if(length(beta) == ncol(z)) {
-#       print("External beta information is used.")
-#       RS <- as.matrix(z) %*% as.matrix(beta)
-#     } else {
-#       stop("Error: The dimension of beta does not match the number of columns in z.")
-#     }
-#   } else if(!is.null(RS)) {
-#     print("External Risk Score information is used.")
-#   }
-#   
-#   time_order <- order(time)
-#   delta      <- delta[time_order]
-#   z          <- z[time_order,]
-#   RS <- RS[time_order]
-#   time       <- time[time_order]
-#   
-#   z_mat <- as.matrix(z)
-#   delta_mat <- as.matrix(delta)
-#   p     <- ncol(z_mat)
-#   beta  <- as.matrix(rep(0,p))
-#   RS    <- as.matrix(RS)
-#   
-#   beta_list <- list()
-#   LP_list <- list()
-#   likelihood_list <- rep(NA, length(eta_list))
-#   for (i in seq_along(eta_list)){
-#     eta <- eta_list[i]
-#     beta_train <- KL_Cox_Estimate(z_mat, delta_mat, t_train, RS, eta=eta)
-#     # beta_train <- KL_Cox_Estimate_cpp(Z = z, delta = delta, theta_tilde = RS, eta = eta, tol = tol, maxit = maxit)
-#     LP_train <- as.matrix(z) %*% as.matrix(beta_train)
-#     
-#     beta_list[[i]] <- beta_train
-#     LP_list[[i]] <- LP_train
-#     likelihood_list[i] <- pl_cal_theta(LP_train, delta, time)
-#   }
-#   
-#   results <- list(beta_list = beta_list, LP_list = LP_list, eta_list = eta_list, likelihood = likelihood_list)
-#   class(results) <- "coxkl"
-#   return(results)
-# }
