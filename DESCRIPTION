@@ -8,7 +8,7 @@ Authors@R: c(
     person("Yubo","Shao",role=c("aut","cre"),email="ybshao@umich.edu"),
     person("Junyi","Qiu",role=c("aut"),email="junyiqiu@umich.edu"),
     person("Xiaohan","Liu",role=c("aut","cre"),email="xhliuu@umich.edu"),
-    person("Di","Wang",role=c("aut"),email="yubos@umich.edu"),
+    person("Di","Wang",role=c("aut"),email="dwwang@umich.edu"),
     person("Kevin","He",role=c("aut"),email="kevinhe@umich.edu")
   )
 Description: 
