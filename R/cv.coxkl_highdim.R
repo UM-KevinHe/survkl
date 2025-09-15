@@ -55,7 +55,7 @@
 #' @export
 cv.coxkl_highdim <- function(z, delta, time, stratum = NULL, RS = NULL, beta = NULL,
                              etas, alpha = 1.0,
-                             lambda = NULL, nlambda = 100, lambda.min.ratio = 1e-3,
+                             lambda = NULL, nlambda = 100, lambda.min.ratio = ifelse(n < p, 0.05, 1e-03),
                              nfolds = 5, 
                              cv.criteria = c("V&VH", "LinPred", "CIndex_pooled", "CIndex_foldaverage"),
                              c_index_stratum = NULL,
@@ -95,6 +95,7 @@ cv.coxkl_highdim <- function(z, delta, time, stratum = NULL, RS = NULL, beta = N
   delta <- as.numeric(delta[time_order])
   RS <- RS[time_order, , drop = FALSE]
   n <- nrow(z)
+  p <- ncol(z)
   n.each_stratum_full <- as.numeric(table(stratum))
   
   ## CV folds
@@ -259,8 +260,8 @@ cv.coxkl_highdim <- function(z, delta, time, stratum = NULL, RS = NULL, beta = N
   )
   
   return(list(
-    full_results = results_df,
-    best_per_eta = best_per_eta,
+    integrated_stat.full_results = results_df,
+    integrated_stat.best_per_eta = best_per_eta,
     external_stat = external_stat
   ))
 }

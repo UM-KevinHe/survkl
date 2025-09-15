@@ -35,7 +35,7 @@
 #'
 #' @export
 coxkl_ridge <- function(z, delta, time, stratum = NULL, RS = NULL, beta = NULL, eta = NULL,
-                        lambda = NULL, nlambda = 100, lambda.min.ratio = 1e-3, penalty.factor = 0.999,
+                        lambda = NULL, nlambda = 100, lambda.min.ratio = ifelse(n_obs < n_vars, 0.01, 1e-04), penalty.factor = 0.999,
                         tol = 1.0e-4, Mstop = 50, backtrack = FALSE, message = FALSE, data_sorted = FALSE,
                         beta_initial = NULL, ...){
   if (is.null(eta)){
@@ -88,6 +88,9 @@ coxkl_ridge <- function(z, delta, time, stratum = NULL, RS = NULL, beta = NULL, 
   n.each_stratum <- as.numeric(table(stratum))
   beta.init <- rep(0, ncol(z_mat)) #initial value of beta
   delta_tilde <- calculateDeltaTilde(delta, time, RS, n.each_stratum)
+  
+  n_vars <- ncol(z_mat)
+  n_obs <- nrow(z_mat)
   
   if (is.null(lambda)) {
     if (nlambda < 2) {

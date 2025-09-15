@@ -45,7 +45,7 @@
 #' @export
 
 cv.coxkl_ridge <- function(z, delta, time, stratum = NULL, RS = NULL, beta = NULL, etas,
-                           lambda = NULL, nlambda = 100, lambda.min.ratio = 1e-3, nfolds = 5, 
+                           lambda = NULL, nlambda = 100, lambda.min.ratio = ifelse(n_obs < n_vars, 0.01, 1e-04), nfolds = 5, 
                            cv.criteria = c("V&VH", "LinPred", "CIndex_pooled", "CIndex_foldaverage"),
                            c_index_stratum = NULL,
                            message = FALSE, seed = NULL,  ...) {
@@ -83,7 +83,6 @@ cv.coxkl_ridge <- function(z, delta, time, stratum = NULL, RS = NULL, beta = NUL
   RS <- RS[time_order, , drop = FALSE]
   n <- nrow(z)
   
-  ## Precompute per-stratum counts for full data (used by VVH/LinPred external)
   n.each_stratum_full <- as.numeric(table(stratum))
   
   ## Fixed CV folds
@@ -102,25 +101,27 @@ cv.coxkl_ridge <- function(z, delta, time, stratum = NULL, RS = NULL, beta = NUL
   } else if (cv.criteria == "CIndex_foldaverage") {
     ext_c_per_fold <- numeric(nfolds)
   }
-  ## For LinPred, external baseline = -2 * pl_cal_theta(RS, full data), computed once at end.
+  
+  n_vars <- ncol(z)
+  n_obs <- nrow(z)
   
   if (message) {
     cat("Cross-validation over eta sequence:\n")
     pb_eta <- txtProgressBar(min = 0, max = n_eta, style = 3, width = 30)
   }
-  
-  ## Outer loop over eta
   for (ei in seq_along(etas)) {
     eta <- etas[ei]
-    
+
     ## Determine lambda sequence for this eta
     if (is.null(lambda)) {
       fit0 <- coxkl_ridge(z = z, delta = delta, time = time, stratum = stratum,
                           RS = RS, eta = eta, lambda = NULL,
                           nlambda = nlambda, lambda.min.ratio = lambda.min.ratio,
                           data_sorted = TRUE, message = FALSE, ...)
+      beta_initial <- fit0$beta[, 1]
       lambda_seq <- as.vector(fit0$lambda)
     } else {
+      beta_initial <- rep(0, ncol(z))
       lambda_seq <- sort(lambda, decreasing = TRUE)
     }
     L <- length(lambda_seq)
@@ -142,7 +143,6 @@ cv.coxkl_ridge <- function(z, delta, time, stratum = NULL, RS = NULL, beta = NUL
       train_idx <- which(folds != f)
       test_idx  <- which(folds == f)
       
-      ## External baseline per fold (criterion-matched) — compute once per fold (independent of eta/lambda)
       if (ei == 1) {  # do this only once across etas; RS is fixed
         if (cv.criteria == "V&VH") {
           n.each_stratum_train <- as.numeric(table(stratum[train_idx]))
@@ -174,16 +174,18 @@ cv.coxkl_ridge <- function(z, delta, time, stratum = NULL, RS = NULL, beta = NUL
         }
       }
       
-      ## Fit the entire lambda path on training fold (warm-start handled inside coxkl_ridge)
       fit_f <- coxkl_ridge(z = z[train_idx, , drop = FALSE],
                            delta = delta[train_idx],
                            time = time[train_idx],
                            stratum = stratum[train_idx],
                            RS = RS[train_idx, , drop = FALSE],
                            eta = eta, lambda = lambda_seq,
-                           data_sorted = TRUE, message = FALSE, ...)
+                           data_sorted = TRUE, message = FALSE, 
+                           beta_initial = beta_initial, ...)
       
       beta_mat <- fit_f$beta
+      beta_initial <- beta_mat[, 1]  # warm start for next fold
+      
       z_train <- z[train_idx, , drop = FALSE]
       z_test  <- z[test_idx, , drop = FALSE]
       delta_train <- delta[train_idx]
@@ -193,7 +195,6 @@ cv.coxkl_ridge <- function(z, delta, time, stratum = NULL, RS = NULL, beta = NUL
       LP_all   <- z       %*% beta_mat
       LP_test  <- z_test  %*% beta_mat
       
-      ## Fold-wise CV statistics for this eta (vector over lambda grid)
       if (cv.criteria == "V&VH") {
         n.each_stratum_train <- as.numeric(table(stratum_train))
         n.each_stratum_all   <- as.numeric(table(stratum))
@@ -208,7 +209,6 @@ cv.coxkl_ridge <- function(z, delta, time, stratum = NULL, RS = NULL, beta = NUL
         } else {
           stratum_test <- c_index_stratum[test_idx]
         }
-        ## Column-wise C-index over lambda (no dependency on unavailable c_stat_stratcox_vec)
         numer_vec <- denom_vec <- cstat_vec <- rep(NA_real_, ncol(LP_test))
         for (j in seq_len(ncol(LP_test))) {
           cstat_j <- c_stat_stratcox(time[test_idx], LP_test[, j], stratum_test, delta[test_idx])
@@ -224,9 +224,7 @@ cv.coxkl_ridge <- function(z, delta, time, stratum = NULL, RS = NULL, beta = NUL
           cnt  <- cnt  + 1
         }
       }
-    } # end folds
-    
-    ## Aggregate folds for this eta
+    } 
     if (cv.criteria == "V&VH") {
       cve_eta <- vvh_sum
     } else if (cv.criteria == "LinPred") {
@@ -246,14 +244,12 @@ cv.coxkl_ridge <- function(z, delta, time, stratum = NULL, RS = NULL, beta = NUL
     )
     
     if (message) setTxtProgressBar(pb_eta, ei)
-  } # end etas
+  } 
   
   if (message) close(pb_eta)
   
-  ## Bind per-eta results (full 2D grid)
   results_df <- do.call(rbind, results_list)
   
-  ## Label columns by criterion and also compute best-per-eta
   if (cv.criteria %in% c("V&VH", "LinPred")) {
     results_df$Loss <- -2 * results_df$score
     results_df$score <- NULL
@@ -275,27 +271,17 @@ cv.coxkl_ridge <- function(z, delta, time, stratum = NULL, RS = NULL, beta = NUL
   }
   rownames(best_per_eta) <- NULL
   
-  ## External baseline (single scalar), matched to the chosen criterion
   external_stat <- switch(cv.criteria,
-                          "V&VH" = {
-                            # Same aggregation as internal VVH: sum over folds then convert to loss scale
-                            -2 * sum(ext_vvh_per_fold)
-                          },
-                          "LinPred" = {
-                            # Assembled CV linear predictor equals RS itself
-                            -2 * pl_cal_theta(as.vector(RS), delta, n.each_stratum_full)
-                          },
-                          "CIndex_pooled" = {
-                            sum(ext_numer) / sum(ext_denom)
-                          },
-                          "CIndex_foldaverage" = {
-                            mean(ext_c_per_fold)
-                          }
+                          "V&VH" = -2 * sum(ext_vvh_per_fold),
+                          "LinPred" = -2 * pl_cal_theta(as.vector(RS), delta, n.each_stratum_full),
+                          "CIndex_pooled" = sum(ext_numer) / sum(ext_denom),
+                          "CIndex_foldaverage" = mean(ext_c_per_fold)
   )
   
+  
   return(list(
-    external_stat.full_results = results_df,   # all (eta, lambda) combinations with CV statistic
-    external_stat.best_per_eta = best_per_eta, # per-eta best lambda rows
+    integrated_stat.full_results = results_df,   # all (eta, lambda) combinations with CV statistic
+    integrated_stat.best_per_eta = best_per_eta, # per-eta best lambda rows
     external_stat = external_stat# scalar baseline matched to cv.criteria
   ))
 }
