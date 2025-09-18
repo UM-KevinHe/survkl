@@ -1,14 +1,9 @@
 #include <RcppArmadillo.h>
-// #include "utils.h"
+#include "utils.h"
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::plugins(cpp11)]]
 
 using namespace Rcpp;
-
-arma::vec rev_cumsum(const arma::vec& X) {
-  return arma::flipud(arma::cumsum(arma::flipud(X)));
-}
-
 
 
 /*

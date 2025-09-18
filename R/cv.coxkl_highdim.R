@@ -120,10 +120,13 @@ cv.coxkl_highdim <- function(z, delta, time, stratum = NULL, RS = NULL, beta = N
     pb_eta <- txtProgressBar(min = 0, max = n_eta, style = 3, width = 30)
   }
   
+  fit_beta_list <- vector("list", length(etas))  
+  lambda_list <- vector("list", length(etas))  
+  
   for (ei in seq_along(etas)) {
     eta <- etas[ei]
     
-    ## Determine lambda path (on full data)
+    ## Determine lambda path (on full data) & estimation on full data
     if (is.null(lambda)) {
       fit0 <- coxkl_highdim(z = z, delta = delta, time = time, stratum = stratum,
                             RS = RS, eta = eta, alpha = alpha,
@@ -132,7 +135,14 @@ cv.coxkl_highdim <- function(z, delta, time, stratum = NULL, RS = NULL, beta = N
       lambda_seq <- as.vector(fit0$lambda)
     } else {
       lambda_seq <- sort(lambda, decreasing = TRUE)
+      fit0 <- coxkl_highdim(z = z, delta = delta, time = time, stratum = stratum,
+                            RS = RS, eta = eta, alpha = alpha,
+                            lambda = lambda_seq, data_sorted = TRUE, message = FALSE, ...)
     }
+    
+    fit_beta_list[[ei]] <- fit0$beta 
+    lambda_list[[ei]]   <- lambda_seq 
+    
     L <- length(lambda_seq)
     
     ## Accumulators
@@ -251,6 +261,19 @@ cv.coxkl_highdim <- function(z, delta, time, stratum = NULL, RS = NULL, beta = N
   }
   rownames(best_per_eta) <- NULL
   
+  beta_best_mat <- sapply(seq_along(etas), function(i) {
+    beta_mat   <- fit_beta_list[[i]]
+    lambda_seq <- lambda_list[[i]]
+    
+    idx <- which(abs(lambda_seq - best_per_eta$lambda[i]) < 1e-12)
+    if (length(idx) != 1) {
+      idx <- which.min(abs(lambda_seq - best_per_eta$lambda[i]))
+    }
+    beta_mat[, idx]
+  })
+  
+  colnames(beta_best_mat) <- etas
+  
   ## External baseline
   external_stat <- switch(cv.criteria,
                           "V&VH" = -2 * sum(ext_vvh_per_fold),
@@ -262,13 +285,10 @@ cv.coxkl_highdim <- function(z, delta, time, stratum = NULL, RS = NULL, beta = N
   return(list(
     integrated_stat.full_results = results_df,
     integrated_stat.best_per_eta = best_per_eta,
+    integrated_stat.betahat_best = beta_best_mat,
     external_stat = external_stat
   ))
 }
-
-
-
-
 
 
 

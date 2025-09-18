@@ -5,7 +5,7 @@
 #include <omp.h>
 #include <chrono>
 #include <RcppArmadilloExtensions/sample.h>
-
+#include "utils.h"
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::plugins(cpp11)]]
 // [[Rcpp::plugins(openmp)]]
@@ -13,9 +13,6 @@ using namespace Rcpp;
 using namespace std;
 using namespace arma;
 
-arma::vec rev_cumsum(const arma::vec& X) {
-  return arma::flipud(arma::cumsum(arma::flipud(X))); 
-}
 
 double mean_crossprod(const arma::mat &Z, arma::vec &r, int j, int n_obs) {
   double crossprod = dot(Z.col(j), r);

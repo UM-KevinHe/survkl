@@ -1,6 +1,6 @@
 #include <RcppArmadillo.h>
 // [[Rcpp::depends(RcppArmadillo)]]
-// #include "utils.h"
+#include "utils.h"
 
 using namespace Rcpp;
 
