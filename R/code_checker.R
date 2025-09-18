@@ -180,24 +180,37 @@ plot(cv.result3$integrated_stat.best_per_eta[,1], cv.result3$integrated_stat.bes
 abline(h = cv.result3$external_stat, col = "red", lty = 2)
 #---------------------------6.coxkl_highdim------------------------------#
 load("data/ExampleDataHighDim.RData")
-result4 <- coxkl_highdim(z = ExampleData$z,
-                         delta = ExampleData$status,
-                         time = ExampleData$time,
-                         stratum = NULL,
-                         RS = NULL,
-                         beta = ExampleData$beta_external,
-                         eta = 0,
-                         alpha = 1.0,
-                         message = T)
+# load("data/ExampleData.RData")
+fit_coxkl <- coxkl_highdim(z = ExampleData$z,
+                           delta = ExampleData$status,
+                           time = ExampleData$time,
+                           stratum = NULL,
+                           RS = NULL,
+                           beta = ExampleData$beta_external,
+                           eta = 0,
+                           alpha = 1.0,
+                           message = T,
+                           lambda.min.ratio = 0.001,
+                           tol = 1.0e-10)
+head(fit_coxkl$beta[, 1:10])
+fit_coxkl$lambda
 
 library(grpreg)
 X <- as.matrix(ExampleData$z)
 y <- survival::Surv(ExampleData$time, ExampleData$status)
 group <- 1:ncol(X)
-fit_lasso <- grpreg::grpsurv(X, y, group = group, penalty = "grLasso", alpha = 1.0)
+fit_grpreg <- grpreg::grpsurv(X, y, group = group, penalty = "grLasso", alpha = 1.0, eps = 1.0e-10)
+head(fit_grpreg$beta[, 1:10])
+fit_grpreg$lambda
 
-max(abs(fit_lasso$lambda - result4$lambda))
-# [1] 1e-09
+max(abs(fit_grpreg$beta[, 1:50] - fit_coxkl$beta[, 1:50])) #5.363571e-10
+
+library(glmnet)
+fit_glmnet <- glmnet::glmnet(X, y, family = "cox", alpha = 1.0, lambda.min.ratio = 0.001, thresh = 1.0e-15)
+head(fit_glmnet$beta[, 1:10])
+fit_glmnet$lambda
+
+max(abs(fit_glmnet$beta[, 1:50] - fit_coxkl$beta[, 1:50])) #9.675516e-08
 
 #---------------------------7. cv.coxkl_highdim ------------------------------#
 load("data/ExampleDataHighDim.RData")
@@ -210,11 +223,17 @@ cv.result5 <- cv.coxkl_highdim(z = ExampleData$z,
                                stratum = NULL,
                                RS = NULL,
                                beta = ExampleData$beta_external,
-                               etas = etas,
+                               etas = 0,
+                               # etas = etas,
                                alpha = 1.0,
                                nfolds = 5, 
+                               # cv.criteria = "V&VH",
                                cv.criteria = "CIndex_pooled",
-                               message = T)
+                               message = T,
+                               lambda.min.ratio = 0.001,
+                               tol = 1.0e-10)
+sum(cv.result5$integrated_stat.betahat_best != 0)
+# 10
 head(cv.result5$integrated_stat.best_per_eta)
 #           eta     lambda CIndex_pooled
 # 1 0.000000000 0.03048043     0.7136595
@@ -227,15 +246,35 @@ head(cv.result5$integrated_stat.best_per_eta)
 cv.result5$external_stat
 # 0.7388379
 
-
-plot(cv.result5$integrated_stat.best_per_eta[,1], cv.result5$integrated_stat.best_per_eta[,3], type = "b", xlab = "eta")
-abline(h = cv.result5$external_stat, col = "red", lty = 2)
-
+test_stat(ExampleData$z, ExampleData$statu, ExampleData$time, test_stratum = NULL, 
+          cv.result5$integrated_stat.betahat_best, criteria ="CIndex")  #0.7457177
 
 
 
 
 
+#--------------------------- 7.2 compare with grpreg and glmnet ------------------------------#
+library(grpreg)
+X <- as.matrix(ExampleData$z)
+y <- survival::Surv(ExampleData$time, ExampleData$status)
+group <- 1:ncol(X)
+fit_cvgrpreg <- grpreg::cv.grpsurv(X, y, group = group, penalty = "grLasso", alpha = 1.0, 
+                                   lambda.min = 0.01, eps = 1.0e-10, max.iter = 1e5)
+betabest.cvgrpre <- coef(fit_cvgrpreg, lambda = fit_cvgrpreg$lambda.min)
+sum(betabest.cvgrpre !=0) #11
+
+test_stat(ExampleData$z, ExampleData$statu, ExampleData$time, test_stratum = NULL, 
+          betabest.cvgrpre, criteria ="CIndex")  #0.7458906
+
+
+library(glmnet)
+fit_cvglmnet <- cv.glmnet(X, y, family = "cox", alpha = 1.0, 
+                          lambda.min.ratio = 0.01, thresh = 1.0e-12)
+betabest.cvglmnet <- fit_cvglmnet$glmnet.fit$beta[, which(fit_cvglmnet$lambda == fit_cvglmnet$lambda.min)]
+sum(betabest.cvglmnet !=0) #12
+
+test_stat(ExampleData$z, ExampleData$statu, ExampleData$time, test_stratum = NULL, 
+          betabest.cvglmnet, criteria ="CIndex")  #0.7475181
 
 
 
