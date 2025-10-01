@@ -2,6 +2,7 @@
 // Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 #include <RcppArmadillo.h>
+#include <Rcpp.h>
 
 using namespace Rcpp;
 
@@ -12,7 +13,7 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 
 // KL_Cox_Estimate_cpp
 arma::vec KL_Cox_Estimate_cpp(const arma::mat& Z, const arma::vec& delta, const arma::vec& delta_tilde, const arma::vec& n_each_stratum, const double eta, arma::vec beta_initial, const double tol, const int maxit, const double lambda, bool backtrack, bool message);
-RcppExport SEXP _coxkl_KL_Cox_Estimate_cpp(SEXP ZSEXP, SEXP deltaSEXP, SEXP delta_tildeSEXP, SEXP n_each_stratumSEXP, SEXP etaSEXP, SEXP beta_initialSEXP, SEXP tolSEXP, SEXP maxitSEXP, SEXP lambdaSEXP, SEXP backtrackSEXP, SEXP messageSEXP) {
+RcppExport SEXP _coxkll_KL_Cox_Estimate_cpp(SEXP ZSEXP, SEXP deltaSEXP, SEXP delta_tildeSEXP, SEXP n_each_stratumSEXP, SEXP etaSEXP, SEXP beta_initialSEXP, SEXP tolSEXP, SEXP maxitSEXP, SEXP lambdaSEXP, SEXP backtrackSEXP, SEXP messageSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -33,7 +34,7 @@ END_RCPP
 }
 // KL_Cox_highdim
 List KL_Cox_highdim(const arma::mat& Z, const arma::vec& delta, const arma::vec& delta_tilde, const double& eta, const arma::vec& n_each_stratum, arma::vec& beta, const arma::vec& K1, const int& K0, const arma::vec& lambda_seq, const double& alpha, bool lambda_early_stop, double stop_loss_ratio, const arma::vec& group_multiplier, const int& max_total_iter, const int& max_each_iter, const double& tol, const int& initial_active_group, const double& nvar_max, const double& group_max, const bool& trace_lambda, const bool& actSet, const int& actIter, const int& activeGroupNum, const bool& actSetRemove);
-RcppExport SEXP _coxkl_KL_Cox_highdim(SEXP ZSEXP, SEXP deltaSEXP, SEXP delta_tildeSEXP, SEXP etaSEXP, SEXP n_each_stratumSEXP, SEXP betaSEXP, SEXP K1SEXP, SEXP K0SEXP, SEXP lambda_seqSEXP, SEXP alphaSEXP, SEXP lambda_early_stopSEXP, SEXP stop_loss_ratioSEXP, SEXP group_multiplierSEXP, SEXP max_total_iterSEXP, SEXP max_each_iterSEXP, SEXP tolSEXP, SEXP initial_active_groupSEXP, SEXP nvar_maxSEXP, SEXP group_maxSEXP, SEXP trace_lambdaSEXP, SEXP actSetSEXP, SEXP actIterSEXP, SEXP activeGroupNumSEXP, SEXP actSetRemoveSEXP) {
+RcppExport SEXP _coxkll_KL_Cox_highdim(SEXP ZSEXP, SEXP deltaSEXP, SEXP delta_tildeSEXP, SEXP etaSEXP, SEXP n_each_stratumSEXP, SEXP betaSEXP, SEXP K1SEXP, SEXP K0SEXP, SEXP lambda_seqSEXP, SEXP alphaSEXP, SEXP lambda_early_stopSEXP, SEXP stop_loss_ratioSEXP, SEXP group_multiplierSEXP, SEXP max_total_iterSEXP, SEXP max_each_iterSEXP, SEXP tolSEXP, SEXP initial_active_groupSEXP, SEXP nvar_maxSEXP, SEXP group_maxSEXP, SEXP trace_lambdaSEXP, SEXP actSetSEXP, SEXP actIterSEXP, SEXP activeGroupNumSEXP, SEXP actSetRemoveSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -65,19 +66,9 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// rcpp_hello_world
-List rcpp_hello_world();
-RcppExport SEXP _coxkl_rcpp_hello_world() {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    rcpp_result_gen = Rcpp::wrap(rcpp_hello_world());
-    return rcpp_result_gen;
-END_RCPP
-}
 // rev_cumsum
 arma::vec rev_cumsum(const arma::vec& X);
-RcppExport SEXP _coxkl_rev_cumsum(SEXP XSEXP) {
+RcppExport SEXP _coxkll_rev_cumsum(SEXP XSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -88,7 +79,7 @@ END_RCPP
 }
 // pl_cal_theta
 double pl_cal_theta(const arma::vec& lp, const arma::vec& delta, const arma::vec& n_each_stratum);
-RcppExport SEXP _coxkl_pl_cal_theta(SEXP lpSEXP, SEXP deltaSEXP, SEXP n_each_stratumSEXP) {
+RcppExport SEXP _coxkll_pl_cal_theta(SEXP lpSEXP, SEXP deltaSEXP, SEXP n_each_stratumSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -101,7 +92,7 @@ END_RCPP
 }
 // calculateDeltaTilde
 arma::vec calculateDeltaTilde(const arma::vec& event, const arma::vec& time, const arma::vec& RS, const arma::vec& n_each_stratum);
-RcppExport SEXP _coxkl_calculateDeltaTilde(SEXP eventSEXP, SEXP timeSEXP, SEXP RSSEXP, SEXP n_each_stratumSEXP) {
+RcppExport SEXP _coxkll_calculateDeltaTilde(SEXP eventSEXP, SEXP timeSEXP, SEXP RSSEXP, SEXP n_each_stratumSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -115,7 +106,7 @@ END_RCPP
 }
 // loss_fn_cpp
 List loss_fn_cpp(const arma::mat& Z, const arma::vec& delta, arma::vec& beta, const arma::vec& n_each_stratum);
-RcppExport SEXP _coxkl_loss_fn_cpp(SEXP ZSEXP, SEXP deltaSEXP, SEXP betaSEXP, SEXP n_each_stratumSEXP) {
+RcppExport SEXP _coxkll_loss_fn_cpp(SEXP ZSEXP, SEXP deltaSEXP, SEXP betaSEXP, SEXP n_each_stratumSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -129,7 +120,7 @@ END_RCPP
 }
 // ddloglik_S0
 List ddloglik_S0(const arma::mat& Z, const arma::vec& delta, const arma::vec& beta, const arma::vec& n_each_stratum);
-RcppExport SEXP _coxkl_ddloglik_S0(SEXP ZSEXP, SEXP deltaSEXP, SEXP betaSEXP, SEXP n_each_stratumSEXP) {
+RcppExport SEXP _coxkll_ddloglik_S0(SEXP ZSEXP, SEXP deltaSEXP, SEXP betaSEXP, SEXP n_each_stratumSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -143,7 +134,7 @@ END_RCPP
 }
 // cox_c_index
 Rcpp::List cox_c_index(const arma::vec& time, const arma::vec& xbeta, const arma::vec& delta);
-RcppExport SEXP _coxkl_cox_c_index(SEXP timeSEXP, SEXP xbetaSEXP, SEXP deltaSEXP) {
+RcppExport SEXP _coxkll_cox_c_index(SEXP timeSEXP, SEXP xbetaSEXP, SEXP deltaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -156,7 +147,7 @@ END_RCPP
 }
 // maxgrad
 double maxgrad(arma::mat& x, arma::vec& r, arma::vec& K, arma::vec& m);
-RcppExport SEXP _coxkl_maxgrad(SEXP xSEXP, SEXP rSEXP, SEXP KSEXP, SEXP mSEXP) {
+RcppExport SEXP _coxkll_maxgrad(SEXP xSEXP, SEXP rSEXP, SEXP KSEXP, SEXP mSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -170,20 +161,19 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_coxkl_KL_Cox_Estimate_cpp", (DL_FUNC) &_coxkl_KL_Cox_Estimate_cpp, 11},
-    {"_coxkl_KL_Cox_highdim", (DL_FUNC) &_coxkl_KL_Cox_highdim, 24},
-    {"_coxkl_rcpp_hello_world", (DL_FUNC) &_coxkl_rcpp_hello_world, 0},
-    {"_coxkl_rev_cumsum", (DL_FUNC) &_coxkl_rev_cumsum, 1},
-    {"_coxkl_pl_cal_theta", (DL_FUNC) &_coxkl_pl_cal_theta, 3},
-    {"_coxkl_calculateDeltaTilde", (DL_FUNC) &_coxkl_calculateDeltaTilde, 4},
-    {"_coxkl_loss_fn_cpp", (DL_FUNC) &_coxkl_loss_fn_cpp, 4},
-    {"_coxkl_ddloglik_S0", (DL_FUNC) &_coxkl_ddloglik_S0, 4},
-    {"_coxkl_cox_c_index", (DL_FUNC) &_coxkl_cox_c_index, 3},
-    {"_coxkl_maxgrad", (DL_FUNC) &_coxkl_maxgrad, 4},
+    {"_coxkll_KL_Cox_Estimate_cpp", (DL_FUNC) &_coxkll_KL_Cox_Estimate_cpp, 11},
+    {"_coxkll_KL_Cox_highdim", (DL_FUNC) &_coxkll_KL_Cox_highdim, 24},
+    {"_coxkll_rev_cumsum", (DL_FUNC) &_coxkll_rev_cumsum, 1},
+    {"_coxkll_pl_cal_theta", (DL_FUNC) &_coxkll_pl_cal_theta, 3},
+    {"_coxkll_calculateDeltaTilde", (DL_FUNC) &_coxkll_calculateDeltaTilde, 4},
+    {"_coxkll_loss_fn_cpp", (DL_FUNC) &_coxkll_loss_fn_cpp, 4},
+    {"_coxkll_ddloglik_S0", (DL_FUNC) &_coxkll_ddloglik_S0, 4},
+    {"_coxkll_cox_c_index", (DL_FUNC) &_coxkll_cox_c_index, 3},
+    {"_coxkll_maxgrad", (DL_FUNC) &_coxkll_maxgrad, 4},
     {NULL, NULL, 0}
 };
 
-RcppExport void R_init_coxkl(DllInfo *dll) {
+RcppExport void R_init_coxkll(DllInfo *dll) {
     R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
     R_useDynamicSymbols(dll, FALSE);
 }
