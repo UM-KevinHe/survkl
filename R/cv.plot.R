@@ -1,27 +1,23 @@
-#' Plot Cross-Validation Results vs Eta
+#' Plot Cross-Validation Results vs Eta (Biometrics-style)
 #'
 #' @description
 #' Plots cross-validation performance across eta values for
-#' \code{cv.coxkl}, \code{cv.coxkl_ridge}, or \code{cv.coxkl_enet} objects.
+#' \code{cv.coxkl}, \code{cv.coxkl_ridge}, or \code{cv.coxkl_enet} objects
+#' in the Biometrics figure style, with a solid blue line for CV performance
+#' and a dotted orange line for the external baseline.
 #'
-#' @param object A fitted CV object of class \code{"cv.coxkl"},
+#' @param object A fitted cross-validation result of class \code{"cv.coxkl"},
 #'   \code{"cv.coxkl_ridge"}, or \code{"cv.coxkl_enet"}.
-#' @param add_baseline Logical; if \code{TRUE} (default), adds a dashed line for external baseline.
-#' @param point_color Color for points (default: "black").
-#' @param line_color Color for the CV curve (default: "#0072B2").
-#' @param baseline_color Color for the baseline line (default: "gray40").
-#' @param ... Additional plotting arguments (ignored).
+#' @param line_color Color for the CV performance curve. Default is \code{"#7570B3"}.
+#' @param baseline_color Color for the external baseline line. Default is \code{"#D95F02"}.
+#' @param ... Additional arguments (currently ignored).
 #'
-#' @return A \code{ggplot} object showing CV performance across eta.
+#' @return A \code{ggplot} object showing cross-validation performance versus \code{eta}.
 #' @export
 cv.plot <- function(object,
-                    add_baseline = TRUE,
-                    point_color = "black",
-                    line_color = "#0072B2",
-                    baseline_color = "gray40",
+                    line_color = "#7570B3",
+                    baseline_color = "#D95F02",
                     ...) {
-  
-  # ---- Identify object type & pull data ----
   if (inherits(object, "cv.coxkl")) {
     df <- object$internal_stat
     criteria <- object$criteria
@@ -34,52 +30,63 @@ cv.plot <- function(object,
     stop("Object must be a cv.coxkl, cv.coxkl_ridge, or cv.coxkl_enet.", call. = FALSE)
   }
   
-  # ---- Decide label & candidate metric columns by criteria ----
   is_loss <- criteria %in% c("V&VH", "LinPred")
   ylab <- if (is_loss) "Loss" else "Concordance Index"
-  
-  loss_candidates   <- c("VVH_Loss", "LinPred_Loss", "Loss", "loss")
+  loss_candidates <- c("VVH_Loss", "LinPred_Loss", "Loss", "loss")
   cindex_candidates <- c("CIndex_pooled", "CIndex_foldaverage", "CIndex", "cindex")
-  
   candidates <- if (is_loss) loss_candidates else cindex_candidates
-  # pick the first existing candidate
   metric_col <- NULL
-  for (nm in candidates) {
-    if (nm %in% names(df)) { metric_col <- nm; break }
-  }
-  # Fallback (defensive): last non-eta/non-lambda numeric column
+  for (nm in candidates) if (nm %in% names(df)) { metric_col <- nm; break }
   if (is.null(metric_col)) {
     num_cols <- names(df)[vapply(df, is.numeric, logical(1))]
     num_cols <- setdiff(num_cols, c("eta", "lambda"))
     if (length(num_cols) == 0L) stop("Could not detect metric column in CV results.", call. = FALSE)
     metric_col <- num_cols[length(num_cols)]
-    warning(sprintf("Metric column not found by criteria; using '%s' instead.", metric_col), call. = FALSE)
   }
   
-  # ---- Clean & order ----
-  if (!("eta" %in% names(df))) stop("CV results must contain 'eta' column.", call. = FALSE)
   df$eta <- as.numeric(df$eta)
   df <- df[order(df$eta), , drop = FALSE]
+  metric_vals <- df[[metric_col]]
   
-  # ---- Plot ----
-  g <- ggplot2::ggplot(df, ggplot2::aes(x = eta, y = .data[[metric_col]])) +
-    ggplot2::geom_line(linewidth = 1, color = line_color) +
-    ggplot2::geom_point(size = 2, color = point_color) +
-    ggplot2::theme_classic(base_size = 13) +
-    ggplot2::labs(x = expression(eta), y = ylab)
+  legend_df <- data.frame(
+    x = rep(c(0, 1), 2),
+    y = rep(1, 4),
+    Method = factor(rep(c("CoxKL", "External"), each = 2),
+                    levels = c("CoxKL", "External"))
+  )
   
-  # ---- External baseline ----
-  if (add_baseline && !is.null(external) && is.finite(external)) {
-    g <- g +
-      ggplot2::geom_hline(yintercept = external, linetype = "dashed",
-                          color = baseline_color, linewidth = 0.9) +
-      ggplot2::annotate("text",
-                        x = max(df$eta, na.rm = TRUE),
-                        y = external,
-                        label = "External baseline",
-                        hjust = 1.1, vjust = -0.5,
-                        color = baseline_color, size = 3.5)
-  }
+  g_main <- ggplot(df, aes(x = eta, y = metric_vals)) +
+    geom_line(aes(color = "CoxKL", linetype = "CoxKL"), size = 1) +
+    geom_point(color = line_color, size = 1.3) +
+    geom_segment(aes(x = min(df$eta), xend = max(df$eta),
+                     y = external, yend = external,
+                     color = "External", linetype = "External"),
+                 linewidth = 1) +
+    scale_color_manual(values = c("CoxKL" = line_color, "External" = baseline_color)) +
+    scale_linetype_manual(values = c("CoxKL" = "solid", "External" = "dotted")) +
+    labs(x = expression(eta), y = ylab) +
+    theme_minimal(base_size = 13) +
+    theme(panel.grid = element_blank(),
+          panel.border = element_blank(),
+          axis.line = element_line(color = "black"),
+          axis.ticks.length = unit(0.1, "cm"),
+          axis.ticks = element_line(color = "black"),
+          axis.text = element_text(size = 14),
+          legend.position = "none")
   
-  g
+  g_legend <- ggplot(legend_df, aes(x = x, y = y, color = Method, linetype = Method)) +
+    geom_line(linewidth = 1) +
+    scale_color_manual(values = c("CoxKL" = line_color, "External" = baseline_color)) +
+    scale_linetype_manual(values = c("CoxKL" = "solid", "External" = "dotted")) +
+    theme_void(base_size = 13) +
+    theme(legend.position = "top",
+          legend.title = element_blank(),
+          legend.text = element_text(size = 14),
+          legend.key.width = unit(1.2, "lines"),
+          legend.key.height = unit(0.6, "lines")) +
+    guides(color = guide_legend(keywidth = 1.2, keyheight = 0.4, title = NULL),
+           linetype = guide_legend(keywidth = 1.2, keyheight = 0.4, title = NULL))
+  
+  legend <- cowplot::get_legend(g_legend)
+  cowplot::plot_grid(legend, g_main, ncol = 1, rel_heights = c(0.08, 1))
 }

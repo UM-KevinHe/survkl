@@ -140,7 +140,7 @@ coxkl_enet <- function(z, delta, time, stratum = NULL, RS = NULL, beta = NULL, e
   delta <- as.numeric(delta)
   time <- as.numeric(time)
   
-  input_data <- list(z = z, time = time, delta = delta, stratum = stratum)
+  input_data <- list(z = z, time = time, delta = delta, stratum = stratum, RS = RS)
   
   if (!data_sorted) {
     ## ---- Sorting Section ----

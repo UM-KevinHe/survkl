@@ -64,7 +64,7 @@ coxkl_ridge <- function(z, delta, time, stratum = NULL, RS = NULL, beta = NULL, 
     if (message) message("External Risk Score information is used.")
   }
   
-  input_data <- list(z = z, time = time, delta = delta, stratum = stratum)
+  input_data <- list(z = z, time = time, delta = delta, stratum = stratum, RS = RS)
   
   if (!data_sorted) {
     ## ---- Sorting Section ----
