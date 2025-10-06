@@ -25,12 +25,15 @@
 #' @param data_sorted Logical; if `TRUE`, assumes input data is already sorted by strata and time.
 #' @param ... Additional arguments.
 #'
-#' @return A list with components:
-#' \describe{
-#'   \item{\code{lambda}}{The lambda sequence used for estimation.}
-#'   \item{\code{beta}}{Matrix of estimated coefficients for each lambda (columns correspond to lambda).}
-#'   \item{\code{linear.predictors}}{Matrix of linear predictors for each lambda.}
-#'   \item{\code{likelihood}}{Vector of log-partial likelihoods for each lambda.}
+#' @return
+#' An object of class \code{"coxkl_ridge"} containing:
+#' \itemize{
+#'   \item \code{lambda}: The lambda sequence used for estimation.
+#'   \item \code{beta}: Matrix of estimated coefficients for each lambda.
+#'   \item \code{linear.predictors}: Matrix of linear predictors.
+#'   \item \code{likelihood}: Vector of log-partial likelihoods.
+#'   \item \code{data}: A list containing the input data used in fitting
+#'         (\code{z}, \code{time}, \code{delta}, \code{stratum}, \code{data_sorted}).
 #' }
 #'
 #' @export
@@ -60,6 +63,8 @@ coxkl_ridge <- function(z, delta, time, stratum = NULL, RS = NULL, beta = NULL, 
     RS <- as.matrix(RS)
     if (message) message("External Risk Score information is used.")
   }
+  
+  input_data <- list(z = z, time = time, delta = delta, stratum = stratum)
   
   if (!data_sorted) {
     ## ---- Sorting Section ----
@@ -154,10 +159,15 @@ coxkl_ridge <- function(z, delta, time, stratum = NULL, RS = NULL, beta = NULL, 
     lambda = lambda.seq,
     beta = beta_mat,
     linear.predictors = LinPred_original,
-    likelihood = likelihood_mat),
-    class = "coxkl_ridge")  
+    likelihood = likelihood_mat,
+    data = list(
+      z = z,
+      time = time,
+      delta = delta,
+      stratum = input_data
+    )
+  ), class = "coxkl_ridge")
 }
-
 
 
 

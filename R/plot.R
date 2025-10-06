@@ -1,85 +1,164 @@
-#' Plot the relationship between performance score vs. \eqn{\eta}
+#' Plot Model Performance vs Eta for coxkl
 #'
-#' This function takes a model fitted from \code{cv.coxkl} to plot the
-#' relationship between performance score and corresponding \eqn{\eta}.
+#' @description
+#' Plots model performance (loss or concordance index) across the \code{eta} sequence.
+#' If no test data are provided, the plot is based on training data likelihoods.
 #'
-#' @param object A model fitted from \code{cv.coxkl}.
-#' @param line_size Size of the lines.
-#' @param point_size Size of the points.
-#' @param legend_title Title displayed above the color/linetype legend.
-#' @param method_name Label used for the main method in legend, color, and linetype.
-#' @param baseline_name Label used for the baseline in legend, color, and linetype.
-#' @param methodline_color Color of the
-#' @param baseline_color Color for the baseline point & segment
-#' @param method_linetype Line type
-#' @param baseline_linetype Line type
+#' @param object A fitted model object of class \code{"coxkl"}.
+#' @param test_z Optional numeric matrix of test covariates.
+#' @param test_time Optional numeric vector of test survival times.
+#' @param test_delta Optional numeric vector of test event indicators.
+#' @param test_stratum Optional vector of test stratum membership.
+#' @param criteria Character string: \code{"loss"} or \code{"CIndex"}.
+#' @param ... Additional arguments (ignored).
 #'
-#' @return
-#' A ggplot object representing the relationship between performance score and eta.
-#'
-#'
-#' @importFrom rlang .data
-#' @importFrom ggplot2 ggplot geom_line geom_segment aes scale_color_manual geom_point expansion theme scale_y_continuous scale_x_continuous scale_linetype_manual element_line element_text element_blank theme_minimal
-#' @method plot coxklpred
+#' @return A \code{ggplot} object showing the performance curve.
 #' @export
-plot.coxklpred <- function(object, line_size = 1, point_size = 3,
-                    methodline_color = "#4682B4",
-                    baseline_color = "#778899",
-                    method_linetype  = "solid",
-                    baseline_linetype= "dashed") {
-  if (missing(object)) stop ("Argument 'object' is required!",call.=F)
+plot.coxkl <- function(object, test_z = NULL, test_time = NULL, test_delta = NULL,
+                       test_stratum = NULL, criteria = c("loss", "CIndex"), ...) {
+  criteria <- match.arg(criteria)
+  if (!inherits(object, "coxkl")) stop("'object' must be of class 'coxkl'.", call. = FALSE)
+  
+  etas <- object$eta
+  beta_mat <- object$beta
+  
+  if (is.null(test_z)) {
+    if (criteria == "loss") {
+      metrics <- -2 * object$likelihood
+    } else {
+      test_z <- object$data$z
+      test_time <- object$data$time
+      test_delta <- object$data$delta
+      test_stratum <- object$data$stratum
+      metrics <- sapply(seq_along(etas), function(i)
+        test_eval(test_z, test_delta, test_time, test_stratum,
+                  betahat = beta_mat[, i], criteria = "CIndex"))
+    }
+  } else {
+    metrics <- sapply(seq_along(etas), function(i)
+      test_eval(test_z, test_delta, test_time, test_stratum,
+                betahat = beta_mat[, i], criteria = criteria))
+  }
+  
+  df <- data.frame(eta = etas, metric = metrics)
+  ylab <- if (criteria == "CIndex") "Concordance Index" else "Loss"
+  
+  ggplot2::ggplot(df, ggplot2::aes(x = eta, y = metric)) +
+    ggplot2::geom_line(linewidth = 1) +
+    ggplot2::geom_point(size = 2) +
+    ggplot2::theme_classic(base_size = 13) +
+    ggplot2::labs(x = expression(eta), y = ylab)
+}
 
-  if (!inherits(object, "coxklpred"))
-    stop("`object` must be the result of predict.coxkl().", call. = FALSE)
 
-  if (!requireNamespace("ggplot2", quietly = TRUE))
-    stop("Package \"ggplot2\" is required for this plot.", call. = FALSE)
+#' Plot Model Performance vs Lambda for coxkl_ridge
+#'
+#' @description
+#' Plots model performance (loss or concordance index) across the \code{lambda} sequence.
+#' If no test data are provided, the plot uses training data likelihoods.
+#'
+#' @param object A fitted model object of class \code{"coxkl_ridge"}.
+#' @param test_z Optional numeric matrix of test covariates.
+#' @param test_time Optional numeric vector of test survival times.
+#' @param test_delta Optional numeric vector of test event indicators.
+#' @param test_stratum Optional vector of test stratum membership.
+#' @param criteria Character string: \code{"loss"} or \code{"CIndex"}.
+#' @param ... Additional arguments (ignored).
+#'
+#' @return A \code{ggplot} object showing the performance curve.
+#' @export
+plot.coxkl_ridge <- function(object, test_z = NULL, test_time = NULL, test_delta = NULL,
+                             test_stratum = NULL, criteria = c("loss", "CIndex"), ...) {
+  criteria <- match.arg(criteria)
+  if (!inherits(object, "coxkl_ridge")) stop("'object' must be of class 'coxkl_ridge'.", call. = FALSE)
+  
+  lambdas <- object$lambda
+  beta_mat <- object$beta
+  
+  if (is.null(test_z)) {
+    if (criteria == "loss") {
+      metrics <- -2 * object$likelihood
+    } else {
+      test_z <- object$data$z
+      test_time <- object$data$time
+      test_delta <- object$data$delta
+      test_stratum <- object$data$stratum
+      metrics <- sapply(seq_along(lambdas), function(i)
+        test_eval(test_z, test_delta, test_time, test_stratum,
+                  betahat = beta_mat[, i], criteria = "CIndex"))
+    }
+  } else {
+    metrics <- sapply(seq_along(lambdas), function(i)
+      test_eval(test_z, test_delta, test_time, test_stratum,
+                betahat = beta_mat[, i], criteria = criteria))
+  }
+  
+  df <- data.frame(lambda = lambdas, metric = metrics)
+  df <- df[order(df$lambda, decreasing = TRUE), ]
+  ylab <- if (criteria == "CIndex") "Concordance Index" else "Loss"
+  
+  ggplot2::ggplot(df, ggplot2::aes(x = lambda, y = metric)) +
+    ggplot2::geom_line(linewidth = 1) +
+    ggplot2::geom_point(size = 2) +
+    ggplot2::scale_x_log10() +
+    ggplot2::scale_x_reverse() +  # 让 log 轴从大→小
+    ggplot2::theme_classic(base_size = 13) +
+    ggplot2::labs(x = expression(lambda), y = ylab)
+}
 
-  legend_title = ""
-  method_name = "CoxKL"
-  baseline_name = "Internal Only"
 
-  col_vec <- setNames(c(methodline_color, baseline_color),
-                      c(method_name, baseline_name))
-  lty_vec <- setNames(c(method_linetype, baseline_linetype),
-                      c(method_name, baseline_name))
 
-  criteria <- "likelihood"
-  eta_list <- object$eta_list
-  performance_score <- object$likelihood
-
-  plot_data <- data.frame(eta = eta_list, performance_score = performance_score)
-  plot_data <- plot_data[order(plot_data$eta), ]
-
-  x_value_for_dot <- plot_data[1,1]
-  internal_loss1 <- plot_data[1,2]
-  x_max <- max(eta_list)
-
-  n <- nrow(plot_data)
-  difference <- max(performance_score) - min(performance_score)
-  loss_min <- min(performance_score)
-  loss_max <- max(performance_score)
-
-  plot_p <- ggplot() +
-    geom_line(aes(x = eta, y = performance_score, color = method_name, linetype = method_name), size = line_size, data = plot_data) +
-    geom_point(aes(x = x_value_for_dot, y = internal_loss1, color = baseline_name), size = point_size) +
-    geom_segment(aes(x = x_value_for_dot, y = internal_loss1, xend = x_max, yend = internal_loss1 ,
-                     color = baseline_name, linetype = baseline_name), size = line_size) +
-    scale_y_continuous(name = criteria, limits=c(loss_min, loss_max)) +
-    scale_x_continuous(name = expression(eta),  breaks = seq(min(eta_list), max(eta_list))) +
-    scale_color_manual(name = legend_title, values = col_vec) +
-    scale_linetype_manual(name = legend_title, values = lty_vec) +
-    theme_minimal(base_size = 14) +
-    theme(
-      axis.line = element_line(size = 0.3),
-      plot.title = element_text(size = 13),
-      axis.title = element_text(size = 11),
-      axis.text = element_text(size=11),
-      panel.border = element_blank(),
-      plot.background = element_blank(),
-      panel.grid.major = element_line(color = "#d3d3d3", linewidth = 0.1),
-      panel.grid.minor = element_blank()
-    )
-
-  return (plot_p)
+#' Plot Model Performance vs Lambda for coxkl_enet
+#'
+#' @description
+#' Plots model performance (loss or concordance index) across the \code{lambda} sequence.
+#' If no test data are provided, the plot uses training data likelihoods.
+#'
+#' @param object A fitted model object of class \code{"coxkl_enet"}.
+#' @param test_z Optional numeric matrix of test covariates.
+#' @param test_time Optional numeric vector of test survival times.
+#' @param test_delta Optional numeric vector of test event indicators.
+#' @param test_stratum Optional vector of test stratum membership.
+#' @param criteria Character string: \code{"loss"} or \code{"CIndex"}.
+#' @param ... Additional arguments (ignored).
+#'
+#' @return A \code{ggplot} object showing the performance curve.
+#' @export
+plot.coxkl_enet <- function(object, test_z = NULL, test_time = NULL, test_delta = NULL,
+                            test_stratum = NULL, criteria = c("loss", "CIndex"), ...) {
+  criteria <- match.arg(criteria)
+  if (!inherits(object, "coxkl_enet")) stop("'object' must be of class 'coxkl_enet'.", call. = FALSE)
+  
+  lambdas <- object$lambda
+  beta_mat <- object$beta
+  
+  if (is.null(test_z)) {
+    if (criteria == "loss") {
+      metrics <- -2 * object$likelihood
+    } else {
+      test_z <- object$data$z
+      test_time <- object$data$time
+      test_delta <- object$data$delta
+      test_stratum <- object$data$stratum
+      metrics <- sapply(seq_along(lambdas), function(i)
+        test_eval(test_z, test_delta, test_time, test_stratum,
+                  betahat = beta_mat[, i], criteria = "CIndex"))
+    }
+  } else {
+    metrics <- sapply(seq_along(lambdas), function(i)
+      test_eval(test_z, test_delta, test_time, test_stratum,
+                betahat = beta_mat[, i], criteria = criteria))
+  }
+  
+  df <- data.frame(lambda = lambdas, metric = metrics)
+  df <- df[order(df$lambda, decreasing = TRUE), ]
+  ylab <- if (criteria == "CIndex") "Concordance Index" else "Loss"
+  
+  ggplot2::ggplot(df, ggplot2::aes(x = lambda, y = metric)) +
+    ggplot2::geom_line(linewidth = 1) +
+    ggplot2::geom_point(size = 2) +
+    ggplot2::scale_x_log10() +
+    ggplot2::scale_x_reverse() +
+    ggplot2::theme_classic(base_size = 13) +
+    ggplot2::labs(x = expression(lambda), y = ylab)
 }

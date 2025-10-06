@@ -278,13 +278,16 @@ cv.coxkl_ridge <- function(z, delta, time, stratum = NULL, RS = NULL, beta = NUL
                           "CIndex_foldaverage" = mean(ext_c_per_fold)
   )
   
-  
-  return(list(
-    integrated_stat.full_results = results_df,   # all (eta, lambda) combinations with CV statistic
-    integrated_stat.best_per_eta = best_per_eta, # per-eta best lambda rows
-    external_stat = external_stat# scalar baseline matched to cv.criteria
-  ))
+  structure(
+    list(
+      integrated_stat.full_results = results_df,
+      integrated_stat.best_per_eta = best_per_eta,
+      external_stat = external_stat,
+      criteria = cv.criteria,
+      nfolds = nfolds
+    ),
+    class = "cv.coxkl_ridge"
+  )
 }
-
   
   

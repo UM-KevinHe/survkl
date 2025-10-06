@@ -285,8 +285,13 @@ cv.coxkl <- function(z, delta, time, stratum = NULL,
                           "CIndex_foldaverage" = mean(ext_c_per_fold)
   )
 
-  return(list(
-    internal_stat = results,
-    external_stat = external_stat
-  ))
+  structure(
+    list(
+      internal_stat = results,
+      external_stat = external_stat,
+      criteria = criteria,
+      nfolds = nfolds
+    ),
+    class = "cv.coxkl"
+  )
 }

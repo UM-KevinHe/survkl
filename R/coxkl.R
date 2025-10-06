@@ -33,19 +33,16 @@
 #' @param data_sorted Logical; if `TRUE`, input data are assumed to be already
 #'   sorted by stratum and time. Default is `FALSE`.
 #'
-#' @return An object of class \code{"coxkl"}, implemented as a list with the
-#'   following components:
-#'   \describe{
-#'     \item{\code{eta}}{Numeric vector of tuning parameters used.}
-#'     \item{\code{beta}}{Numeric matrix of estimated coefficients. Columns
-#'       correspond to different values of \code{eta}, rows to covariates.}
-#'     \item{\code{linear.predictors}}{Numeric matrix of linear predictors on the
-#'       training data, aligned with rows of \code{z}. If input data were not
-#'       pre-sorted, linear predictors are re-ordered back to the original input
-#'       order.}
-#'     \item{\code{likelihood}}{Numeric vector of log-partial likelihood values,
-#'       one per fitted model (indexed by \code{eta}).}
-#'   }
+#' @return
+#' An object of class \code{"coxkl"} containing:
+#' \itemize{
+#'   \item \code{eta}: the fitted \eqn{\eta} sequence.
+#'   \item \code{beta}: estimated coefficient matrix (\eqn{p \times |\eta|}).
+#'   \item \code{linear.predictors}: matrix of linear predictors.
+#'   \item \code{likelihood}: vector of partial likelihoods.
+#'   \item \code{data}: a list containing the input data used in fitting
+#'         (\code{z}, \code{time}, \code{delta}, \code{stratum}, \code{data_sorted}).
+#' }
 #'
 #' @examples
 #' data(ExampleData)
@@ -73,8 +70,6 @@
 #' )
 #'
 #' @export
-
-
 coxkl <- function(z, delta, time, stratum = NULL,
                   RS = NULL, beta = NULL, 
                   etas, tol = 1.0e-4, Mstop = 100,
@@ -96,6 +91,8 @@ coxkl <- function(z, delta, time, stratum = NULL,
     RS <- as.matrix(RS)
     if (message) message("External Risk Score information is used.")
   }
+  
+  input_data <- list(z = z, time = time, delta = delta, stratum = stratum)
   
   if (!data_sorted) {
     ## ---- Sorting Section ----
@@ -167,7 +164,8 @@ coxkl <- function(z, delta, time, stratum = NULL,
     eta = etas,
     beta = beta_mat,
     linear.predictors = LinPred_original,
-    likelihood = likelihood_mat),
-    class = "coxkl")  
+    likelihood = likelihood_mat,
+    data = input_data
+  ), class = "coxkl")
 }
 

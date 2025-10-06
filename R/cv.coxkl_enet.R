@@ -41,7 +41,7 @@
 #'   }
 #' @param message Logical; whether to print progress messages. Default = \code{FALSE}.
 #' @param seed Optional integer random seed for fold assignment.
-#' @param ... Additional arguments passed to \code{\link{coxkl_highdim}}.
+#' @param ... Additional arguments passed to \code{\link{coxkl_enet}}.
 #'
 #' @return A \code{data.frame} with two columns:
 #'   \describe{
@@ -128,14 +128,14 @@ cv.coxkl_enet <- function(z, delta, time, stratum = NULL, RS = NULL, beta = NULL
     
     ## Determine lambda path (on full data) & estimation on full data
     if (is.null(lambda)) {
-      fit0 <- coxkl_highdim(z = z, delta = delta, time = time, stratum = stratum,
+      fit0 <- coxkl_enet(z = z, delta = delta, time = time, stratum = stratum,
                             RS = RS, eta = eta, alpha = alpha,
                             lambda = NULL, nlambda = nlambda, lambda.min.ratio = lambda.min.ratio,
                             data_sorted = TRUE, message = FALSE, ...)
       lambda_seq <- as.vector(fit0$lambda)
     } else {
       lambda_seq <- sort(lambda, decreasing = TRUE)
-      fit0 <- coxkl_highdim(z = z, delta = delta, time = time, stratum = stratum,
+      fit0 <- coxkl_enet(z = z, delta = delta, time = time, stratum = stratum,
                             RS = RS, eta = eta, alpha = alpha,
                             lambda = lambda_seq, data_sorted = TRUE, message = FALSE, ...)
     }
@@ -181,7 +181,7 @@ cv.coxkl_enet <- function(z, delta, time, stratum = NULL, RS = NULL, beta = NULL
       }
       
       ## Fit full lambda path on training fold
-      fit_f <- coxkl_highdim(z = z[train_idx, , drop = FALSE],
+      fit_f <- coxkl_enet(z = z[train_idx, , drop = FALSE],
                              delta = delta[train_idx],
                              time = time[train_idx],
                              stratum = stratum[train_idx],
@@ -226,7 +226,7 @@ cv.coxkl_enet <- function(z, delta, time, stratum = NULL, RS = NULL, beta = NULL
     if (cv.criteria == "V&VH") {
       cve_eta <- vvh_sum
     } else if (cv.criteria == "LinPred") {
-      Lmat <- loss.coxkl_highdim(delta, Y, stratum, total = FALSE)
+      Lmat <- loss.coxkl_enet(delta, Y, stratum, total = FALSE)
       cve_eta <- colSums(Lmat)
     } else if (cv.criteria == "CIndex_pooled") {
       cve_eta <- numer / denom
@@ -282,14 +282,19 @@ cv.coxkl_enet <- function(z, delta, time, stratum = NULL, RS = NULL, beta = NULL
                           "CIndex_foldaverage" = mean(ext_c_per_fold)
   )
   
-  return(list(
-    integrated_stat.full_results = results_df,
-    integrated_stat.best_per_eta = best_per_eta,
-    integrated_stat.betahat_best = beta_best_mat,
-    external_stat = external_stat
-  ))
+  structure(
+    list(
+      integrated_stat.full_results = results_df,
+      integrated_stat.best_per_eta = best_per_eta,
+      integrated_stat.betahat_best = beta_best_mat,
+      external_stat = external_stat,
+      criteria = cv.criteria,
+      alpha = alpha,
+      nfolds = nfolds
+    ),
+    class = "cv.coxkl_enet"
+  )
 }
-
 
 
 

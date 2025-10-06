@@ -140,6 +140,7 @@ coxkl_enet <- function(z, delta, time, stratum = NULL, RS = NULL, beta = NULL, e
   delta <- as.numeric(delta)
   time <- as.numeric(time)
   
+  input_data <- list(z = z, time = time, delta = delta, stratum = stratum)
   
   if (!data_sorted) {
     ## ---- Sorting Section ----
@@ -267,22 +268,22 @@ coxkl_enet <- function(z, delta, time, stratum = NULL, RS = NULL, beta = NULL, e
   } else {
     LinPred_original <- LinPred
   }
-  
 
-  result <- structure(list(beta = beta,
-                           group = factor(initial.group),
-                           lambda = lambda,
-                           alpha = alpha,
-                           likelihood = loss,
-                           n = n,
-                           df = df,
-                           iter = iter,
-                           W = exp(LinPred_original),  # rescale beta will not change the linear predictors (Z matrix is also standardized)
-                           df = df,
-                           group.multiplier = group.multiplier),
-                      class = "coxkl_enet")
+  result <- structure(list(
+    beta = beta,
+    group = factor(initial.group),
+    lambda = lambda,
+    alpha = alpha,
+    likelihood = loss,
+    n = n,
+    df = df,
+    iter = iter,
+    W = exp(LinPred_original),
+    group.multiplier = group.multiplier,
+    data = input_data
+  ), class = "coxkl_enet")
   
-  if (returnX == TRUE){  # used for cross validation!
+  if (returnX == TRUE){
     result$returnX <- list(XX = std.Z,
                            time = time,
                            delta = delta,
