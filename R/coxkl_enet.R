@@ -98,13 +98,13 @@
 #'
 #'
 #' @export
-coxkl_highdim <- function(z, delta, time, stratum = NULL, RS = NULL, beta = NULL, eta = NULL,
-                          alpha = NULL, lambda = NULL, nlambda = 100, lambda.min.ratio = ifelse(n < p, 0.05, 1e-03), 
-                          lambda.early.stop = FALSE, tol = 1.0e-4, Mstop = 1000, max.total.iter = (Mstop * nlambda), 
-                          group = 1:ncol(z), group.multiplier = NULL, standardize = T, 
-                          nvar.max = ncol(z), group.max = length(unique(group)), stop.loss.ratio = 1e-3, 
-                          actSet = TRUE, actIter = Mstop, actGroupNum = sum(unique(group) != 0), actSetRemove = F,
-                          returnX = FALSE, trace.lambda = FALSE, message = FALSE, data_sorted = FALSE, ...){
+coxkl_enet <- function(z, delta, time, stratum = NULL, RS = NULL, beta = NULL, eta = NULL,
+                       alpha = NULL, lambda = NULL, nlambda = 100, lambda.min.ratio = ifelse(n < p, 0.05, 1e-03), 
+                       lambda.early.stop = FALSE, tol = 1.0e-4, Mstop = 1000, max.total.iter = (Mstop * nlambda), 
+                       group = 1:ncol(z), group.multiplier = NULL, standardize = T, 
+                       nvar.max = ncol(z), group.max = length(unique(group)), stop.loss.ratio = 1e-3, 
+                       actSet = TRUE, actIter = Mstop, actGroupNum = sum(unique(group) != 0), actSetRemove = F,
+                       returnX = FALSE, trace.lambda = FALSE, message = FALSE, data_sorted = FALSE, ...){
   
   if (is.null(alpha)){
     warning("alpha is not provided. Setting alpha = 1 (lasso penalty).", call. = FALSE)
@@ -280,7 +280,7 @@ coxkl_highdim <- function(z, delta, time, stratum = NULL, RS = NULL, beta = NULL
                            W = exp(LinPred_original),  # rescale beta will not change the linear predictors (Z matrix is also standardized)
                            df = df,
                            group.multiplier = group.multiplier),
-                      class = "coxkl_highdim")
+                      class = "coxkl_enet")
   
   if (returnX == TRUE){  # used for cross validation!
     result$returnX <- list(XX = std.Z,

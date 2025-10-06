@@ -1,4 +1,4 @@
-#' Cross-Validation for CoxKL High-Dimensional Model (eta tuning)
+#' Cross-Validation for CoxKL Model with elastic net & lasso penalty
 #'
 #' This function performs cross-validation on the high-dimensional Cox model with
 #' Kullback–Leibler (KL) penalty.
@@ -53,13 +53,13 @@
 #'   }
 #'   
 #' @export
-cv.coxkl_highdim <- function(z, delta, time, stratum = NULL, RS = NULL, beta = NULL,
-                             etas, alpha = 1.0,
-                             lambda = NULL, nlambda = 100, lambda.min.ratio = ifelse(n < p, 0.05, 1e-03),
-                             nfolds = 5, 
-                             cv.criteria = c("V&VH", "LinPred", "CIndex_pooled", "CIndex_foldaverage"),
-                             c_index_stratum = NULL,
-                             message = FALSE, seed = NULL, ...) {
+cv.coxkl_enet <- function(z, delta, time, stratum = NULL, RS = NULL, beta = NULL,
+                          etas, alpha = 1.0,
+                          lambda = NULL, nlambda = 100, lambda.min.ratio = ifelse(n < p, 0.05, 1e-03),
+                          nfolds = 5, 
+                          cv.criteria = c("V&VH", "LinPred", "CIndex_pooled", "CIndex_foldaverage"),
+                          c_index_stratum = NULL,
+                          message = FALSE, seed = NULL, ...) {
   
   ## Input check & data preparation
   if (is.null(etas)) stop("etas must be provided.", call. = FALSE)

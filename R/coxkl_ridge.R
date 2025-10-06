@@ -155,7 +155,7 @@ coxkl_ridge <- function(z, delta, time, stratum = NULL, RS = NULL, beta = NULL, 
     beta = beta_mat,
     linear.predictors = LinPred_original,
     likelihood = likelihood_mat),
-    class = "coxkl")  
+    class = "coxkl_ridge")  
 }
 
 
