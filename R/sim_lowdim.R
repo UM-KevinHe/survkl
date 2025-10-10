@@ -14,6 +14,7 @@
 #'   \eqn{h_0(t) = \lambda_0 \nu_0 t^{\nu_0 - 1}}.
 #' @param qualities Character; external data quality level, one of 
 #'   \code{"Good"}, \code{"Fair"}, or \code{"Poor"}.
+#' @param pL_map_external latent mixture for external, indicate the heterogeneity between external and internal cohorts.
 #' @param seed Random seed for reproducibility.
 #'
 #' @return A list with three elements:
@@ -30,14 +31,13 @@
 sim_lowdim <- function(n_int = 200, n_test = 1000, n_ext = 1000, 
                        beta_true = c(0.3, -0.3,  0.3, -0.3,  0.3, -0.3),
                        int_cens_target = 0.3, ext_cens_target = 0.5, 
-                       lambda0 =  1, nu0 = 2, # Weibull baseline: h0(t) = lambda0*nu0 * t^(nu0-1)
+                       lambda0 =  1, nu0 = 2,
                        qualities = c("Good","Fair","Poor"),
+                       pL_map_external = c(Good = 1.0, Fair = 0.5, Poor = 0.0), 
                        seed = 1){
   
   set.seed(seed)
-  
   qualities <- match.arg(qualities, c("Good","Fair","Poor"), several.ok=FALSE)
-  pL_map_external <- c(Good = 1.0, Fair = 0.5, Poor = 0.0)  # latent mixture for external, indicate the heterogeneity between external and internal cohort
   
   names(beta_true) <- paste0("Z", 1:6)
   pL_ext <- unname(pL_map_external[qualities])
