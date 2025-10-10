@@ -19,19 +19,18 @@ plot.coxkl <- function(object, test_z = NULL, test_time = NULL, test_delta = NUL
   criteria <- match.arg(criteria)
   if (!inherits(object, "coxkl")) stop("'object' must be of class 'coxkl'.", call. = FALSE)
   
-  etas <- object$eta
-  beta_mat <- object$beta
-  z_train <- object$data$z
-  time_train <- object$data$time
-  delta_train <- object$data$delta
+  etas          <- object$eta
+  beta_mat      <- object$beta
+  z_train       <- object$data$z
+  time_train    <- object$data$time
+  delta_train   <- object$data$delta
   stratum_train <- object$data$stratum
-  RS_external <- object$data$RS
   
   using_train <- is.null(test_z) && is.null(test_time) && is.null(test_delta) && is.null(test_stratum)
   if (using_train) {
-    test_z <- z_train
-    test_time <- time_train
-    test_delta <- delta_train
+    test_z       <- z_train
+    test_time    <- time_train
+    test_delta   <- delta_train
     test_stratum <- stratum_train
   }
   
@@ -50,49 +49,36 @@ plot.coxkl <- function(object, test_z = NULL, test_time = NULL, test_delta = NUL
     )
   }
   
-  ext_perf <- NA_real_
-  if (!is.null(RS_external)) {
-    ext_perf <- test_eval(
-      test_RS      = RS_external,
-      test_delta   = test_delta,
-      test_time    = test_time,
-      test_stratum = test_stratum,
-      criteria     = criteria
-    )
-  }
+  idx0 <- which.min(abs(etas - 0))
+  x0   <- etas[idx0]
+  y0   <- as.numeric(metrics[idx0])
+  xmax <- max(etas, na.rm = TRUE)
   
-  df <- data.frame(eta = etas, metric = metrics)
+  df   <- data.frame(eta = etas, metric = as.numeric(metrics))
   ylab <- if (criteria == "CIndex") "C Index" else "Loss"
   
-  p <- ggplot(df, aes(x = eta, y = metric)) +
-    geom_line(size = 1, color = "#7570B3") +
-    geom_point(size = 2, color = "#7570B3") +
-    labs(x = expression(eta), y = ylab) +
-    theme_biometrics()
+  p <- ggplot2::ggplot(df, ggplot2::aes(x = eta, y = metric)) +
+    ggplot2::geom_line(size = 1, color = "#7570B3") +
+    ggplot2::geom_point(size = 2, color = "#7570B3") +
+    ggplot2::geom_segment(
+      data = data.frame(x0 = x0, y0 = y0, xmax = xmax),
+      ggplot2::aes(x = x0, xend = xmax, y = y0, yend = y0),
+      inherit.aes = FALSE, color = "#1B9E77", linetype = "dotted", linewidth = 1
+    ) +
+    ggplot2::geom_point(
+      data = data.frame(x0 = x0, y0 = y0),
+      ggplot2::aes(x = x0, y = y0),
+      inherit.aes = FALSE, color = "#1B9E77", shape = 16, size = 3
+    ) +
+    ggplot2::labs(x = expression(eta), y = ylab) +
+    theme_biometrics() +
+    ggplot2::coord_cartesian(
+      ylim = c(min(c(df$metric, y0), na.rm = TRUE) * 0.995,
+               max(c(df$metric, y0), na.rm = TRUE) * 1.005)
+    )
   
-  if (is.finite(ext_perf)) {
-    p <- p +
-      geom_segment(
-        inherit.aes = FALSE,
-        x = 0, xend = max(df$eta, na.rm = TRUE),
-        y = ext_perf, yend = ext_perf,
-        color = "#D95F02", linetype = "dotted", linewidth = 1
-      ) +
-      coord_cartesian(
-        ylim = c(min(c(df$metric, ext_perf), na.rm = TRUE) * 0.995,
-                 max(c(df$metric, ext_perf), na.rm = TRUE) * 1.005)
-      )
-  } else {
-    p <- p +
-      coord_cartesian(
-        ylim = c(min(df$metric, na.rm = TRUE) * 0.995,
-                 max(df$metric, na.rm = TRUE) * 1.005)
-      )
-  }
-  
-  p
+  return(p)
 }
-
 
 
 
@@ -155,7 +141,7 @@ plot.coxkl_ridge <- function(object, test_z = NULL, test_time = NULL, test_delta
   ggplot(df, aes(x = lambda, y = metric)) +
     geom_line(size = 1, color = "#7570B3") +
     geom_point(size = 2, color = "#7570B3") +
-    scale_x_reverse(trans = "log10") +  # ✅ 单一 log10+reverse
+    scale_x_reverse(trans = "log10") +
     labs(x = expression(lambda), y = ylab) +
     coord_cartesian(
       ylim = c(min(df$metric, na.rm = TRUE) * 0.995,
