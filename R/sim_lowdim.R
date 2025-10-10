@@ -12,9 +12,7 @@
 #' @param ext_cens_target Target censoring rate for external data.
 #' @param lambda0,nu0 Parameters of the Weibull baseline hazard function 
 #'   \eqn{h_0(t) = \lambda_0 \nu_0 t^{\nu_0 - 1}}.
-#' @param qualities Character; external data quality level, one of 
-#'   \code{"Good"}, \code{"Fair"}, or \code{"Poor"}.
-#' @param pL_map_external latent mixture for external, indicate the heterogeneity between external and internal cohorts.
+#' @param heterogeneity the heterogeneity between external and internal cohorts.
 #' @param seed Random seed for reproducibility.
 #'
 #' @return A list with three elements:
@@ -32,20 +30,17 @@ sim_lowdim <- function(n_int = 200, n_test = 1000, n_ext = 1000,
                        beta_true = c(0.3, -0.3,  0.3, -0.3,  0.3, -0.3),
                        int_cens_target = 0.3, ext_cens_target = 0.5, 
                        lambda0 =  1, nu0 = 2,
-                       qualities = c("Good","Fair","Poor"),
-                       pL_map_external = c(Good = 1.0, Fair = 0.5, Poor = 0.0), 
+                       heterogeneity = 1.0, 
                        seed = 1){
   
   set.seed(seed)
-  qualities <- match.arg(qualities, c("Good","Fair","Poor"), several.ok=FALSE)
   
   names(beta_true) <- paste0("Z", 1:6)
-  pL_ext <- unname(pL_map_external[qualities])
-  df_ext <- sim(n_ext, ext_cens_target, beta_true = beta_true, pL_group = pL_ext)
+  df_ext <- sim(n_ext, ext_cens_target, beta_true = beta_true, pL_group = heterogeneity, lambda0 = lambda0, nu0 = nu0)
   
   pL_internal <- 1.0
-  df_tr <- sim(n_int, int_cens_target, beta_true = beta_true, pL_group = pL_internal)
-  df_te <- sim(n_test, int_cens_target, beta_true = beta_true, pL_group = pL_internal)
+  df_tr <- sim(n_int, int_cens_target, beta_true = beta_true, pL_group = pL_internal, lambda0 = lambda0, nu0 = nu0)
+  df_te <- sim(n_test, int_cens_target, beta_true = beta_true, pL_group = pL_internal, lambda0 = lambda0, nu0 = nu0)
 
   return(list(external = df_ext, 
               internal_train=df_tr, 
@@ -60,7 +55,7 @@ simulate_survival_weibull <- function(eta, lambda = lambda0, nu = nu0) {
 }
 
 
-sim <- function(n, target_cens, beta_true, pL_group = 1.0) {
+sim <- function(n, target_cens, beta_true, pL_group = 1.0, lambda0 = 1, nu0 = 2) {
   Z1Z2 <- simu_z_AR1(n, 2, rho=0.5)
   colnames(Z1Z2) <- c("Z1","Z2")
   Z3   <- rbinom(n, 1, 0.5)
@@ -70,7 +65,7 @@ sim <- function(n, target_cens, beta_true, pL_group = 1.0) {
   Z6   <- rnorm(n, mean=-2*L, sd=1)
   X    <- cbind(Z1Z2, Z3=Z3, Z4=Z4, Z5=Z5, Z6=Z6)
   eta  <- drop(as.matrix(X) %*% beta_true)
-  Tt   <- simulate_survival_weibull(eta)
+  Tt   <- simulate_survival_weibull(eta, lambda=lambda0, nu=nu0)
   ub   <- tune_censoring_uniform(Tt, target=target_cens)
   Cc   <- runif(n, 0, ub)
   status <- as.integer(Tt <= Cc)
