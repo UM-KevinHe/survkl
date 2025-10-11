@@ -34,8 +34,24 @@ plot.coxkl <- function(object, test_z = NULL, test_time = NULL, test_delta = NUL
     test_stratum <- stratum_train
   }
   
-  if (using_train && criteria == "loss") {
-    metrics <- -2 * object$likelihood
+  n_eval <- nrow(as.matrix(test_z))
+  
+  if (criteria == "loss") {
+    if (using_train) {
+      metrics <- (-2 * object$likelihood) / n_eval
+    } else {
+      raw_metrics <- sapply(seq_along(etas), function(i)
+        test_eval(
+          test_z       = test_z,
+          test_delta   = test_delta,
+          test_time    = test_time,
+          test_stratum = test_stratum,
+          betahat      = beta_mat[, i],
+          criteria     = "loss"
+        )
+      )
+      metrics <- as.numeric(raw_metrics) / n_eval
+    }
   } else {
     metrics <- sapply(seq_along(etas), function(i)
       test_eval(
@@ -44,7 +60,7 @@ plot.coxkl <- function(object, test_z = NULL, test_time = NULL, test_delta = NUL
         test_time    = test_time,
         test_stratum = test_stratum,
         betahat      = beta_mat[, i],
-        criteria     = criteria
+        criteria     = "CIndex"
       )
     )
   }
@@ -238,13 +254,6 @@ theme_biometrics <- function() {
       legend.position = "none"
     )
 }
-
-
-
-
-
-
-
 
 
 
