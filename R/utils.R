@@ -120,13 +120,20 @@ setupLambdaCoxKL <- function(Z, time, delta, delta_tilde, RS, beta.init, stratum
   storage.mode(K1) <- "integer"
   if (K1[1]!=0) { ## some covariates are not penalized
     nullFit <- coxkl(Z[, group == 0, drop = FALSE], delta, time, stratum, RS, beta = NULL, eta)
-    LinPred <- nullFit$linear.predictors[[1]]
-    beta.init <- c(nullFit$beta[[1]], rep(0, length(beta.init) - length(nullFit$beta[[1]])))
+    LinPred <- nullFit$linear.predictors
+    beta.init <- c(nullFit$beta, rep(0, length(beta.init) - length(nullFit$beta)))
     rsk <- c()  
     for (i in seq_along(unique(stratum))){
       rsk <- c(rsk, rev(cumsum(rev(exp(LinPred[stratum == i])))))
     }
-    r <- (delta + eta * delta_tilde)/(1 + eta) - exp(LinPred) * cumsum(delta / rsk)
+    # r <- (delta + eta * delta_tilde)/(1 + eta) - exp(LinPred) * cumsum(delta / rsk)
+    
+    r <- numeric(length(delta))
+    for (i in seq_along(unique(stratum))) {
+      idx <- which(stratum == i)
+      r[idx] <- (delta[idx] + eta * delta_tilde[idx])/(1 + eta) - exp(LinPred[idx]) * cumsum(delta[idx] / rsk[idx])
+    }
+
   } else { ## all covariates are penalized
     w <- c()
     h <- c()
@@ -136,6 +143,7 @@ setupLambdaCoxKL <- function(Z, time, delta, delta_tilde, RS, beta.init, stratum
       h <- c(h, cumsum(delta[stratum == i] * temp.w))
     }
     r <- (delta + eta * delta_tilde)/(1 + eta) - h
+
     beta.init <- beta.init
   }
   
