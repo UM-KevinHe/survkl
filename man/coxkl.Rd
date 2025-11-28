@@ -8,58 +8,103 @@ coxkl(
   z,
   delta,
   time,
+  stratum = NULL,
   RS = NULL,
   beta = NULL,
-  eta_list,
-  tol = 1e-07,
-  Mstop = 50
+  etas,
+  tol = 1e-04,
+  Mstop = 100,
+  backtrack = FALSE,
+  message = FALSE,
+  data_sorted = FALSE,
+  beta_initial = NULL
 )
 }
 \arguments{
-\item{z}{Numeric covariate matrix with rows representing observations and columns representing predictor variables. All variables must be numeric.}
+\item{z}{Numeric matrix of covariates with rows representing observations and
+columns representing predictor variables. All covariates must be numeric.}
 
-\item{delta}{Numeric event indicator vector (1 = event occurred, 0 = censored).}
+\item{delta}{Numeric vector of event indicators (1 = event, 0 = censored).}
 
-\item{time}{Numeric vector of observed event or censoring times. No sorting is required.}
+\item{time}{Numeric vector of observed event or censoring times. No sorting
+required.}
 
-\item{RS}{Numeric vector or matrix of precomputed external risk scores. Length (or number of rows) must match the number of observations. If not provided, \code{beta} must be specified.}
+\item{stratum}{Optional numeric or factor vector defining strata.}
 
-\item{beta}{Numeric vector of externally derived coefficients (e.g., from prior studies). Length must match the number of columns in \code{z}. Use zeros to represent absent covariates if fewer coefficients are externally available. If not provided, \code{RS} must be specified.}
+\item{RS}{Optional numeric vector or matrix of external risk scores. Length
+(or number of rows) must equal the number of observations. If not supplied,
+\code{beta} must be provided.}
 
-\item{eta_list}{Numeric vector of tuning parameters controlling the integration strength of the external information. Higher values indicate greater reliance on external information.}
+\item{beta}{Optional numeric vector of external coefficients (e.g., from prior
+studies). Length must equal the number of columns in \code{z}. Use zeros to
+represent covariates without external information. If not supplied, \code{RS}
+must be provided.}
 
-\item{tol}{Numeric scalar controlling convergence tolerance for optimization. Default is \code{1.0e-7}.}
+\item{etas}{Numeric vector of tuning parameters controlling the reliance on
+external information. Larger values place more weight on the external
+source.}
 
-\item{Mstop}{Integer specifying the maximum number of iterations allowed for the optimization algorithm. Default is \code{50}.}
+\item{tol}{Convergence tolerance for the optimization algorithm. Default is
+\code{1e-4}.}
+
+\item{Mstop}{Maximum number of iterations for the optimization algorithm.
+Default is \code{100}.}
+
+\item{backtrack}{Logical; if \code{TRUE}, backtracking line search is applied during
+optimization. Default is \code{FALSE}.}
+
+\item{message}{Logical; if \code{TRUE}, progress messages are printed during model
+fitting. Default is \code{FALSE}.}
+
+\item{data_sorted}{Logical; if \code{TRUE}, input data are assumed to be already
+sorted by stratum and time. Default is \code{FALSE}.}
+
+\item{beta_initial}{Optional numeric vector of length \code{p} giving the starting
+value for the first \code{eta}. If \code{NULL}, a zero vector is used.}
 }
 \value{
-A list with the following components:
-\describe{
-\item{\code{beta_list}}{List of estimated coefficient vectors corresponding to each \code{eta} value.}
-\item{\code{LP_list}}{List of linear predictor vectors computed on the training data corresponding to each \code{eta} value.}
-\item{\code{eta_list}}{Original vector of tuning parameters (\code{eta}) provided by the user.}
+An object of class \code{"coxkl"} containing:
+\itemize{
+\item \code{eta}: the fitted \eqn{\eta} sequence.
+\item \code{beta}: estimated coefficient matrix (\eqn{p \times |\eta|}).
+\item \code{linear.predictors}: matrix of linear predictors.
+\item \code{likelihood}: vector of partial likelihoods.
+\item \code{data}: a list containing the input data used in fitting
+(\code{z}, \code{time}, \code{delta}, \code{stratum}, \code{data_sorted}).
 }
 }
 \description{
-Estimates the coefficients of a Cox proportional hazards model incorporating external information using Kullback-Leibler (KL) divergence. External information can be integrated via precomputed external risk scores (RS) or externally derived coefficient estimates (beta). The strength of integration is controlled by tuning parameters (eta).
+Fits a Cox proportional hazards model that incorporates external information
+via a Kullback–Leibler (KL) divergence penalty. External information can be
+supplied either as external risk scores (\code{RS}) or as external coefficients
+(\code{beta}). The tuning parameter(s) \code{etas} control the strength of integration.
+}
+\details{
+If \code{beta} is supplied (length \code{ncol(z)}), external risk scores are computed
+internally as \code{RS = z \%*\% beta}. If \code{RS} is supplied, it is used directly.
+Data are optionally sorted by \code{stratum} (or a single stratum if \code{NULL}) and
+increasing \code{time} when \code{data_sorted = FALSE}. Estimation proceeds over the
+sorted data, and the returned \code{linear.predictors} are mapped back to the
+original order. Optimization uses warm starts across the (ascending) \code{etas}
+grid and supports backtracking line search when \code{backtrack = TRUE}.
+
+Internally, the routine computes a stratum-wise adjusted event indicator
+(\code{delta_tilde}) and maximizes a KL-regularized partial likelihood. The current
+implementation fixes \code{lambda = 0} in the low-level optimizer and exposes
+\code{etas} as the primary tuning control.
 }
 \examples{
-# Example data has 6 covariates: z1, z2, z5, z6 (continuous) and z3, z4 (binary)
-# External beta is simulated from a homogeneous data distribution.
+data(Exampledata_lowdim)
 
-# Using external beta information
-result1 <- coxkl(z = ExampleData$z,
-                 delta = ExampleData$status,
-                 time = ExampleData$time,
-                 beta = ExampleData$beta_external,
-                 eta_list = seq(0, 5, 1))
+train_dat_lowdim <- ExampleData_lowdim$train
+beta_external_good_lowdim <- ExampleData_lowdim$beta_external_good
 
-# Using external risk score information
-rs <- as.matrix(ExampleData$z) \%*\% as.matrix(ExampleData$beta_external)
-result2 <- coxkl(z = ExampleData$z,
-                 delta = ExampleData$status,
-                 time = ExampleData$time,
-                 RS = rs,
-                 eta_list = seq(0, 5, 1))
+model <- coxkl(z = train_dat_lowdim$z,
+     delta = train_dat_lowdim$status,
+     time = train_dat_lowdim$time,
+     stratum = train_dat_lowdim$stratum,
+     RS = NULL,
+     beta = beta_external_good_lowdim,
+     etas = c(0:5))
 
 }

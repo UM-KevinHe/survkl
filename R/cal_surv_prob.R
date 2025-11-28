@@ -1,19 +1,33 @@
 #' Calculate Survival Probabilities
 #'
-#' @param z A matrix or data frame of covariates. Each row corresponds to an
-#'   observation, and each column corresponds to a predictor variable.
-#' @param delta A numeric vector for the event indicator, where typically 1
-#'   indicates an event occurred and 0 indicates censoring.
-#' @param time A numeric vector of the observation times (either event or
-#'   censoring time).
-#' @param beta A numeric vector of regression coefficients, one for each
-#'   column in `z`.
-#' @param stratum An optional vector specifying the stratum for each observation.
-#'   If `NULL` or missing, a single-stratum model is assumed.
+#' @description
+#' Computes individual survival probabilities from a fitted linear predictor
+#' \code{z\%*\%beta} using a stratified Breslow-type baseline hazard estimate.
 #'
-#' @return A matrix where each row corresponds to an individual and each column
-#'   corresponds to an ordered event time. The value `S[i, j]` is the
-#'   estimated survival probability for subject `i` at the `j`-th time point.
+#' @param z A numeric matrix (or data frame coercible to matrix) of covariates.
+#'   Each row is an observation and each column a predictor.
+#' @param delta A numeric vector of event indicators (1 = event, 0 = censored).
+#' @param time A numeric vector of observed times (event or censoring).
+#' @param beta A numeric vector of regression coefficients with length equal to
+#'   the number of columns in \code{z}.
+#' @param stratum An optional vector specifying the stratum for each observation. 
+#'   If missing, a single-stratum model is assumed.
+#'
+#' @details
+#' Inputs are internally sorted by \code{stratum} and \code{time}. Within each
+#' stratum, a baseline hazard increment is computed as \code{delta/S0}, where
+#' \code{S0} is the risk set sum returned by \code{ddloglik_S0}. The stratified
+#' baseline cumulative hazard \code{Lambda0} is then formed by a cumulative sum
+#' within stratum, and individual survival curves are computed as
+#' \code{S(t) = exp(-Lambda0(t) * exp(z \%*\% beta))}.
+#'
+#' @return
+#' A numeric matrix of survival probabilities with \code{nrow(z)} rows and
+#' \code{length(time)} columns. Rows correspond to observations; columns are in
+#' the internal sorted order of \code{(stratum, time)} (i.e., not collapsed to
+#' unique event times). Entry \code{S[i, j]} is the estimated survival
+#' probability for subject \code{i} evaluated at the \code{j}-th sorted time
+#' point.
 #'
 #' @export
 cal_surv_prob <- function(z, delta, time, beta, stratum) {
@@ -58,22 +72,28 @@ cal_surv_prob <- function(z, delta, time, beta, stratum) {
 }
 
 
-#' Calculate the Log-Likelihood for a Stratified Survival Model
+#' Calculate the Log-Partial Likelihood for a Stratified Cox Model
 #'
-#' @param z A matrix or data frame of covariates. Each row corresponds to an
-#'   observation, and each column corresponds to a predictor variable.
-#' @param delta A numeric vector for the event indicator, where typically 1
-#'   indicates an event occurred and 0 indicates censoring.
-#' @param time A numeric vector of the observation times (either event or
-#'   censoring time).
-#' @param stratum An optional vector specifying the stratum for each observation.
-#'   Can be a factor, character, or numeric vector. If `NULL` or missing, a
-#'   single-stratum model is assumed.
-#' @param beta A numeric vector of regression coefficients, one for each
-#'   column in `z`.
+#' @description
+#' Computes the stratified Cox partial log-likelihood for given covariates,
+#' event indicators, times, and coefficients.
 #'
-#' @return A single numeric value representing the calculated log-likelihood of
-#'   the model.
+#' @param z A numeric matrix (or data frame coercible to matrix) of covariates.
+#'   Each row is an observation and each column a predictor.
+#' @param delta A numeric vector of event indicators (1 = event, 0 = censored).
+#' @param time A numeric vector of observed times (event or censoring).
+#' @param stratum An optional vector specifying the stratum for each observation
+#'   (factor/character/numeric). If missing, a single-stratum model is assumed.
+#' @param beta A numeric vector of regression coefficients with length equal to
+#'   the number of columns in \code{z}.
+#'
+#' @details
+#' Inputs are internally sorted by \code{stratum} and \code{time}. The function
+#' evaluates the stratified Cox partial log-likelihood using the supplied \code{z}, 
+#' \code{delta}, \code{beta}, and the stratum sizes.
+#'
+#' @return
+#' A single numeric value giving the stratified Cox partial log-likelihood.
 #'
 #' @export
 loss_fn <- function(z, delta, time, stratum, beta) {

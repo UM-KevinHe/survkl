@@ -1,3 +1,28 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
+^src/.*\.tmp$
+^\.github$
+^\.github/
+
+^LICENSE\.md$
+
+# Exclude pkgdown configuration
 ^_pkgdown\.yml$
+
+# Exclude cleanup script
+^cleanup\.txt$
+
+# Exclude incorrect configure script
+^configure\.txt$
+
+# Exclude pkgdown-generated docs
+^docs/
+
+# Exclude Windows DLLs
+^pprof/src/.*\.dll$
+^src/.*\.dll$
+
+# Exclude other build artifacts
+^.*\.o$
+^.*\.so$
+^.*\.dylib$

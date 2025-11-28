@@ -1,23 +1,132 @@
-#' Simulated Data
+#' Example high-dimensional survival data
 #'
-#' @description This dataset contains simulated data intended for examples
-#' and testing within the package.
+#' A simulated survival dataset in a high-dimensional linear setting
+#' with 50 covariates (6 signals + 44 AR(1) noise), Weibull baseline
+#' hazard, and controlled censoring. Includes internal train/test sets,
+#' and an external-data–estimated coefficient vector.
 #'
-#' @format A list with 2 elements:
+#' @name ExampleData_highdim
+#' @docType data
+#' @usage data(ExampleData_highdim)
+#'
+#' @format A list containing the following elements:
 #' \describe{
-#'   \item{beta_external1}{A vector representing the parameters from Cox model parameters with good quality.}
-#'   \item{beta_external2}{A vector representing the parameters from Cox model parameters with good quality.}
-#'   \item{data_internal_list}{A list containing internal data elements with 100 replicates.}
+#'   \item{train}{A list with components:
+#'     \describe{
+#'       \item{z}{Data frame of size \eqn{n_\mathrm{train}\times 50} with covariates \code{Z1}–\code{Z50}.}
+#'       \item{status}{Vector of event indicators (\code{1}=event, \code{0}=censored).}
+#'       \item{time}{Numeric vector of observed times \eqn{\min(T, C)}.}
+#'       \item{stratum}{Vector of stratum labels (here all \code{1}).}
+#'     }
+#'   }
+#'   \item{test}{A list with the same structure as \code{train}, with size \eqn{n_\mathrm{test}\times 50} for \code{z}.}
+#'   \item{beta_external}{Numeric vector (length 50, named \code{Z1}–\code{Z50}) of Cox coefficients
+#'     estimated on an external dataset using only \code{Z1}–\code{Z6} and expanded to length 50
+#'     (zeros for \code{Z7}–\code{Z50}).}
 #' }
 #'
-#' @usage data(simulatedData)
-#' @name simulatedData
-NULL
-
-
-#' Study to Understand Prognoses Preferences Outcomes and Risks of Treatment From Python
+#' @details Data-generating mechanism:
+#' \itemize{
+#'   \item Covariates: 50 variables with signals \code{Z1}–\code{Z6} and noise \code{Z7}–\code{Z50}.
+#'     \itemize{
+#'       \item \code{Z1}, \code{Z2} ~ bivariate normal with AR(1) correlation \eqn{\rho=0.5}.
+#'       \item \code{Z3}, \code{Z4} ~ independent Bernoulli(0.5).
+#'       \item \code{Z5} ~ \eqn{N(2,1)}, \code{Z6} ~ \eqn{N(-2,1)} (group indicator fixed at 1).
+#'       \item \code{Z7}–\code{Z50} ~ multivariate normal with AR(1) correlation \eqn{\rho=0.5}.
+#'     }
+#'   \item True coefficients: \eqn{\beta = (0.3,-0.3,0.3,-0.3,0.3,-0.3,0,\ldots,0)} (length 50).
+#'   \item Event times: Weibull baseline hazard
+#'     \eqn{h_0(t)=\lambda\nu\, t^{\nu-1}} with \eqn{\lambda=1}, \eqn{\nu=2}.
+#'     Given linear predictor \eqn{\eta = Z^\top \beta}, draw \eqn{U\sim\mathrm{Unif}(0,1)} and set
+#'     \deqn{T = \left(\frac{-\log U}{\lambda\, e^{\eta}}\right)^{1/\nu}.}
+#'   \item Censoring: \eqn{C\sim \mathrm{Unif}(0,\text{ub})} with \code{ub} tuned iteratively to
+#'     achieve the target censoring rate (internal: \code{0.70}; external: \code{0.50}).
+#'     Observed time is \eqn{\min(T,C)}, status is \eqn{\mathbf{1}\{T \le C\}}.
+#'   \item External coefficients: Fit a Cox model
+#'     \code{Surv(time, status) ~ Z1 + ... + Z6} on the external data (Breslow ties),
+#'     then place the estimated coefficients into a length-50 vector (zeros elsewhere).
+#' }
+#'
+#' @examples
+#' data(ExampleData_highdim)
 #' 
-"SUPPORT"
+#' head(ExampleData_highdim$train$z)
+#' table(ExampleData_highdim$train$status)
+#' summary(ExampleData_highdim$train$time)
+#'
+#' head(ExampleData_highdim$test$z)
+#' table(ExampleData_highdim$test$status)
+#' summary(ExampleData_highdim$test$time)
+#' 
+"ExampleData_highdim"
+
+
+#' Example low-dimensional survival data
+#'
+#' A simulated survival dataset in a low-dimensional linear setting
+#' with 6 covariates (2 correlated continuous, 2 binary, 2 mean-shifted normals),
+#' Weibull baseline hazard, and controlled censoring. Includes internal train/test sets,
+#' and three external-quality coefficient vectors.
+#'
+#' @name ExampleData_lowdim
+#' @docType data
+#' @usage data(ExampleData_lowdim)
+#'
+#' @format A list containing the following elements:
+#' \describe{
+#'   \item{train}{A list with components:
+#'     \describe{
+#'       \item{z}{Data frame of size \eqn{n_\mathrm{train}\times 6} with covariates \code{Z1}–\code{Z6}.}
+#'       \item{status}{Vector of event indicators (\code{1}=event, \code{0}=censored).}
+#'       \item{time}{Numeric vector of observed times \eqn{\min(T, C)}.}
+#'       \item{stratum}{Vector of stratum labels (here all \code{1}).}
+#'     }
+#'   }
+#'   \item{test}{A list with the same structure as \code{train}, with size \eqn{n_\mathrm{test}\times 6} for \code{z}.}
+#'   \item{beta_external_good}{Numeric vector (length 6; named \code{Z1}–\code{Z6}) of Cox coefficients estimated on a
+#'     "Good" external dataset using all \code{Z1}–\code{Z6}.}
+#'   \item{beta_external_fair}{Numeric vector (length 6; names \code{Z1}–\code{Z6}) of Cox coefficients estimated on a
+#'     "Fair" external dataset using a reduced subset \code{Z1}, \code{Z3}, \code{Z5}, \code{Z6};
+#'     coefficients for variables not used are \code{0}.}
+#'   \item{beta_external_poor}{Numeric vector (length 6; names \code{Z1}–\code{Z6}) of Cox coefficients estimated on a
+#'     "Poor" external dataset using \code{Z1} and \code{Z5} only; remaining entries are \code{0}.}
+#' }
+#'
+#' @details Data-generating mechanism:
+#' \itemize{
+#'   \item Covariates: 6 variables \code{Z1}–\code{Z6}.
+#'     \itemize{
+#'       \item \code{Z1}, \code{Z2} ~ bivariate normal with AR(1) correlation \eqn{\rho=0.5}.
+#'       \item \code{Z3}, \code{Z4} ~ independent Bernoulli(0.5).
+#'       \item \code{Z5} ~ \eqn{N(2,1)}, \code{Z6} ~ \eqn{N(-2,1)} (group indicator fixed at 1 for internal train/test).
+#'     }
+#'   \item True coefficients: \eqn{\beta = (0.3,-0.3,0.3,-0.3,0.3,-0.3)} (length 6).
+#'   \item Event times: Weibull baseline hazard
+#'     \eqn{h_0(t)=\lambda\nu \, t^{\nu-1}} with \eqn{\lambda=1}, \eqn{\nu=2}.
+#'     Given linear predictor \eqn{\eta = Z^\top \beta}, draw \eqn{U\sim\mathrm{Unif}(0,1)} and set
+#'     \deqn{T = \left(\frac{-\log U}{\lambda \, e^{\eta}}\right)^{1/\nu}.}
+#'   \item Censoring: \eqn{C\sim \mathrm{Unif}(0,\text{ub})} with \code{ub} tuned iteratively to
+#'     achieve the target censoring rate (internal: \code{0.70}; external: \code{0.50}).
+#'     Observed time is \eqn{\min(T,C)}, status is \eqn{\mathbf{1}\{T \le C\}}.
+#'   \item External coefficients: For each quality level ("Good", "Fair", "Poor"), fit a Cox model
+#'     \code{Surv(time, status) ~ Z1 + ...} on the corresponding external data (Breslow ties)
+#'     using the specified covariate subset; place estimates into a length-6 vector named \code{Z1}–\code{Z6}
+#'     with zeros for variables not included.
+#' }
+#'
+#' @examples
+#' data(ExampleData_lowdim)
+#' 
+#' head(ExampleData_lowdim$train$z)
+#' table(ExampleData_lowdim$train$status)
+#' summary(ExampleData_lowdim$train$time)
+#'
+#' head(ExampleData_lowdim$test$z)
+#' table(ExampleData_lowdim$test$status)
+#' summary(ExampleData_lowdim$test$time)
+#' 
+"ExampleData_lowdim"
+
 
 
 #' Study to Understand Prognoses Preferences Outcomes and Risks of Treatment
@@ -25,7 +134,7 @@ NULL
 #' @docType data
 #' @usage data(support)
 #' 
-#' @description The SUPPORT dataset tracks five response variables: hospital
+#' @description The \code{support} dataset tracks five response variables: hospital
 #'   death, severe functional disability, hospital costs, and time until death
 #'   and death itself. The patients are followed for up to 5.56 years. See Bhatnagar et al. (2020) for details.
 #'

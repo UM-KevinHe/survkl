@@ -59,7 +59,7 @@ Available at the following website:
 data(support)
 }
 \description{
-The SUPPORT dataset tracks five response variables: hospital
+The \code{support} dataset tracks five response variables: hospital
 death, severe functional disability, hospital costs, and time until death
 and death itself. The patients are followed for up to 5.56 years. See Bhatnagar et al. (2020) for details.
 }

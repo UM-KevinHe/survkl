@@ -3,8 +3,8 @@
 #' This function performs cross-validation on the high-dimensional Cox model with
 #' Kullback–Leibler (KL) penalty.
 #' It tunes the parameter \code{eta} (external information weight) using user-specified
-#' cross-validation criteria, while internally selecting the optimal \code{lambda}
-#' at each fold.
+#' cross-validation criteria, while also evaluating a \code{lambda} path
+#' (either provided or generated) and selecting the best \code{lambda} per \code{eta}.
 #'
 #' @param z Numeric matrix of covariates with rows representing individuals and
 #'   columns representing predictors.
@@ -18,40 +18,88 @@
 #' @param etas Numeric vector of candidate \code{eta} values to be evaluated.
 #' @param alpha Elastic-net mixing parameter in \eqn{(0,1]}. Default = \code{1}
 #'   (lasso penalty).
+#' @param lambda Optional numeric scalar or vector of penalty parameters. If \code{NULL},
+#'   a decreasing path is generated using \code{nlambda} and \code{lambda.min.ratio}.
+#' @param nlambda Integer number of lambda values to generate when \code{lambda} is
+#'   \code{NULL}. Default \code{100}.
+#' @param lambda.min.ratio Ratio of the smallest to the largest lambda when
+#'   generating a sequence (when \code{lambda} is \code{NULL}). Default \code{0.05} when \code{n < p},
+#'   otherwise \code{1e-3}.
 #' @param nfolds Integer; number of cross-validation folds. Default = \code{5}.
-#' @param cv.eta.criteria Character string specifying the cross-validation criterion
-#'   for selecting \code{eta}. Choices are:
+#' @param cv.criteria Character string specifying the cross-validation criterion. Choices are:
 #'   \itemize{
-#'     \item \code{"V&VH"} (default): V&VH loss.
-#'     \item \code{"LinPred"}: loss based on cross-validated linear predictors approach.
-#'     \item \code{"CIndex_pooled"}: pool all held-out predictions and compute one overall CIndex
-#'     \item \code{"CIndex_foldaverage"}: average CIndex across folds.
-#'   }.
-#'   default is \code{"V&VH"}.
-#' @param c_index_stratum Optional stratum vector. Required only when 
-#'   \code{criteria} is set to \code{"CIndex_pooled"} or \code{"CIndex_foldaverage"}, 
-#'   and a stratified C-index needs to be computed while the fitted model 
-#'   is non-stratified. Default is \code{NULL}, which means the stratified 
-#'   C-index is not used.
-#' @param cv.lambda.criteria Character string specifying the criterion for selecting optimal
-#'   \code{lambda}. Choices are:
-#'   \itemize{
-#'     \item \code{"V&VH"} (default): V&VH loss.
-#'     \item \code{"LinPred"}: loss based on cross-validated linear predictors approach.
+#'     \item \code{"V&VH"} (default): \code{"V&VH"} loss.
+#'     \item \code{"LinPred"}: loss based on cross-validated linear predictors.
+#'     \item \code{"CIndex_pooled"}: pool all held-out predictions and compute one overall C-index.
+#'     \item \code{"CIndex_foldaverage"}: average C-index across folds.
 #'   }
+#' @param c_index_stratum Optional stratum vector. Used only when
+#'   \code{cv.criteria} is \code{"CIndex_pooled"} or \code{"CIndex_foldaverage"} to compute a
+#'   stratified C-index while the fitted model is non-stratified; if supplied, it must be
+#'   identical to \code{stratum}. Default \code{NULL}.
 #' @param message Logical; whether to print progress messages. Default = \code{FALSE}.
 #' @param seed Optional integer random seed for fold assignment.
 #' @param ... Additional arguments passed to \code{\link{coxkl_enet}}.
 #'
-#' @return A \code{data.frame} with two columns:
-#'   \describe{
-#'     \item{\code{eta}}{Candidate \code{eta} values.}
-#'     \item{criteria column}{The value of the chosen \code{cv.eta.criteria}
-#'       for each \code{eta}. Column name depends on the criterion:
-#'       \code{"VVH_Loss"}, \code{"LinPred_Loss"}, \code{"CIndex_pooled"},
-#'       or \code{"CIndex_foldaverage"}.}
-#'   }
+#' @details
+#' Data are sorted by \code{stratum} and \code{time}. External info must be from \code{RS} or
+#' \code{beta} (if \code{beta} given with length \code{ncol(z)}, \code{RS = z \%*\% beta}); \code{alpha} \in (0,1].
+#' 
+#' For each candidate \code{eta}, a decreasing \code{lambda} path is used (generated from \code{nlambda}/\code{lambda.min.ratio}
+#' if \code{lambda = NULL}); CV folds are created by \code{get_fold}. Each fold fits \code{\link{coxkl_enet}}
+#' on the training split (full \code{lambda} path) and evaluates the chosen criterion on the test split.
+#' 
+#' Aggregation follows the code paths for \code{"V&VH"}, \code{"LinPred"}, \code{"CIndex_pooled"}, or \code{"CIndex_foldaverage"}:
+#' \itemize{
+#'   \item \code{"V&VH"}: sums \code{pl(full) - pl(train)} across folds (reported as loss via \code{Loss = -2 * score}).
+#'   \item \code{"LinPred"}: aggregates test-fold linear predictors and evaluates partial log-likelihood on full data (reported as \code{Loss = -2 * score}).
+#'   \item \code{"CIndex_pooled"}: pools comparable-pair numerators/denominators across folds to compute one C-index.
+#'   \item \code{"CIndex_foldaverage"}: averages the per-fold stratified C-index.
+#' }
+#' The best \code{lambda} is selected per \code{eta} (min loss / max C-index), and the function returns full results,
+#' the per-\code{eta} optimum, corresponding coefficients, and an external baseline from \code{RS}.
+#'
+#' @return An object of class \code{"cv.coxkl_enet"}:
+#' \describe{
+#'   \item{\code{integrated_stat.full_results}}{Data frame with columns
+#'     \code{eta}, \code{lambda}, and the aggregated CV score for each \code{lambda}
+#'     under the chosen \code{cv.criteria}. For loss criteria, an additional
+#'     column with the transformed loss (\code{Loss = -2 * score}); for C-index criteria,
+#'     a column named \code{CIndex_pooled} or \code{CIndex_foldaverage}.}
+#'   \item{\code{integrated_stat.best_per_eta}}{Data frame with the best
+#'     \code{lambda} (per \code{eta}) according to the chosen \code{cv.criteria}
+#'     (minimizing loss or maximizing C-index).}
+#'   \item{\code{integrated_stat.betahat_best}}{Matrix of coefficient vectors
+#'     (columns) corresponding to the best \code{lambda} for each \code{eta}.}
+#'   \item{\code{external_stat}}{Scalar baseline statistic computed from the external
+#'     risk score \code{RS} under the same \code{cv.criteria}.}
+#'   \item{\code{criteria}}{The evaluation criterion used (as provided in \code{cv.criteria}).}
+#'   \item{\code{alpha}}{The elastic-net mixing parameter used.}
+#'   \item{\code{nfolds}}{Number of folds.}
+#' }
 #'   
+#' @examples
+#' data(example_data_highdim) 
+#' 
+#' train_dat_highdim <- ExampleData_highdim$train
+#' beta_external_highdim <- ExampleData_highdim$beta_external
+#' 
+#' etas <- generate_eta(method = "exponential", n = 50, max_eta = 10)
+#' etas <- sample(etas) 
+#' 
+#' cv_res <- cv.coxkl_enet(z = train_dat_highdim$z,
+#'                         delta = train_dat_highdim$status,
+#'                         time = train_dat_highdim$time,
+#'                         stratum = NULL,
+#'                         RS = NULL,
+#'                         beta = beta_external_highdim,
+#'                         etas = etas,
+#'                         alpha = 1.0,
+#'                         nfolds = 5, 
+#'                         cv.criteria = "CIndex_pooled",
+#'                         message = T)
+#'    
+#' @importFrom utils txtProgressBar setTxtProgressBar
 #' @export
 cv.coxkl_enet <- function(z, delta, time, stratum = NULL, RS = NULL, beta = NULL,
                           etas, alpha = 1.0,

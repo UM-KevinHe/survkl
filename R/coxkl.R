@@ -1,10 +1,9 @@
 #' Cox Proportional Hazards Model with KL Divergence for Data Integration
-#'
+#' 
 #' Fits a Cox proportional hazards model that incorporates external information
-#' using Kullback–Leibler (KL) divergence. External information can be supplied
-#' either as precomputed external risk scores (`RS`) or as externally derived
-#' coefficients (`beta`). The integration strength is controlled by the tuning
-#' parameter(s) `eta`.
+#' via a Kullback–Leibler (KL) divergence penalty. External information can be
+#' supplied either as external risk scores (`RS`) or as external coefficients
+#' (`beta`). The tuning parameter(s) `etas` control the strength of integration.
 #'
 #' @param z Numeric matrix of covariates with rows representing observations and
 #'   columns representing predictor variables. All covariates must be numeric.
@@ -32,6 +31,8 @@
 #'   fitting. Default is `FALSE`.
 #' @param data_sorted Logical; if `TRUE`, input data are assumed to be already
 #'   sorted by stratum and time. Default is `FALSE`.
+#' @param beta_initial Optional numeric vector of length `p` giving the starting
+#'   value for the first `eta`. If `NULL`, a zero vector is used.
 #'
 #' @return
 #' An object of class \code{"coxkl"} containing:
@@ -43,33 +44,41 @@
 #'   \item \code{data}: a list containing the input data used in fitting
 #'         (\code{z}, \code{time}, \code{delta}, \code{stratum}, \code{data_sorted}).
 #' }
+#' 
+#' @details
+#' If `beta` is supplied (length `ncol(z)`), external risk scores are computed
+#' internally as `RS = z %*% beta`. If `RS` is supplied, it is used directly.
+#' Data are optionally sorted by `stratum` (or a single stratum if `NULL`) and
+#' increasing `time` when `data_sorted = FALSE`. Estimation proceeds over the
+#' sorted data, and the returned `linear.predictors` are mapped back to the
+#' original order. Optimization uses warm starts across the (ascending) `etas`
+#' grid and supports backtracking line search when `backtrack = TRUE`.
+#'
+#' Internally, the routine computes a stratum-wise adjusted event indicator
+#' (`delta_tilde`) and maximizes a KL-regularized partial likelihood. The current
+#' implementation fixes `lambda = 0` in the low-level optimizer and exposes
+#' `etas` as the primary tuning control.
 #'
 #' @examples
-#' data(ExampleData)
-#' etas <- generate_eta(method = "exponential", n = 5, max_eta = 5)
+#' data(Exampledata_lowdim)
+#' 
+#' train_dat_lowdim <- ExampleData_lowdim$train
+#' beta_external_good_lowdim <- ExampleData_lowdim$beta_external_good
+#' 
+#' model <- coxkl(z = train_dat_lowdim$z,
+#'      delta = train_dat_lowdim$status,
+#'      time = train_dat_lowdim$time,
+#'      stratum = train_dat_lowdim$stratum,
+#'      RS = NULL,
+#'      beta = beta_external_good_lowdim,
+#'      etas = c(0:5))
 #'
-#' # Example 1: use external beta information
-#' result1 <- coxkl(
-#'   z = ExampleData$z,
-#'   delta = ExampleData$status,
-#'   time = ExampleData$time,
-#'   stratum = ExampleData$stratum, 
-#'   beta = ExampleData$beta_external,
-#'   etas = etas
-#' )
+#' @importFrom utils txtProgressBar setTxtProgressBar
 #'
-#' # Example 2: use external risk score information
-#' rs <- as.matrix(ExampleData$z) %*% as.matrix(ExampleData$beta_external)
-#' result2 <- coxkl(
-#'   z = ExampleData$z,
-#'   delta = ExampleData$status,
-#'   time = ExampleData$time,
-#'   stratum = ExampleData$stratum,
-#'   RS = rs,
-#'   etas = etas
-#' )
+#' @useDynLib survkl, .registration = TRUE
 #'
 #' @export
+
 coxkl <- function(z, delta, time, stratum = NULL,
                   RS = NULL, beta = NULL, 
                   etas, tol = 1.0e-4, Mstop = 100,

@@ -1,4 +1,4 @@
-Package: coxkll
+Package: survkl
 Title: Estimate Survival Data with Data Intergration
 Version: 1.0.0
 URL: 
@@ -31,7 +31,8 @@ Imports:
     tibble,
     rlang,
     survival,
-    RcppParallel
+    RcppParallel,
+    cowplot
 Depends:
     R (>= 4.0)
 Suggests:

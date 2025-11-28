@@ -40,7 +40,7 @@ If you encounter any problems or bugs, please contact us at: [lfluo\@umich.edu](
 
 ## Contributing
 
-We welcome contributions to the **coxkl** package. Please see our [CONTRIBUTING.md](https://github.com/UM-KevinHe/coxkl/blob/main/.github/CONTRIBUTING.md) file for detailed guidelines of how to contribute.
+We welcome contributions to the **survkl** package. Please see our [CONTRIBUTING.md](https://github.com/UM-KevinHe/coxkl/blob/main/.github/CONTRIBUTING.md) file for detailed guidelines of how to contribute.
 
 # References
 

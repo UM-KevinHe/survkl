@@ -3,7 +3,8 @@
 #' This function performs cross-validation on the Cox model with Kullback–Leibler (KL) 
 #' penalty and ridge (L2) regularization. It tunes the parameter \code{eta} 
 #' (external information weight) using user-specified cross-validation criteria, 
-#' while internally selecting the optimal \code{lambda} at each fold.
+#' while internally evaluating a \code{lambda} path (provided or generated) and 
+#' selecting the best \code{lambda} per \code{eta}
 #'
 #' @param z Numeric matrix of covariates with rows representing individuals and
 #'   columns representing predictors.
@@ -16,32 +17,71 @@
 #'   \code{ncol(z)}). If not provided, \code{RS} must be supplied.
 #' @param etas Numeric vector of candidate \code{eta} values to be evaluated.
 #' @param lambda Optional numeric scalar or vector of penalty parameters. If `NULL`, a sequence is generated automatically.
-#' @param nfolds Integer; number of cross-validation folds. Default = \code{5}.
+#' @param nlambda Integer number of lambda values to generate when \code{lambda} is \code{NULL}. Default \code{100}.
+#' @param lambda.min.ratio Ratio of the smallest to the largest lambda when generating a sequence 
+#'   (when \code{lambda} is \code{NULL}). Default \code{0.01} when \code{n < p}, otherwise \code{1e-4}.
+#' @param nfolds Integer; number of cross-validation folds. Default \code{5}.
 #' @param cv.criteria Character string specifying the cross-validation criterion. Choices are:
 #'   \itemize{
-#'     \item \code{"V&VH"} (default): V&VH loss.
-#'     \item \code{"LinPred"}: loss based on cross-validated linear predictors approach.
-#'     \item \code{"CIndex_pooled"}: pool all held-out predictions and compute one overall CIndex.
-#'     \item \code{"CIndex_foldaverage"}: average CIndex across folds.
-#'   }.
-#'   Default is \code{"V&VH"}.
-#' @param c_index_stratum Optional stratum vector. Required only when 
-#'   \code{cv.eta.criteria} is set to \code{"CIndex_pooled"} or \code{"CIndex_foldaverage"}, 
-#'   and a stratified C-index needs to be computed while the fitted model 
-#'   is non-stratified. Default is \code{NULL}.
-#' @param message Logical; whether to print progress messages. Default = \code{FALSE}.
+#'     \item \code{"V&VH"} (default): \code{"V&VH"} loss.
+#'     \item \code{"LinPred"}: loss based on cross-validated linear predictors.
+#'     \item \code{"CIndex_pooled"}: pool all held-out predictions and compute one overall C-index.
+#'     \item \code{"CIndex_foldaverage"}: average C-index across folds.
+#'   }
+#' @param c_index_stratum Optional stratum vector. Used only when 
+#'   \code{cv.criteria} is \code{"CIndex_pooled"} or \code{"CIndex_foldaverage"} to compute a stratified C-index 
+#'   for a non-stratified fit; if supplied, it must be identical to \code{stratum}. Default \code{NULL}.
+#' @param message Logical; whether to print progress messages. Default \code{FALSE}.
 #' @param seed Optional integer random seed for fold assignment.
 #' @param ... Additional arguments passed to \code{\link{coxkl_ridge}}.
 #'
-#' @return A \code{data.frame} with two columns:
-#'   \describe{
-#'     \item{\code{eta}}{Candidate \code{eta} values.}
-#'     \item{criteria column}{The value of the chosen \code{cv.eta.criteria}
-#'       for each \code{eta}. Column name depends on the criterion:
-#'       \code{"VVH_Loss"}, \code{"LinPred_Loss"}, \code{"CIndex_pooled"},
-#'       or \code{"CIndex_foldaverage"}.}
-#'   }
-#'   
+#' @details
+#' Data are sorted by \code{stratum} and \code{time}. External information must be given via \code{RS} 
+#' or \code{beta} (if \code{beta} has length \code{ncol(z)}, the function computes \code{RS = z \%*\% beta}). 
+#' For each candidate \code{eta}, a \code{lambda} path is determined (generated if \code{lambda = NULL}, otherwise 
+#' the supplied \code{lambda} values are sorted decreasingly). Cross-validation folds are created by \code{get_fold}. 
+#' In each fold, \code{\link{coxkl_ridge}} is fit on the training split across the full \code{lambda} path 
+#' with \code{data_sorted = TRUE}, and the chosen criterion is evaluated on the test split and aggregated:
+#' \itemize{
+#'   \item \code{"V&VH"}: sums \code{pl(full) - pl(train)} across folds (reported as loss via \code{Loss = -2 * score}).
+#'   \item \code{"LinPred"}: aggregates test-fold linear predictors and evaluates partial log-likelihood on full data (reported as \code{Loss = -2 * score}).
+#'   \item \code{"CIndex_pooled"}: pools comparable-pair numerators/denominators across folds to compute one C-index.
+#'   \item \code{"CIndex_foldaverage"}: averages the per-fold stratified C-index.
+#' }
+#' The best \code{lambda} is chosen per \code{eta} (minimizing loss or maximizing C-index). The function 
+#' also computes an external baseline statistic from \code{RS} under the same criterion.
+#'
+#'
+#' @return An object of class \code{"cv.coxkl_ridge"}:
+#' \describe{
+#'   \item{\code{integrated_stat.full_results}}{Data frame with columns \code{eta}, \code{lambda}, and the aggregated CV score per \code{lambda};
+#'     for loss criteria an additional column \code{Loss = -2 * score}; for C-index criteria a column named \code{CIndex_pooled} or \code{CIndex_foldaverage}.}
+#'   \item{\code{integrated_stat.best_per_eta}}{Data frame with the best \code{lambda} (per \code{eta}) according to the chosen criterion.}
+#'   \item{\code{external_stat}}{Scalar baseline statistic computed from \code{RS} under the same \code{cv.criteria}.}
+#'   \item{\code{criteria}}{The evaluation criterion used.}
+#'   \item{\code{nfolds}}{Number of folds.}
+#' }
+#' 
+#' @examples
+#' data(example_data_highdim) 
+#' 
+#' train_dat_highdim <- ExampleData_highdim$train
+#' beta_external_highdim <- ExampleData_highdim$beta_external
+#' 
+#' etas <- generate_eta(method = "exponential", n = 50, max_eta = 10)
+#' etas <- sample(etas)
+#' cv_res <- cv.coxkl_ridge(z = train_dat_highdim$z,
+#'                          delta = train_dat_highdim$status,
+#'                          time = train_dat_highdim$time,
+#'                          stratum = NULL,
+#'                          RS = NULL,
+#'                          beta = beta_external_highdim,
+#'                          etas = etas,
+#'                          nfolds = 5, 
+#'                          cv.criteria = "CIndex_pooled",
+#'                          message = T)
+#' 
+#' @importFrom utils txtProgressBar setTxtProgressBar
 #' @export
 
 cv.coxkl_ridge <- function(z, delta, time, stratum = NULL, RS = NULL, beta = NULL, etas,

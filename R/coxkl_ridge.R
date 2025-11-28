@@ -16,13 +16,14 @@
 #' @param lambda Optional numeric scalar or vector of penalty parameters. If `NULL`, a sequence is generated automatically.
 #' @param nlambda Number of lambda values to generate if `lambda` is `NULL`.
 #' @param lambda.min.ratio Ratio defining the minimum lambda relative to `lambda.max`.
-#' @param penalty.factor Numeric scalar in `[0, 1)` .Controls the overall strength of the penalty when generating the ridge 
+#' @param penalty.factor Numeric scalar in `[0, 1)`. Controls the overall strength of the penalty when generating the ridge 
 #'   regression lambda sequence. Smaller values correspond to stronger penalization. Only used when `lambda = NULL`.
 #' @param tol Convergence tolerance for the iterative estimation algorithm.
 #' @param Mstop Maximum number of iterations for estimation.
 #' @param backtrack Logical; if `TRUE`, uses backtracking line search.
 #' @param message Logical; if `TRUE`, progress messages are printed during model fitting. Default is `FALSE`.
 #' @param data_sorted Logical; if `TRUE`, assumes input data is already sorted by strata and time.
+#' @param beta_initial Optional; default NULL. When NULL, the algorithm initializes beta_initial to a zero vector as a warm start
 #' @param ... Additional arguments.
 #'
 #' @return
@@ -35,8 +36,35 @@
 #'   \item \code{data}: A list containing the input data used in fitting
 #'         (\code{z}, \code{time}, \code{delta}, \code{stratum}, \code{data_sorted}).
 #' }
-#'
+#' 
+#' @details
+#' The estimator maximizes a KL-regularized Cox partial log-likelihood with a ridge (L2) penalty on all coefficients.
+#' External information is incorporated via a KL term weighted by `eta`: if `beta` is supplied (length `ncol(z)`),
+#' external risk scores are computed internally as `RS = z %*% beta`; otherwise `RS` must be provided.
+#' If `lambda` is `NULL`, a decreasing lambda path of length `nlambda` is generated using `lambda.min.ratio`
+#' (its overall scale is influenced by `penalty.factor`). Optimization proceeds along the lambda path with warm starts
+#' (re-using the previous solution as `beta_initial`); when `beta_initial = NULL`, the first step uses zeros.
+#' If `data_sorted = FALSE`, data are sorted by `stratum` and `time` for fitting and the returned linear predictors are
+#' mapped back to the original observation order. `tol`, `Mstop`, and `backtrack` control convergence and line search.
+#' 
+#' @examples
+#' data(example_data_highdim) 
+#' 
+#' train_dat_highdim <- ExampleData_highdim$train
+#' beta_external_highdim <- ExampleData_highdim$beta_external
+#' 
+#' model_ridge <- coxkl_ridge(z = train_dat_highdim$z,
+#'                            delta = train_dat_highdim$status,
+#'                            time = train_dat_highdim$time,
+#'                            stratum = NULL,
+#'                            RS = NULL,
+#'                            beta = beta_external_highdim,
+#'                            message = T)
+#' 
+#' @importFrom utils txtProgressBar setTxtProgressBar
+#' 
 #' @export
+
 coxkl_ridge <- function(z, delta, time, stratum = NULL, RS = NULL, beta = NULL, eta = NULL,
                         lambda = NULL, nlambda = 100, lambda.min.ratio = ifelse(n_obs < n_vars, 0.01, 1e-04), penalty.factor = 0.999,
                         tol = 1.0e-4, Mstop = 50, backtrack = FALSE, message = FALSE, data_sorted = FALSE,
@@ -164,7 +192,7 @@ coxkl_ridge <- function(z, delta, time, stratum = NULL, RS = NULL, beta = NULL, 
       z = z,
       time = time,
       delta = delta,
-      stratum = input_data
+      stratum = input_data$stratum
     )
   ), class = "coxkl_ridge")
 }

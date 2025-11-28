@@ -1,18 +1,61 @@
-#' Plot Cross-Validation Results vs Eta (Biometrics-style)
+#' Plot Cross-Validation Results vs Eta
 #'
 #' @description
-#' Plots cross-validation performance across eta values for
-#' \code{cv.coxkl}, \code{cv.coxkl_ridge}, or \code{cv.coxkl_enet} objects
-#' in the Biometrics figure style, with a solid blue line for CV performance
-#' and a dotted orange line for the external baseline.
+#' Plots cross-validated performance across \code{eta} for
+#' \code{cv.coxkl}, \code{cv.coxkl_ridge}, or \code{cv.coxkl_enet} results.
+#' The main CV curve is drawn as a solid purple line; a green dotted horizontal
+#' reference line is placed at the value corresponding to \code{eta = 0}
+#' (or the closest available \code{eta}), with a solid green point marking that
+#' reference level.
 #'
 #' @param object A fitted cross-validation result of class \code{"cv.coxkl"},
 #'   \code{"cv.coxkl_ridge"}, or \code{"cv.coxkl_enet"}.
-#' @param line_color Color for the CV performance curve. Default is \code{"#7570B3"}.
-#' @param baseline_color Color for the external baseline line. Default is \code{"#D95F02"}.
+#' @param line_color Color for the CV performance curve. Default \code{"#7570B3"}.
+#' @param baseline_color Color for the horizontal reference line and point.
+#'   Default \code{"#1B9E77"}.
 #' @param ... Additional arguments (currently ignored).
-#'
+#' 
+#' @details
+#' The function reads the performance metric from the object:
+#' \itemize{
+#'   \item For \code{"cv.coxkl"}: uses \code{object$internal_stat} (one row per \code{eta}).
+#'   \item For \code{"cv.coxkl_ridge"} and \code{"cv.coxkl_enet"}:
+#'         uses \code{object$integrated_stat.best_per_eta} (best \code{lambda} per \code{eta}).
+#' }
+#' The y-axis label is set to \dQuote{Loss} if \code{criteria} in the object is
+#' \dQuote{V&VH} or \dQuote{LinPred}; otherwise it is \dQuote{C Index}.
+#' The horizontal reference (“baseline”) is taken from the plotted series at
+#' \code{eta = 0} (or the nearest \code{eta} present in the results).
+#' 
 #' @return A \code{ggplot} object showing cross-validation performance versus \code{eta}.
+#' 
+#' @seealso \code{\link{cv.coxkl}}, \code{\link{cv.coxkl_ridge}}, \code{\link{cv.coxkl_enet}}
+#' 
+#' @examples
+#' data(Exampledata_lowdim)
+#' 
+#' train_dat_lowdim <- ExampleData_lowdim$train
+#' beta_external_good_lowdim <- ExampleData_lowdim$beta_external_good
+#' 
+#' etas <- generate_eta(method = "exponential", n = 10, max_eta = 5)
+#' etas <- sample(etas)
+#' 
+#' cv_res <- cv.coxkl(z = train_dat_lowdim$z,
+#'                    delta = train_dat_lowdim$status,
+#'                    time = train_dat_lowdim$time,
+#'                    stratum = NULL,
+#'                    RS = NULL,
+#'                    beta = beta_external_good_lowdim,
+#'                    etas = etas,
+#'                    nfolds = 5,
+#'                    criteria = c("LinPred"),   #"V&VH", "LinPred", "CIndex_pooled", "CIndex_foldaverage"
+#'                    message = T)
+#' 
+#' 
+#' @importFrom ggplot2 ggplot aes geom_line geom_point geom_segment labs theme_minimal theme
+#' @importFrom ggplot2 element_blank element_line element_text
+#' @importFrom grid unit
+#' @importFrom cowplot plot_grid get_legend
 #' @export
 cv.plot <- function(object,
                     line_color = "#7570B3",      # CoxKL main curve (purple)

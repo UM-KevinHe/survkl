@@ -7,7 +7,21 @@
 #' strength is controlled by the tuning parameter `eta`.
 #'
 #' @details
-#' Setting `lambda = 0` reduces to the unpenalized \code{coxkl()} model.
+#' Setting `lambda = 0` reduces to the unpenalized \code{\link{coxkl}} model.
+#' 
+#' When `lambda > 0`, the model fits a KL-regularized Cox objective with an
+#' elastic-net penalty:
+#' \deqn{\ell_{\mathrm{KL}}(\beta;\eta) \;-\; \lambda\Big\{ \alpha\|\beta\|_1 \;+\; (1-\alpha)\tfrac{1}{2}\|\beta\|_2^2 \Big\},}
+#' where \eqn{\alpha=1} gives lasso and \eqn{0<\alpha<1} gives elastic net. Grouped
+#' penalties are supported via `group` (use `0` for unpenalized variables), with optional
+#' per-group scaling through `group.multiplier`. If `lambda` is `NULL`, a decreasing path
+#' of length `nlambda` is generated using `lambda.min.ratio`; early stopping can prune the
+#' path (`lambda.early.stop`, `stop.loss.ratio`). When `standardize = TRUE`, predictors are
+#' standardized for fitting and coefficients are rescaled on output. If `data_sorted = FALSE`,
+#' data are sorted by `stratum` then `time` for optimization and predictions are returned in
+#' the original order (reported via `W = exp(linear predictors)`). An active-set scheme
+#' (`actSet`, `actIter`, `nvar.max`, `group.max`, `actGroupNum`, `actSetRemove`) is used to
+#' accelerate the solution along the lambda path.
 #'
 #' @param z Numeric matrix of covariates with rows representing observations and
 #'   columns representing predictor variables. All covariates must be numeric.
@@ -62,13 +76,17 @@
 #'   active-set scheme. 
 #' @param actSetRemove Logical; if `TRUE`, allow dropping variables/groups from
 #'   the active set during iterations. Default `FALSE`.
+#' @param returnX Logical; if `TRUE`, return standardized design and related
+#'   internals in `result$returnX`. Default `FALSE`.
 #' @param trace.lambda Logical; if `TRUE`, record path-wise traces across the
 #'   lambda sequence. Default `FALSE`.
 #' @param message Logical; if `TRUE`, progress messages are printed during model
 #'   fitting. Default is `FALSE`.
-#' @param ... Additional arguments (currently ignored).
+#' @param data_sorted Logical; if `TRUE`, input is assumed already sorted by
+#'   `stratum` then `time`. Default `FALSE`.
+#' @param ... Additional arguments.
 #'
-#' @return An object of class \code{"coxkl_highdim"}, a list with components:
+#' @return An object of class \code{"coxkl_enet"}, a list with components:
 #' \describe{
 #'   \item{\code{beta}}{Coefficient estimates (vector or matrix across the path).}
 #'   \item{\code{group}}{A \code{factor} of the original group assignments.}
@@ -79,25 +97,33 @@
 #'   \item{\code{df}}{Effective degrees of freedom (e.g., number of nonzero
 #'     coefficients or group-adjusted count) along the path.}
 #'   \item{\code{iter}}{Number of iterations taken (per lambda and/or total).}
-#'   \item{\code{W}}{Exponentiated linear predictors on the original scale}.}
+#'   \item{\code{W}}{Exponentiated linear predictors on the original scale.}
 #'   \item{\code{group.multiplier}}{Group-specific penalty multipliers used.}
+#'   \item{\code{returnX}}{Only when \code{returnX = TRUE}: a list with elements
+#'     \code{XX} (standardization/orthogonalization info from \code{std.Z}),
+#'     \code{time}, \code{delta}, \code{stratum}, and \code{RS}.}
 #' }
-#'
+#' 
+#' @seealso \code{\link{coxkl}}
+#' 
 #' @examples
-#' data(ExampleData)
-#'
-#' # With external beta
-#' fit_hd1 <- coxkl_highdim(
-#'   z = ExampleData$z,
-#'   delta = ExampleData$status,
-#'   time = ExampleData$time,
-#'   stratum = ExampleData$stratum,
-#'   beta = ExampleData$beta_external,
-#'   etas = 1
-#' )
-#'
+#' data(example_data_highdim) 
+#' 
+#' train_dat_highdim <- ExampleData_highdim$train
+#' beta_external_highdim <- ExampleData_highdim$beta_external
+#' 
+#' model_enet <- coxkl_enet(z = train_dat_highdim$z,
+#'                          delta = train_dat_highdim$status,
+#'                          time = train_dat_highdim$time,
+#'                          stratum = NULL,
+#'                          RS = NULL,
+#'                          beta = beta_external_highdim,
+#'                          eta = 0,
+#'                          alpha = 1.0,
+#'                          message = T)
 #'
 #' @export
+
 coxkl_enet <- function(z, delta, time, stratum = NULL, RS = NULL, beta = NULL, eta = NULL,
                        alpha = NULL, lambda = NULL, nlambda = 100, lambda.min.ratio = ifelse(n < p, 0.05, 1e-03), 
                        lambda.early.stop = FALSE, tol = 1.0e-4, Mstop = 1000, max.total.iter = (Mstop * nlambda), 

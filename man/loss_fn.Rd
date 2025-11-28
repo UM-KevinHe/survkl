@@ -2,10 +2,33 @@
 % Please edit documentation in R/cal_surv_prob.R
 \name{loss_fn}
 \alias{loss_fn}
-\title{Calculate the likelihood}
+\title{Calculate the Log-Partial Likelihood for a Stratified Cox Model}
 \usage{
-loss_fn(z, delta, time, beta)
+loss_fn(z, delta, time, stratum, beta)
+}
+\arguments{
+\item{z}{A numeric matrix (or data frame coercible to matrix) of covariates.
+Each row is an observation and each column a predictor.}
+
+\item{delta}{A numeric vector of event indicators (1 = event, 0 = censored).}
+
+\item{time}{A numeric vector of observed times (event or censoring).}
+
+\item{stratum}{An optional vector specifying the stratum for each observation
+(factor/character/numeric). If missing, a single-stratum model is assumed.}
+
+\item{beta}{A numeric vector of regression coefficients with length equal to
+the number of columns in \code{z}.}
+}
+\value{
+A single numeric value giving the stratified Cox partial log-likelihood.
 }
 \description{
-Calculate the likelihood
+Computes the stratified Cox partial log-likelihood for given covariates,
+event indicators, times, and coefficients.
+}
+\details{
+Inputs are internally sorted by \code{stratum} and \code{time}. The function
+evaluates the stratified Cox partial log-likelihood using the supplied \code{z},
+\code{delta}, \code{beta}, and the stratum sizes.
 }

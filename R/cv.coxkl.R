@@ -1,61 +1,85 @@
-#' Cross-Validated Cox–KL to Tune the Integration Parameter (eta)
+#' Cross-Validated Selection of Integration Parameter （`eta`） for the Cox–KL Model
 #'
 #' Performs K-fold cross-validation to select the integration parameter `eta`
 #' for the Cox–KL model. Each fold fits the model on a training split and
 #' evaluates on the held-out split using the specified performance criterion.
+#' 
 #'
 #' @param z Numeric matrix of covariates (rows = observations, columns = variables).
 #' @param delta Numeric vector of event indicators (1 = event, 0 = censored).
 #' @param time Numeric vector of observed event or censoring times.
-#' @param stratum Optional numeric or factor vector defining strata.
+#' @param stratum Optional numeric or factor vector defining strata. If `NULL`,
+#'   all observations are treated as a single stratum.
 #' @param RS Optional numeric vector or matrix of external risk scores. If omitted,
 #'   `beta` must be supplied.
 #' @param beta Optional numeric vector of external coefficients. If omitted, `RS`
 #'   must be supplied.
-#' @param etas Numeric vector of candidate tuning values to be cross-validated.
-#'   Default is `NULL`, which sets `etas = 0`.
-#' @param tol Convergence tolerance for the optimizer used inside `coxkl`. Default `1e-4`.
-#' @param Mstop Maximum number of Newton iterations used inside `coxkl`. Default `100`.
+#' @param etas Numeric vector of candidate tuning values to be cross-validated. (required). 
+#'   Values are internally sorted in ascending order.
+#' @param tol Convergence tolerance for the optimizer used inside \code{\link{coxkl}}. Default `1e-4`.
+#' @param Mstop Maximum number of Newton iterations used inside \code{\link{coxkl}}. Default `100`.
 #' @param backtrack Logical; if `TRUE`, backtracking line search is applied during
 #'   optimization. Default is `FALSE`.
 #' @param nfolds Number of cross-validation folds. Default `5`.
 #' @param criteria Character string specifying the performance criterion.
-#'   Choices are `"V&VH"`, `"LinPred"`, `"CIndex_pooled"`, or `"CIndex_foldaverage"`.
-#'   Default `"V&VH"`.
+#'   Choices are `"V&VH"` (default), `"LinPred"`, `"CIndex_pooled"`, or `"CIndex_foldaverage"`.
 #' @param c_index_stratum Optional stratum vector. Only required when
 #'   \code{criteria} is set to `"CIndex_pooled"` or `"CIndex_foldaverage"`,
 #'   and a stratified C-index is desired while the fitted model is non-stratified.
 #'   Default `NULL`.
-#' @param message Logical; if `TRUE`, prints progress messages. Default `FALSE`.
+#' @param message Logical; if `TRUE`, prints progress messages and per-fold progress bars. Default `FALSE`.
 #' @param seed Optional integer seed for reproducible fold assignment. Default `NULL`.
 #' @param ... Additional arguments passed to \code{\link{coxkl}}.
 #'
-#' @return A \code{data.frame} with one row per candidate `eta` and columns:
+#'
+#' @details
+#' External information is required: supply either \code{RS} or \code{beta} (if \code{beta} is given,
+#' \code{RS} is computed as \code{z \%*\% beta}). Folds are created with stratification by
+#' \code{stratum} and censoring status. Within each fold and each candidate \code{eta},
+#' the function fits \code{coxkl} on the training split with warm-starts initialized to zero
+#' and evaluates on the test split:
+#' \itemize{
+#'   \item \code{"V&VH"}: uses the difference of partial log-likelihoods between full and
+#'         training fits; reported as \eqn{-2} times the aggregated quantity.
+#'   \item \code{"LinPred"}: aggregates the test-split linear predictors across folds and
+#'         evaluates \eqn{-2} times the partial log-likelihood on the full data.
+#'   \item \code{"CIndex_pooled"}: pools pairwise comparable counts across folds (numerator/denominator).
+#'   \item \code{"CIndex_foldaverage"}: averages the per-fold stratified C-index.
+#' }
+#' The function also computes an external baseline statistic from \code{RS} using the
+#' same criterion for comparison.
+#'
+#' @return An object of class \code{"cv.coxkl"} with components:
 #' \describe{
-#'   \item{\code{eta}}{The candidate `eta` values.}
-#'   \item{\code{VVH_Loss}}{If \code{criteria = "V&VH"}, the cross-validated V&VH loss.}
-#'   \item{\code{LinPred_Loss}}{If \code{criteria = "LinPred"}, the loss based on linear predictors.}
-#'   \item{\code{CIndex_pooled}}{If \code{criteria = "CIndex_pooled"}, the pooled cross-validated C-index.}
-#'   \item{\code{CIndex_foldaverage}}{If \code{criteria = "CIndex_foldaverage"}, the average fold-wise C-index.}
+#'   \item{\code{internal_stat}}{A data.frame with one row per \code{eta} containing \code{eta} and the
+#'         cross-validated measure named according to \code{criteria} (one of
+#'         \code{VVH_Loss}, \code{LinPred_Loss}, \code{CIndex_pooled}, \code{CIndex_foldaverage}).}
+#'   \item{\code{external_stat}}{Scalar baseline statistic computed from \code{RS} under the same \code{criteria}.}
+#'   \item{\code{criteria}}{The evaluation criterion used.}
+#'   \item{\code{nfolds}}{Number of folds.}
 #' }
 #'
 #' @examples
-#' data(ExampleData)
-#' etas <- generate_eta(method = "exponential", n = 5, max_eta = 5)
-#'
-#' # Example 1: use external beta information, evaluate by V&VH
-#' result1 <- cv.coxkl(z = ExampleData$z, delta = ExampleData$status,
-#'                     time = ExampleData$time, beta = ExampleData$beta_external,
-#'                     etas = etas,
-#'                     nfolds = 5, criteria = "V&VH")
-#'
-#' # Example 2: use external risk score information, evaluate by pooled C-index
-#' rs <- as.matrix(ExampleData$z) %*% as.matrix(ExampleData$beta_external)
-#' result2 <- cv.coxkl(z = ExampleData$z, delta = ExampleData$status,
-#'                     time = ExampleData$time, RS = rs,
-#'                     etas = etas,
-#'                     nfolds = 5, criteria = "CIndex_pooled")
-#'
+#' data(Exampledata_lowdim)
+#' 
+#' train_dat_lowdim <- ExampleData_lowdim$train
+#' beta_external_good_lowdim <- ExampleData_lowdim$beta_external_good
+#' 
+#' etas <- generate_eta(method = "exponential", n = 10, max_eta = 5)
+#' etas <- sample(etas)
+#' 
+#' cv_res <- cv.coxkl(z = train_dat_lowdim$z,
+#'                    delta = train_dat_lowdim$status,
+#'                    time = train_dat_lowdim$time,
+#'                    stratum = NULL,
+#'                    RS = NULL,
+#'                    beta = beta_external_good_lowdim,
+#'                    etas = etas,
+#'                    nfolds = 5,
+#'                    criteria = c("LinPred"),   #"V&VH", "LinPred", "CIndex_pooled", "CIndex_foldaverage"
+#'                    message = T)
+#'                     
+#' @importFrom utils txtProgressBar setTxtProgressBar
 #' @export
 cv.coxkl <- function(z, delta, time, stratum = NULL,
                      RS = NULL, beta = NULL,
