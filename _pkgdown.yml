@@ -1,7 +1,7 @@
 # _pkgdown.yml
 
 # Website Basic Configuration
-url: https://umkevinhe.github.io/coxkl/ # Replace with your actual deployed URL later
+url: https://umkevinhe.github.io/survkl/ # Replace with your actual deployed URL later
   template:
   bootstrap: 5 # Use Bootstrap 5
 params:
@@ -26,7 +26,7 @@ navbar:
     #   href: articles/kl_theory.html # Example future article
   right: # Items aligned to the right
     - icon: fa-github fa-lg # Link to GitHub repository
-    # href: https://github.com/YourUsername/coxkl # Replace with your repo URL
+    # href: https://github.com/UM-KevinHe/survkl # Replace with your repo URL
   
   # Function Reference Page Organization
   reference:
@@ -38,7 +38,7 @@ navbar:
       for tuning parameter selection.
       contents:
         - coxkl
-        - cv.coxkl # Assuming this function exists
+        - cv.coxkl
     
     - title: "High-Dimensional Cox KL Integration"
       desc: >
@@ -46,8 +46,10 @@ navbar:
       external information via KL divergence alongside regularization
       (Lasso, Ridge, Elastic Net). Includes cross-validation.
       contents:
-        - coxkl_highdim
-        - cv.coxkl_highdim # Assuming this function exists
+        - coxkl_ridge
+        - coxkl_enet
+        - cv.coxkl_ridge
+        - cv.coxkl_enet
   
   # Development Mode (shows unreleased features/docs) - Optional
   # development:

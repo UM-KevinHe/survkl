@@ -12,8 +12,7 @@ Authors@R: c(
     person("Kevin","He",role=c("aut"),email="kevinhe@umich.edu")
   )
 Description: 
-    For more information, see Wu et al. (2022) <doi: 10.1007/s10985-021-09544-2> and 
-    Luo et al. (2023) <doi:10.1177/09622802231181471>.
+    For more information, see Wang et al. (2023) <https://doi.org/10.48550/arXiv.2302.11123>.
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)

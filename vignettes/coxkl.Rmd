@@ -1,5 +1,5 @@
 ---
-title: "coxkl: Cox Models with KL Divergence for Survival Data Integration"
+title: "survkl: Cox Models with KL Divergence for Survival Data Integration"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{coxkl Introduction}
@@ -24,7 +24,7 @@ Consequently, it is crucial to develop a transfer learning procedure that effect
 
 Although Kullback-Leibler (KL) divergence has been proposed to integrate external predicted probabilities for binary outcomes, such approaches are not directly applicable to censored time-to-event data due to the complexities of censoring and the typical format of external survival information (e.g., risk scores or coefficients lacking baseline hazard).
 
-To address these issues, the `coxkl` R package provides a transfer learning-based framework for efficient survival data integration, leveraging external information alongside newly collected time-to-event data.
+To address these issues, the `survkl` R package provides a transfer learning-based framework for efficient survival data integration, leveraging external information alongside newly collected time-to-event data.
 This package offers several key features:
 
 Privacy-Preserving: Requires less sensitive summary statistics (like risk scores or coefficient estimates) from external sources, with no need for individual-level external data.
@@ -32,26 +32,26 @@ Robust & Flexible: Handles potential heterogeneity between data sources and supp
 Adaptive Weighting: Uses tuning parameters (eta) to control the relative weight of external information, prioritizing compatible sources.
 High-Dimensionality Support: Implements regularized methods (Ridge, LASSO, Elastic Net via `coxkl_highdim`) to handle datasets where the number of predictors exceeds the number of observations.
 Partial Information Handling: Accommodates scenarios where external studies provide information on only a subset of predictors available in the internal study.
-This vignette provides an introduction to the `coxkl` package and demonstrates its core functionalities.
+This vignette provides an introduction to the `survkl` package and demonstrates its core functionalities.
 
 ## Installation:
 
-You can install the development version of `coxkl` from GitHub using remotes:
+You can install the development version of `survkl` from GitHub using remotes:
 
 ```{r, eval=FALSE}
 require("devtools")
 require("remotes")
-remotes::install_github("UM-KevinHe/coxkll", ref = "main")
+remotes::install_github("UM-KevinHe/survkl", ref = "main")
 ```
 
 ## Quick Start
 
 This section provides a brief overview of the main functions using example data included with the package.
 
-First, load the `coxkl` package:
+First, load the `survkl` package:
 
 ```{r}
-library(coxkll)
+library(survkl)
 ```
 
 ### Low-Dimensional Integration (`coxkl`)
