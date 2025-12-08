@@ -2,7 +2,6 @@
 
 **survkl** provides flexible and efficient tools for integrating external risk scores into Cox proportional hazards models while accounting for population heterogeneity. The package enables robust estimation, improved predictive accuracy, and user-friendly workflows for modern survival analysis.
 
----
 
 ## Key Features
 
@@ -21,12 +20,11 @@
 - **Built-In Cross-Validation**  
   Automated selection of tuning and penalization parameters.
 
----
 
 ## Installation
 
 > Note: This package is under active development. Please report any issues you encounter.  
-> Requires **R ≥ 4.1.0**.
+> Requires **R ≥ 4.0.0**.
 
 Install from CRAN:
 
@@ -41,14 +39,12 @@ Or install the development version from GitHub:
 We recommend starting with the  
 **Quick Start Tutorial:** https://um-kevinhe.github.io/survkl/articles/survkl.html#quick-start
 
----
 
 ## Detailed Tutorial
 
 Full package documentation and parameter explanations:  
 https://um-kevinhe.github.io/survkl/index.html
 
----
 
 ## Getting Help
 
@@ -59,7 +55,6 @@ If you encounter problems or bugs, please contact us:
 - xhliuu@umich.edu
 - kevinhe@umich.edu
 
----
 
 ## Contributing
 
