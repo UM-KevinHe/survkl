@@ -40,7 +40,7 @@ When \code{criteria = "loss"} and no test data are supplied, the plotted values 
 performance is computed via \code{test_eval(..., criteria)}. The x-axis is shown
 in decreasing \code{lambda} with a reversed log10 scale.
 
-data(example_data_highdim)
+data(ExampleData_highdim)
 
 train_dat_highdim <- ExampleData_highdim$train
 beta_external_highdim <- ExampleData_highdim$beta_external

@@ -103,12 +103,12 @@ The best \code{lambda} is chosen per \code{eta} (minimizing loss or maximizing C
 also computes an external baseline statistic from \code{RS} under the same criterion.
 }
 \examples{
-data(example_data_highdim) 
+data(ExampleData_highdim) 
 
 train_dat_highdim <- ExampleData_highdim$train
 beta_external_highdim <- ExampleData_highdim$beta_external
 
-etas <- generate_eta(method = "exponential", n = 50, max_eta = 10)
+etas <- generate_eta(method = "exponential", n = 10, max_eta = 100)
 etas <- sample(etas)
 cv_res <- cv.coxkl_ridge(z = train_dat_highdim$z,
                          delta = train_dat_highdim$status,

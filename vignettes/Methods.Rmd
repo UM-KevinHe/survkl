@@ -1,0 +1,11 @@
+---
+title: "Methods for Transfer-learning Based Integrated Cox Models"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Methods for Transfer-learning Based Integrated Cox Models}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\usepackage[utf8]{inputenc}
+editor_options:
+  markdown:
+    wrap: sentence
+---

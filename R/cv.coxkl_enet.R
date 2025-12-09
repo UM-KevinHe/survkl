@@ -43,7 +43,7 @@
 #'
 #' @details
 #' Data are sorted by \code{stratum} and \code{time}. External info must be from \code{RS} or
-#' \code{beta} (if \code{beta} given with length \code{ncol(z)}, \code{RS = z \%*\% beta}); \code{alpha} \in (0,1].
+#' \code{beta} (if \code{beta} given with length \code{ncol(z)}, \code{RS = z \%*\% beta}); \code{alpha} \eqn{\in (0,1]}.
 #' 
 #' For each candidate \code{eta}, a decreasing \code{lambda} path is used (generated from \code{nlambda}/\code{lambda.min.ratio}
 #' if \code{lambda = NULL}); CV folds are created by \code{get_fold}. Each fold fits \code{\link{coxkl_enet}}
@@ -79,12 +79,12 @@
 #' }
 #'   
 #' @examples
-#' data(example_data_highdim) 
+#' data(ExampleData_highdim) 
 #' 
 #' train_dat_highdim <- ExampleData_highdim$train
 #' beta_external_highdim <- ExampleData_highdim$beta_external
 #' 
-#' etas <- generate_eta(method = "exponential", n = 50, max_eta = 10)
+#' etas <- generate_eta(method = "exponential", n = 10, max_eta = 100)
 #' etas <- sample(etas) 
 #' 
 #' cv_res <- cv.coxkl_enet(z = train_dat_highdim$z,

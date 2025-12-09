@@ -48,7 +48,7 @@
 #' mapped back to the original observation order. `tol`, `Mstop`, and `backtrack` control convergence and line search.
 #' 
 #' @examples
-#' data(example_data_highdim) 
+#' data(ExampleData_highdim) 
 #' 
 #' train_dat_highdim <- ExampleData_highdim$train
 #' beta_external_highdim <- ExampleData_highdim$beta_external

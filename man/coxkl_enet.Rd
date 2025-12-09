@@ -174,7 +174,7 @@ the original order (reported via \verb{W = exp(linear predictors)}). An active-s
 accelerate the solution along the lambda path.
 }
 \examples{
-data(example_data_highdim) 
+data(ExampleData_highdim) 
 
 train_dat_highdim <- ExampleData_highdim$train
 beta_external_highdim <- ExampleData_highdim$beta_external

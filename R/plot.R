@@ -33,12 +33,12 @@
 #' beta_external_good_lowdim <- ExampleData_lowdim$beta_external_good
 #' 
 #' model <- coxkl(z = train_dat_lowdim$z,
-#'      delta = train_dat_lowdim$status,
-#'      time = train_dat_lowdim$time,
-#'      stratum = train_dat_lowdim$stratum,
-#'      RS = NULL,
-#'      beta = beta_external_good_lowdim,
-#'      etas = c(0:5))
+#'                delta = train_dat_lowdim$status,
+#'                time = train_dat_lowdim$time,
+#'                stratum = train_dat_lowdim$stratum,
+#'                RS = NULL,
+#'                beta = beta_external_good_lowdim,
+#'                etas = c(0:5))
 #'      
 #' plot(model)      
 #'      
@@ -152,7 +152,7 @@ plot.coxkl <- function(object, test_z = NULL, test_time = NULL, test_delta = NUL
 #' performance is computed via \code{test_eval(..., criteria)}. The x-axis is shown
 #' in decreasing \code{lambda} with a reversed log10 scale.
 #' 
-#' data(example_data_highdim) 
+#' data(ExampleData_highdim) 
 #' 
 #' train_dat_highdim <- ExampleData_highdim$train
 #' beta_external_highdim <- ExampleData_highdim$beta_external
@@ -250,7 +250,7 @@ plot.coxkl_ridge <- function(object, test_z = NULL, test_time = NULL, test_delta
 #' @return A \code{ggplot} object showing the performance curve.
 #' 
 #' @examples
-#' data(example_data_highdim) 
+#' data(ExampleData_highdim) 
 #' 
 #' train_dat_highdim <- ExampleData_highdim$train
 #' beta_external_highdim <- ExampleData_highdim$beta_external

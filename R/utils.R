@@ -111,6 +111,8 @@ c_stat_stratcox_vec <- function(time, LP_mat, stratum, delta) {
 #' for the Cox–KL model. The maximum lambda (`lambda.max`) is defined as the 
 #' smallest value that shrinks all coefficients (`beta`) to zero. Note that different 
 #' values of `eta` will produce different `lambda` sequences.
+#' @keywords internal
+#' @noRd
 setupLambdaCoxKL <- function(Z, time, delta, delta_tilde, RS, beta.init, stratum,
                              group, group.multiplier, n.each_stratum, alpha, 
                              eta, nlambda, lambda.min.ratio) {

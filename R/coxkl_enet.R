@@ -107,7 +107,7 @@
 #' @seealso \code{\link{coxkl}}
 #' 
 #' @examples
-#' data(example_data_highdim) 
+#' data(ExampleData_highdim) 
 #' 
 #' train_dat_highdim <- ExampleData_highdim$train
 #' beta_external_highdim <- ExampleData_highdim$beta_external

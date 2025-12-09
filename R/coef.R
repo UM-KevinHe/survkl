@@ -25,12 +25,12 @@
 #' beta_external_good_lowdim <- ExampleData_lowdim$beta_external_good
 #' 
 #' model <- coxkl(z = train_dat_lowdim$z,
-#'      delta = train_dat_lowdim$status,
-#'      time = train_dat_lowdim$time,
-#'      stratum = train_dat_lowdim$stratum,
-#'      RS = NULL,
-#'      beta = beta_external_good_lowdim,
-#'      etas = c(0:5))
+#'                delta = train_dat_lowdim$status,
+#'                time = train_dat_lowdim$time,
+#'                stratum = train_dat_lowdim$stratum,
+#'                RS = NULL,
+#'                beta = beta_external_good_lowdim,
+#'                etas = c(0:5))
 #' coef(model)
 #'
 #' @exportS3Method coef coxkl
@@ -113,7 +113,7 @@ coef.coxkl <- function(object, eta = NULL, ...) {
 #' Each column corresponds to one value of \code{lambda}, sorted in \emph{descending} order.
 #' 
 #' @examples
-#' data(example_data_highdim) 
+#' data(ExampleData_highdim) 
 #' 
 #' train_dat_highdim <- ExampleData_highdim$train
 #' beta_external_highdim <- ExampleData_highdim$beta_external
@@ -208,7 +208,7 @@ coef.coxkl_ridge <- function(object, lambda = NULL, ...) {
 #' value of \code{lambda}, sorted in \emph{descending} order.
 #' 
 #' @examples
-#' data(example_data_highdim) 
+#' data(ExampleData_highdim) 
 #' 
 #' train_dat_highdim <- ExampleData_highdim$train
 #' beta_external_highdim <- ExampleData_highdim$beta_external

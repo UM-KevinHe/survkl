@@ -55,12 +55,12 @@ train_dat_lowdim <- ExampleData_lowdim$train
 beta_external_good_lowdim <- ExampleData_lowdim$beta_external_good
 
 model <- coxkl(z = train_dat_lowdim$z,
-     delta = train_dat_lowdim$status,
-     time = train_dat_lowdim$time,
-     stratum = train_dat_lowdim$stratum,
-     RS = NULL,
-     beta = beta_external_good_lowdim,
-     etas = c(0:5))
+               delta = train_dat_lowdim$status,
+               time = train_dat_lowdim$time,
+               stratum = train_dat_lowdim$stratum,
+               RS = NULL,
+               beta = beta_external_good_lowdim,
+               etas = c(0:5))
      
 plot(model)      
      

@@ -28,7 +28,7 @@ linear interpolation is performed between nearest neighbors; out-of-range
 requests error.
 }
 \examples{
-data(example_data_highdim) 
+data(ExampleData_highdim) 
 
 train_dat_highdim <- ExampleData_highdim$train
 beta_external_highdim <- ExampleData_highdim$beta_external

@@ -92,7 +92,7 @@ If \code{data_sorted = FALSE}, data are sorted by \code{stratum} and \code{time}
 mapped back to the original observation order. \code{tol}, \code{Mstop}, and \code{backtrack} control convergence and line search.
 }
 \examples{
-data(example_data_highdim) 
+data(ExampleData_highdim) 
 
 train_dat_highdim <- ExampleData_highdim$train
 beta_external_highdim <- ExampleData_highdim$beta_external

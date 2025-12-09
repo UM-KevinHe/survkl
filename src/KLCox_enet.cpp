@@ -22,7 +22,7 @@ double mean_crossprod(const arma::mat &Z, arma::vec &r, int j, int n_obs) {
 /*
 // [[Rcpp::export]]
 arma::vec rev_cumsum(const arma::vec& X) {
-  return arma::flipud(arma::cumsum(arma::flipud(X))); 
+  return arma::flipud(arma::cumsum(arma::flipud(X)));
 }
 */
 
