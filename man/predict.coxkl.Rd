@@ -2,7 +2,7 @@
 % Please edit documentation in R/predict.R
 \name{predict.coxkl}
 \alias{predict.coxkl}
-\title{Predict Linear Predictors from a coxkl Object}
+\title{Predict Linear Predictors from a \code{coxkl} Object}
 \usage{
 \method{predict}{coxkl}(object, newz, eta = NULL, ...)
 }
@@ -12,18 +12,23 @@
 \item{newz}{A numeric matrix or data frame of new covariates (must match the
 dimension of the training design matrix used to fit the model).}
 
-\item{eta}{Optional numeric value(s) specifying which \code{eta} values to use
-for prediction. If \code{NULL}, predictions for all fitted \code{eta} values are returned.}
+\item{eta}{Optional numeric vector of \code{eta} value(s) for which to predict.
+If \code{NULL}, predictions for all fitted \code{eta} values are returned.}
 
-\item{...}{Additional arguments (currently ignored).}
+\item{...}{Additional arguments.}
 }
 \value{
-A numeric matrix of linear predictors.
-Each column corresponds to one value of \code{eta}, sorted in ascending order.
+A numeric matrix of linear predictors with one column per \code{eta} (sorted ascending).
 }
 \description{
 Computes linear predictors for new data based on a fitted \code{coxkl} model.
-Users can specify one or more \code{eta} values; if not provided, predictions
-are returned for all fitted \code{eta} values. Linear interpolation is applied
-if an intermediate \code{eta} value is requested.
+If \code{eta} is supplied, predictions are returned for those \code{eta} values;
+otherwise predictions are returned for all fitted \code{eta}s. Linear interpolation
+is applied if an intermediate \code{eta} value is requested.
+}
+\details{
+The linear predictors are computed as \code{as.matrix(newz) \%*\% beta}.
+}
+\seealso{
+\code{\link{coef.coxkl}}
 }

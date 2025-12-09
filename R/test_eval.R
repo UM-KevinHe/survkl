@@ -14,26 +14,34 @@
 #'   Required if \code{test_RS} is not provided.
 #' @param test_RS Optional numeric vector of pre-computed risk scores (e.g., linear predictors).
 #'   If provided, \code{test_z} and \code{betahat} are ignored.
-#' @param test_delta Numeric vector of event indicators (1 for event, 0 for censoring).
+#' @param test_delta Numeric vector of event indicators (1 = event, 0 = censored).
 #' @param test_time Numeric vector of survival times for the test dataset.
 #' @param test_stratum Optional vector indicating stratum membership for each test observation.
 #'   If \code{NULL}, all observations are assumed to belong to a single stratum.
 #' @param betahat Optional numeric vector of estimated regression coefficients.
 #'   Required if \code{test_RS} is not provided.
-#' @param criteria Character string specifying the evaluation criterion.
-#'   Must be either \code{"loss"} for log-partial-likelihood loss
-#'   or \code{"CIndex"} for concordance index.
-#'
+#' @param criteria Character string specifying the evaluation criterion; one of:
+#'   \itemize{
+#'     \item \code{"loss"}: negative twice the log–partial-likelihood.
+#'     \item \code{"CIndex"}: concordance index.
+#'   }
+#'   
+#' @details
+#' Prior to evaluation, observations are sorted by \emph{(stratum, time)} to ensure correct
+#' risk-set construction. For stratified C-index computation, the provided \code{test_stratum}
+#' is used; otherwise all test data are treated as a single stratum.
+#' 
+#' You may supply either covariates and coefficients (\code{test_z} with \code{betahat})
+#' or a precomputed risk score vector (\code{test_RS}). When \code{test_RS} is provided,
+#' \code{test_z} and \code{betahat} are ignored.
+#' 
 #' @return
 #' A numeric value representing either:
 #' \itemize{
-#'   \item the negative twice log-partial-likelihood (\code{criteria = "loss"});
-#'   \item or the concordance index (\code{criteria = "CIndex"}).
+#'   \item if \code{criteria = "loss"}: the negative twice log–partial-likelihood on the test data.
+#'   \item if \code{criteria = "CIndex"}: the concordance index on the test data.
 #' }
 #'
-#' @details
-#' Observations are automatically sorted by stratum and time to ensure correct
-#' risk set ordering before evaluation.
 #'
 #' @export
 test_eval <- function(test_z = NULL, test_RS = NULL, test_delta, test_time,

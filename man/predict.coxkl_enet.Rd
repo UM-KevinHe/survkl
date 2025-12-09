@@ -14,15 +14,22 @@
 \item{lambda}{Optional numeric value(s) specifying the regularization parameter(s)
 for which to predict. If \code{NULL}, predictions for all fitted \code{lambda} values are returned.}
 
-\item{...}{Additional arguments (currently ignored).}
+\item{...}{Additional arguments.}
 }
 \value{
 A numeric matrix of linear predictors.
 Each column corresponds to one \code{lambda}, sorted in descending order.
 }
 \description{
-Computes linear predictors for new data from a fitted \code{coxkl_enet} model.
-Users can specify one or more \code{lambda} values; if not provided, predictions
-are returned for all fitted \code{lambda} values. Linear interpolation is applied
-if an intermediate \code{lambda} value is requested.
+Computes linear predictors for new data using a fitted \code{coxkl_enet} model.
+If \code{lambda} is supplied, predictions are returned for those \code{lambda}
+values; otherwise predictions are returned for all fitted \code{lambda}s. When a
+requested \code{lambda} lies between fitted values, coefficients are linearly
+interpolated.
+}
+\details{
+The linear predictors are computed as \code{as.matrix(newz) \%*\% beta}.
+}
+\seealso{
+\code{\link{coef.coxkl_enet}}
 }

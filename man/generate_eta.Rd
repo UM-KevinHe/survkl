@@ -7,19 +7,36 @@
 generate_eta(method = "exponential", n = 10, max_eta = 5)
 }
 \arguments{
-\item{method}{Character string specifying the method to generate \code{eta}.
-Options are \code{"linear"} for a linearly spaced sequence, or \code{"exponential"}
+\item{method}{Character string selecting how to generate \code{eta}:
+\dQuote{linear} or \dQuote{exponential}. Default is \dQuote{exponential}.
 for an exponentially spaced sequence scaled to \code{max_eta}. Default is \code{"exponential"}.}
 
 \item{n}{Integer, the number of \code{eta} values to generate. Default is 10.}
 
 \item{max_eta}{Numeric, the maximum value of \code{eta} in the sequence. Default is 5.}
+
+\item{min_eta}{Numeric, the minimum value of \code{eta} in the sequence. Default is 1.}
 }
 \value{
 Numeric vector of length \code{n} containing the generated \code{eta} values.
 }
 \description{
 Produces a numeric vector of \code{eta} values to be used in Cox–KL model.
+}
+\details{
+\itemize{
+\item \emph{Exponential}: values are formed by exponentiating a grid from
+\code{log(1)} to \code{log(100)}, then linearly rescaling to the interval
+\code{[0, max_eta]}. Thus the smallest value equals \code{0} and the largest
+equals \code{max_eta}.
+\item \emph{Linear}: the current implementation calls
+\code{seq(min_eta, max_eta, length.out = n)} and therefore assumes a
+numeric object \code{min_eta} exists in the calling environment. If
+\code{min_eta} is not defined, this branch will error at runtime.
+}
+Only the exact strings \dQuote{linear} and \dQuote{exponential} are supported;
+other values for \code{method} will result in an error because \code{eta_values}
+is never created.
 }
 \examples{
 # Generate 10 exponentially spaced eta values up to 5
