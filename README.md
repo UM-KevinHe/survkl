@@ -36,15 +36,9 @@ Or install the development version from GitHub:
     require("remotes")
     remotes::install_github("UM-KevinHe/survkl")
 
-We recommend starting with the  
-**Quick Start Tutorial:** https://um-kevinhe.github.io/survkl/articles/survkl.html#quick-start
-
-
 ## Detailed Tutorial
 
-Full package documentation and parameter explanations:  
-https://um-kevinhe.github.io/survkl/index.html
-
+Full package documentation and parameter explanations: [here](https://um-kevinhe.github.io/survkl/)
 
 ## Getting Help
 
