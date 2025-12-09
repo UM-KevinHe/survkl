@@ -44,17 +44,10 @@ Full package documentation and parameter explanations: [here](https://um-kevinhe
 
 If you encounter problems or bugs, please contact us:
 
-- **ybshao@umich.edu**
+- ybshao@umich.edu
 - lfluo@umich.edu
 - xhliuu@umich.edu
 - kevinhe@umich.edu
-
-
-## Contributing
-
-Contributions to **survkl** are welcome!  
-Guidelines are available here:  
-https://github.com/UM-KevinHe/survkl/blob/main/.github/CONTRIBUTING.md
 
 ---
 
