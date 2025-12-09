@@ -103,6 +103,6 @@ model_ridge <- coxkl_ridge(z = train_dat_highdim$z,
                            stratum = NULL,
                            RS = NULL,
                            beta = beta_external_highdim,
-                           message = T)
+                           message = TRUE)
 
 }

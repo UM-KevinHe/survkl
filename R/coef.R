@@ -124,7 +124,7 @@ coef.coxkl <- function(object, eta = NULL, ...) {
 #'                            stratum = NULL,
 #'                            RS = NULL,
 #'                            beta = beta_external_highdim,
-#'                            message = T)
+#'                            message = TRUE)
 #' coef(model_ridge)
 #'
 #' @exportS3Method coef coxkl_ridge
@@ -221,7 +221,7 @@ coef.coxkl_ridge <- function(object, lambda = NULL, ...) {
 #'                          beta = beta_external_highdim,
 #'                          eta = 0,
 #'                          alpha = 1.0,
-#'                          message = T)
+#'                          message = TRUE)
 #' coef(enet_model)                         
 #'    
 #' @exportS3Method coef coxkl_enet

@@ -163,7 +163,7 @@ plot.coxkl <- function(object, test_z = NULL, test_time = NULL, test_delta = NUL
 #'                            stratum = NULL,
 #'                            RS = NULL,
 #'                            beta = beta_external_highdim,
-#'                            message = T)
+#'                            message = TRUE)
 #'  
 #' plot(model_ridge)
 #' 
@@ -263,7 +263,7 @@ plot.coxkl_ridge <- function(object, test_z = NULL, test_time = NULL, test_delta
 #'                          beta = beta_external_highdim,
 #'                          eta = 0,
 #'                          alpha = 1.0,
-#'                          message = T)
+#'                          message = TRUE)
 #'                          
 #' plot(model_enet)
 #'

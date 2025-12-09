@@ -140,6 +140,6 @@ cv_res <- cv.coxkl_enet(z = train_dat_highdim$z,
                         alpha = 1.0,
                         nfolds = 5, 
                         cv.criteria = "CIndex_pooled",
-                        message = T)
+                        message = TRUE)
    
 }

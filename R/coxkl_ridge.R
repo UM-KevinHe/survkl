@@ -59,7 +59,7 @@
 #'                            stratum = NULL,
 #'                            RS = NULL,
 #'                            beta = beta_external_highdim,
-#'                            message = T)
+#'                            message = TRUE)
 #' 
 #' @importFrom utils txtProgressBar setTxtProgressBar
 #' 

@@ -51,7 +51,7 @@ enet_model <- coxkl_enet(z = train_dat_highdim$z,
                          beta = beta_external_highdim,
                          eta = 0,
                          alpha = 1.0,
-                         message = T)
+                         message = TRUE)
 #> External beta information is used.
 #> Warning: Stratum information not provided. All data is assumed to originate from a single stratum!
 coef(enet_model)                         

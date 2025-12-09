@@ -97,7 +97,7 @@
 #'                         alpha = 1.0,
 #'                         nfolds = 5, 
 #'                         cv.criteria = "CIndex_pooled",
-#'                         message = T)
+#'                         message = TRUE)
 #'    
 #' @importFrom utils txtProgressBar setTxtProgressBar
 #' @export
@@ -274,7 +274,7 @@ cv.coxkl_enet <- function(z, delta, time, stratum = NULL, RS = NULL, beta = NULL
     if (cv.criteria == "V&VH") {
       cve_eta <- vvh_sum
     } else if (cv.criteria == "LinPred") {
-      Lmat <- loss.coxkl_enet(delta, Y, stratum, total = FALSE)
+      Lmat <- loss.coxkl_highdim(delta, Y, stratum, total = FALSE)
       cve_eta <- colSums(Lmat)
     } else if (cv.criteria == "CIndex_pooled") {
       cve_eta <- numer / denom

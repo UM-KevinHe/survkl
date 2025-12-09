@@ -51,7 +51,7 @@ time = train_dat_highdim$time,
 stratum = NULL,
 RS = NULL,
 beta = beta_external_highdim,
-message = T)
+message = TRUE)
 
 plot(model_ridge)
 }

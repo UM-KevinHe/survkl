@@ -49,7 +49,7 @@ model_ridge <- coxkl_ridge(z = train_dat_highdim$z,
                            stratum = NULL,
                            RS = NULL,
                            beta = beta_external_highdim,
-                           message = T)
+                           message = TRUE)
 #> Warning: eta is not provided. Setting eta = 0 (no external information used).
 #> External beta information is used.
 #> Warning: Stratum information not provided. All data is assumed to originate from a single stratum!

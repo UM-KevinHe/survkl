@@ -57,7 +57,7 @@ model_enet <- coxkl_enet(z = train_dat_highdim$z,
                          beta = beta_external_highdim,
                          eta = 0,
                          alpha = 1.0,
-                         message = T)
+                         message = TRUE)
                          
 plot(model_enet)
 

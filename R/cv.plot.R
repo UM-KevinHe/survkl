@@ -49,7 +49,7 @@
 #'                    etas = etas,
 #'                    nfolds = 5,
 #'                    criteria = c("LinPred"),   #"V&VH", "LinPred", "CIndex_pooled", "CIndex_foldaverage"
-#'                    message = T)
+#'                    message = TRUE)
 #' 
 #' 
 #' @importFrom ggplot2 ggplot aes geom_line geom_point geom_segment labs theme_minimal theme

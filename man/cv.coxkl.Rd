@@ -116,6 +116,6 @@ cv_res <- cv.coxkl(z = train_dat_lowdim$z,
                    etas = etas,
                    nfolds = 5,
                    criteria = c("LinPred"),   #"V&VH", "LinPred", "CIndex_pooled", "CIndex_foldaverage"
-                   message = T)
+                   message = TRUE)
                     
 }

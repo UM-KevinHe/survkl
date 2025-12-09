@@ -4,7 +4,7 @@
 \alias{generate_eta}
 \title{Generate a Sequence of Tuning Parameters (eta)}
 \usage{
-generate_eta(method = "exponential", n = 10, max_eta = 5)
+generate_eta(method = "exponential", n = 10, max_eta = 5, min_eta = 0)
 }
 \arguments{
 \item{method}{Character string selecting how to generate \code{eta}:
@@ -15,7 +15,7 @@ for an exponentially spaced sequence scaled to \code{max_eta}. Default is \code{
 
 \item{max_eta}{Numeric, the maximum value of \code{eta} in the sequence. Default is 5.}
 
-\item{min_eta}{Numeric, the minimum value of \code{eta} in the sequence. Default is 1.}
+\item{min_eta}{Numeric, the minimum value of \code{eta} in the sequence. Default is 0.}
 }
 \value{
 Numeric vector of length \code{n} containing the generated \code{eta} values.
@@ -31,8 +31,7 @@ Produces a numeric vector of \code{eta} values to be used in Cox–KL model.
 equals \code{max_eta}.
 \item \emph{Linear}: the current implementation calls
 \code{seq(min_eta, max_eta, length.out = n)} and therefore assumes a
-numeric object \code{min_eta} exists in the calling environment. If
-\code{min_eta} is not defined, this branch will error at runtime.
+numeric object \code{min_eta} exists in the calling environment.
 }
 Only the exact strings \dQuote{linear} and \dQuote{exponential} are supported;
 other values for \code{method} will result in an error because \code{eta_values}

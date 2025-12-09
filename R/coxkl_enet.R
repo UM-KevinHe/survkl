@@ -120,7 +120,7 @@
 #'                          beta = beta_external_highdim,
 #'                          eta = 0,
 #'                          alpha = 1.0,
-#'                          message = T)
+#'                          message = TRUE)
 #'
 #' @export
 

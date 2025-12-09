@@ -63,6 +63,7 @@
 #' }
 #' 
 #' @examples
+#' \donttest{
 #' data(ExampleData_highdim) 
 #' 
 #' train_dat_highdim <- ExampleData_highdim$train
@@ -79,8 +80,8 @@
 #'                          etas = etas,
 #'                          nfolds = 5, 
 #'                          cv.criteria = "CIndex_pooled",
-#'                          message = T)
-#' 
+#'                          message = TRUE)
+#'}
 #' @importFrom utils txtProgressBar setTxtProgressBar
 #' @export
 

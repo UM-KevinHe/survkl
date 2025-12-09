@@ -40,7 +40,7 @@ get_fold <- function(nfolds = 5, delta, stratum) {
 #'   for an exponentially spaced sequence scaled to `max_eta`. Default is `"exponential"`.
 #' @param n Integer, the number of `eta` values to generate. Default is 10.
 #' @param max_eta Numeric, the maximum value of `eta` in the sequence. Default is 5.
-#' @param min_eta Numeric, the minimum value of `eta` in the sequence. Default is 1.
+#' @param min_eta Numeric, the minimum value of `eta` in the sequence. Default is 0.
 #'
 #' @details
 #' \itemize{
@@ -50,8 +50,7 @@ get_fold <- function(nfolds = 5, delta, stratum) {
 #'     equals \code{max_eta}.
 #'   \item \emph{Linear}: the current implementation calls
 #'     \code{seq(min_eta, max_eta, length.out = n)} and therefore assumes a
-#'     numeric object \code{min_eta} exists in the calling environment. If
-#'     \code{min_eta} is not defined, this branch will error at runtime.
+#'     numeric object \code{min_eta} exists in the calling environment. 
 #' }
 #' Only the exact strings \dQuote{linear} and \dQuote{exponential} are supported;
 #' other values for \code{method} will result in an error because \code{eta_values}
@@ -68,7 +67,7 @@ get_fold <- function(nfolds = 5, delta, stratum) {
 #'
 #' @export
 
-generate_eta <- function(method = "exponential", n = 10, max_eta = 5) {
+generate_eta <- function(method = "exponential", n = 10, max_eta = 5, min_eta = 0) {
   if (method == "linear") {
     eta_values <- seq(min_eta, max_eta, length.out = n)
   } else if (method == "exponential") {

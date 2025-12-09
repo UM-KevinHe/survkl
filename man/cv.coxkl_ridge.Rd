@@ -119,6 +119,6 @@ cv_res <- cv.coxkl_ridge(z = train_dat_highdim$z,
                          etas = etas,
                          nfolds = 5, 
                          cv.criteria = "CIndex_pooled",
-                         message = T)
+                         message = TRUE)
 
 }

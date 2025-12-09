@@ -77,7 +77,7 @@
 #'                    etas = etas,
 #'                    nfolds = 5,
 #'                    criteria = c("LinPred"),   #"V&VH", "LinPred", "CIndex_pooled", "CIndex_foldaverage"
-#'                    message = T)
+#'                    message = TRUE)
 #'                     
 #' @importFrom utils txtProgressBar setTxtProgressBar
 #' @export
