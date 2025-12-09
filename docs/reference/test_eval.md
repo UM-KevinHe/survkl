@@ -38,7 +38,7 @@ test_eval(
 
 - test_delta:
 
-  Numeric vector of event indicators (1 for event, 0 for censoring).
+  Numeric vector of event indicators (1 = event, 0 = censored).
 
 - test_time:
 
@@ -57,19 +57,28 @@ test_eval(
 
 - criteria:
 
-  Character string specifying the evaluation criterion. Must be either
-  `"loss"` for log-partial-likelihood loss or `"CIndex"` for concordance
-  index.
+  Character string specifying the evaluation criterion; one of:
+
+  - `"loss"`: negative twice the log–partial-likelihood.
+
+  - `"CIndex"`: concordance index.
 
 ## Value
 
 A numeric value representing either:
 
-- the negative twice log-partial-likelihood (`criteria = "loss"`);
+- if `criteria = "loss"`: the negative twice log–partial-likelihood on
+  the test data.
 
-- or the concordance index (`criteria = "CIndex"`).
+- if `criteria = "CIndex"`: the concordance index on the test data.
 
 ## Details
 
-Observations are automatically sorted by stratum and time to ensure
-correct risk set ordering before evaluation.
+Prior to evaluation, observations are sorted by *(stratum, time)* to
+ensure correct risk-set construction. For stratified C-index
+computation, the provided `test_stratum` is used; otherwise all test
+data are treated as a single stratum.
+
+You may supply either covariates and coefficients (`test_z` with
+`betahat`) or a precomputed risk score vector (`test_RS`). When
+`test_RS` is provided, `test_z` and `betahat` are ignored.

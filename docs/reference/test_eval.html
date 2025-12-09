@@ -28,6 +28,7 @@ test_RS, a pre-computed numeric vector of risk scores.
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../articles/survkl.html">Get started</a></li>
+<li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-appendix" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Appendix</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-appendix"><li><a class="dropdown-item" href="../articles/Methods.html">Methods</a></li>
@@ -81,7 +82,7 @@ If provided, <code>test_z</code> and <code>betahat</code> are ignored.</p></dd>
 
 
 <dt id="arg-test-delta">test_delta<a class="anchor" aria-label="anchor" href="#arg-test-delta"></a></dt>
-<dd><p>Numeric vector of event indicators (1 for event, 0 for censoring).</p></dd>
+<dd><p>Numeric vector of event indicators (1 = event, 0 = censored).</p></dd>
 
 
 <dt id="arg-test-time">test_time<a class="anchor" aria-label="anchor" href="#arg-test-time"></a></dt>
@@ -99,20 +100,24 @@ Required if <code>test_RS</code> is not provided.</p></dd>
 
 
 <dt id="arg-criteria">criteria<a class="anchor" aria-label="anchor" href="#arg-criteria"></a></dt>
-<dd><p>Character string specifying the evaluation criterion.
-Must be either <code>"loss"</code> for log-partial-likelihood loss
-or <code>"CIndex"</code> for concordance index.</p></dd>
+<dd><p>Character string specifying the evaluation criterion; one of:</p><ul><li><p><code>"loss"</code>: negative twice the log–partial-likelihood.</p></li>
+<li><p><code>"CIndex"</code>: concordance index.</p></li>
+</ul></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A numeric value representing either:</p><ul><li><p>the negative twice log-partial-likelihood (<code>criteria = "loss"</code>);</p></li>
-<li><p>or the concordance index (<code>criteria = "CIndex"</code>).</p></li>
+    <p>A numeric value representing either:</p><ul><li><p>if <code>criteria = "loss"</code>: the negative twice log–partial-likelihood on the test data.</p></li>
+<li><p>if <code>criteria = "CIndex"</code>: the concordance index on the test data.</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>Observations are automatically sorted by stratum and time to ensure correct
-risk set ordering before evaluation.</p>
+    <p>Prior to evaluation, observations are sorted by <em>(stratum, time)</em> to ensure correct
+risk-set construction. For stratified C-index computation, the provided <code>test_stratum</code>
+is used; otherwise all test data are treated as a single stratum.</p>
+<p>You may supply either covariates and coefficients (<code>test_z</code> with <code>betahat</code>)
+or a precomputed risk score vector (<code>test_RS</code>). When <code>test_RS</code> is provided,
+<code>test_z</code> and <code>betahat</code> are ignored.</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

@@ -16,6 +16,7 @@
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../articles/survkl.html">Get started</a></li>
+<li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-appendix" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Appendix</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-appendix"><li><a class="dropdown-item" href="../articles/Methods.html">Methods</a></li>
@@ -48,8 +49,8 @@
 
 
 <dl><dt id="arg-method">method<a class="anchor" aria-label="anchor" href="#arg-method"></a></dt>
-<dd><p>Character string specifying the method to generate <code>eta</code>.
-Options are <code>"linear"</code> for a linearly spaced sequence, or <code>"exponential"</code>
+<dd><p>Character string selecting how to generate <code>eta</code>:
+“linear” or “exponential”. Default is “exponential”.
 for an exponentially spaced sequence scaled to <code>max_eta</code>. Default is <code>"exponential"</code>.</p></dd>
 
 
@@ -60,10 +61,29 @@ for an exponentially spaced sequence scaled to <code>max_eta</code>. Default is 
 <dt id="arg-max-eta">max_eta<a class="anchor" aria-label="anchor" href="#arg-max-eta"></a></dt>
 <dd><p>Numeric, the maximum value of <code>eta</code> in the sequence. Default is 5.</p></dd>
 
+
+<dt id="arg-min-eta">min_eta<a class="anchor" aria-label="anchor" href="#arg-min-eta"></a></dt>
+<dd><p>Numeric, the minimum value of <code>eta</code> in the sequence. Default is 1.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>Numeric vector of length <code>n</code> containing the generated <code>eta</code> values.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+
+<ul><li><p><em>Exponential</em>: values are formed by exponentiating a grid from
+<code>log(1)</code> to <code>log(100)</code>, then linearly rescaling to the interval
+<code>[0, max_eta]</code>. Thus the smallest value equals <code>0</code> and the largest
+equals <code>max_eta</code>.</p></li>
+<li><p><em>Linear</em>: the current implementation calls
+<code>seq(min_eta, max_eta, length.out = n)</code> and therefore assumes a
+numeric object <code>min_eta</code> exists in the calling environment. If
+<code>min_eta</code> is not defined, this branch will error at runtime.</p></li>
+</ul><p>Only the exact strings “linear” and “exponential” are supported;
+other values for <code>method</code> will result in an error because <code>eta_values</code>
+is never created.</p>
     </div>
 
     <div class="section level2">

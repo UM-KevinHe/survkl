@@ -4,7 +4,7 @@ pkgdown_sha: ~
 articles:
   Methods: Methods.html
   survkl: survkl.html
-last_built: 2025-12-09T02:18Z
+last_built: 2025-12-09T03:15Z
 urls:
   reference: https://umkevinhe.github.io/survkl/reference
   article: https://umkevinhe.github.io/survkl/articles

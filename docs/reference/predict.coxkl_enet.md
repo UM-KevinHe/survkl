@@ -1,9 +1,10 @@
 # Predict Linear Predictors from a coxkl_enet Object
 
-Computes linear predictors for new data from a fitted `coxkl_enet`
-model. Users can specify one or more `lambda` values; if not provided,
-predictions are returned for all fitted `lambda` values. Linear
-interpolation is applied if an intermediate `lambda` value is requested.
+Computes linear predictors for new data using a fitted `coxkl_enet`
+model. If `lambda` is supplied, predictions are returned for those
+`lambda` values; otherwise predictions are returned for all fitted
+`lambda`s. When a requested `lambda` lies between fitted values,
+coefficients are linearly interpolated.
 
 ## Usage
 
@@ -31,9 +32,17 @@ predict(object, newz, lambda = NULL, ...)
 
 - ...:
 
-  Additional arguments (currently ignored).
+  Additional arguments.
 
 ## Value
 
 A numeric matrix of linear predictors. Each column corresponds to one
 `lambda`, sorted in descending order.
+
+## Details
+
+The linear predictors are computed as `as.matrix(newz) %*% beta`.
+
+## See also
+
+[`coef.coxkl_enet`](https://umkevinhe.github.io/survkl/reference/coef.coxkl_enet.md)

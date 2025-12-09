@@ -1,9 +1,9 @@
-# Predict Linear Predictors from a coxkl Object
+# Predict Linear Predictors from a `coxkl` Object
 
 Computes linear predictors for new data based on a fitted `coxkl` model.
-Users can specify one or more `eta` values; if not provided, predictions
-are returned for all fitted `eta` values. Linear interpolation is
-applied if an intermediate `eta` value is requested.
+If `eta` is supplied, predictions are returned for those `eta` values;
+otherwise predictions are returned for all fitted `eta`s. Linear
+interpolation is applied if an intermediate `eta` value is requested.
 
 ## Usage
 
@@ -25,15 +25,22 @@ predict(object, newz, eta = NULL, ...)
 
 - eta:
 
-  Optional numeric value(s) specifying which `eta` values to use for
-  prediction. If `NULL`, predictions for all fitted `eta` values are
-  returned.
+  Optional numeric vector of `eta` value(s) for which to predict. If
+  `NULL`, predictions for all fitted `eta` values are returned.
 
 - ...:
 
-  Additional arguments (currently ignored).
+  Additional arguments.
 
 ## Value
 
-A numeric matrix of linear predictors. Each column corresponds to one
-value of `eta`, sorted in ascending order.
+A numeric matrix of linear predictors with one column per `eta` (sorted
+ascending).
+
+## Details
+
+The linear predictors are computed as `as.matrix(newz) %*% beta`.
+
+## See also
+
+[`coef.coxkl`](https://umkevinhe.github.io/survkl/reference/coef.coxkl.md)

@@ -422,10 +422,11 @@ plot(
 ```
 
 ![Plot generated in survkl
-vignette](survkl_files/figure-html/unnamed-chunk-20-1.png) The function
-`cv.coxkl_ridge` performs K-fold cross-validation to tune the
-integration parameter `eta` while internally scanning over a `lambda`
-path for each candidate `eta`. For each `eta`, it:
+vignette](survkl_files/figure-html/unnamed-chunk-20-1.png)
+
+The function `cv.coxkl_ridge` performs K-fold cross-validation to tune
+the integration parameter `eta` while internally scanning over a
+`lambda` path for each candidate `eta`. For each `eta`, it:
 
 - evaluates a sequence of ridge penalties `lambda`,
 - computes the chosen cross-validation criterion on held-out folds,
@@ -598,9 +599,11 @@ plot(
 ```
 
 ![Plot generated in survkl
-vignette](survkl_files/figure-html/unnamed-chunk-28-1.png) Similar, the
-function `cv.coxkl_enet` extends the above fitting procedure by
-performing K-fold cross-validation over a supplied grid of eta values:
+vignette](survkl_files/figure-html/unnamed-chunk-28-1.png)
+
+Similar, the function `cv.coxkl_enet` extends the above fitting
+procedure by performing K-fold cross-validation over a supplied grid of
+eta values:
 
 ``` r
 set.seed(1)

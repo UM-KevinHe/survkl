@@ -30,6 +30,7 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
 <li class="active nav-item"><a class="nav-link" href="../articles/survkl.html">Get started</a></li>
+<li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-appendix" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Appendix</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-appendix">
@@ -448,8 +449,8 @@ the test data by passing it via the <code>test_*</code> arguments:</p>
 <span>  test_stratum <span class="op">=</span> <span class="va">test_hd</span><span class="op">$</span><span class="va">stratum</span>,</span>
 <span>  criteria     <span class="op">=</span> <span class="st">"loss"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p><img src="survkl_files/figure-html/unnamed-chunk-20-1.png" class="r-plt" alt="Plot generated in survkl vignette" width="700">
-The function <code>cv.coxkl_ridge</code> performs K-fold
+<p><img src="survkl_files/figure-html/unnamed-chunk-20-1.png" class="r-plt" alt="Plot generated in survkl vignette" width="700"></p>
+<p>The function <code>cv.coxkl_ridge</code> performs K-fold
 cross-validation to tune the integration parameter <code>eta</code>
 while internally scanning over a <code>lambda</code> path for each
 candidate <code>eta</code>. For each <code>eta</code>, it:</p>
@@ -608,8 +609,8 @@ held-out data:</p>
 <span>  test_stratum <span class="op">=</span> <span class="va">test_hd</span><span class="op">$</span><span class="va">stratum</span>,</span>
 <span>  criteria <span class="op">=</span> <span class="st">"loss"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p><img src="survkl_files/figure-html/unnamed-chunk-28-1.png" class="r-plt" alt="Plot generated in survkl vignette" width="700">
-Similar, the function <code>cv.coxkl_enet</code> extends the above
+<p><img src="survkl_files/figure-html/unnamed-chunk-28-1.png" class="r-plt" alt="Plot generated in survkl vignette" width="700"></p>
+<p>Similar, the function <code>cv.coxkl_enet</code> extends the above
 fitting procedure by performing K-fold cross-validation over a supplied
 grid of eta values:</p>
 <div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">

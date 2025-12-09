@@ -47,7 +47,9 @@
 ## Coefficient & Prediction
 
 - [`predict(`*`<coxkl>`*`)`](https://umkevinhe.github.io/survkl/reference/predict.coxkl.md)
-  : Predict Linear Predictors from a coxkl Object
+  :
+
+  Predict Linear Predictors from a `coxkl` Object
 
 - [`predict(`*`<coxkl_ridge>`*`)`](https://umkevinhe.github.io/survkl/reference/predict.coxkl_ridge.md)
   : Predict Linear Predictors from a coxkl_ridge Object
