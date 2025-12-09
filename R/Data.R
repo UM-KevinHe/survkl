@@ -223,16 +223,8 @@
 #' 
 #' 
 #' @examples
-#' \dontrun{
-#' rm(list = ls())
-#' library(devtools)
-#' 
-#' setwd("~/University of Michigan Dropbox/Lingfeng Luo/Lingfeng Research/R Tutorial Package/coxkl/coxkll/")
-#' 
-#' load_all()
-#' 
+#' \donttest{
 #' data(support)
-#' set.seed(123)
 #' 
 #' support <- support[support$ca %in% c("metastatic"),]
 #' time <- support$d.time

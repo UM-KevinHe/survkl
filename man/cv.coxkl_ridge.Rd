@@ -103,6 +103,7 @@ The best \code{lambda} is chosen per \code{eta} (minimizing loss or maximizing C
 also computes an external baseline statistic from \code{RS} under the same criterion.
 }
 \examples{
+\donttest{
 data(ExampleData_highdim) 
 
 train_dat_highdim <- ExampleData_highdim$train
@@ -120,5 +121,5 @@ cv_res <- cv.coxkl_ridge(z = train_dat_highdim$z,
                          nfolds = 5, 
                          cv.criteria = "CIndex_pooled",
                          message = TRUE)
-
+}
 }
