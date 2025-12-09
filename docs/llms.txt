@@ -1,0 +1,185 @@
+# survkl: An R Package for Transfer-Learning–Based Integrated Cox Models
+
+**survkl** provides flexible and efficient tools for integrating
+external risk scores into Cox proportional hazards models while
+accounting for population heterogeneity. The package enables robust
+estimation, improved predictive accuracy, and user-friendly workflows
+for modern survival analysis.
+
+## Key Features
+
+- **Integration of External Risk Scores**  
+  Seamlessly incorporate predictions from *any* external risk model
+  (e.g., polygenic hazard scores, deep-learning–based risk scores).
+
+- **Population Heterogeneity Adjustment**  
+  Corrects for distributional differences between the external model’s
+  training population and your study population.
+
+- **Efficient Computation**  
+  Designed for high-dimensional and large-scale survival datasets.
+
+- **Improved Estimation and Prediction**  
+  Demonstrated gains in estimation efficiency and predictive accuracy.
+
+- **Built-In Cross-Validation**  
+  Automated selection of tuning and penalization parameters.
+
+## Installation
+
+> Note: This package is under active development. Please report any
+> issues you encounter.  
+> Requires **R ≥ 4.0.0**.
+
+Install from CRAN:
+
+``` R
+install.packages("survkl")
+```
+
+Or install the development version from GitHub:
+
+``` R
+require("devtools")
+require("remotes")
+remotes::install_github("UM-KevinHe/survkl")
+```
+
+We recommend starting with the  
+**Quick Start Tutorial:**
+<https://um-kevinhe.github.io/survkl/articles/survkl.html#quick-start>
+
+## Detailed Tutorial
+
+Full package documentation and parameter explanations:  
+<https://um-kevinhe.github.io/survkl/index.html>
+
+## Getting Help
+
+If you encounter problems or bugs, please contact us:
+
+- **<ybshao@umich.edu>**
+- <lfluo@umich.edu>
+- <xhliuu@umich.edu>
+- <kevinhe@umich.edu>
+
+## Contributing
+
+Contributions to **survkl** are welcome!  
+Guidelines are available here:  
+<https://github.com/UM-KevinHe/survkl/blob/main/.github/CONTRIBUTING.md>
+
+------------------------------------------------------------------------
+
+## References
+
+1.  Wang, D., Ye, W., Zhu, J., Xu, G., Tang, W., Zawistowski, M.,
+    Fritsche, L. G., & He, K. (2023). Incorporating external risk
+    information with the Cox model under population heterogeneity:
+    Applications to trans-ancestry polygenic hazard scores.
+    *arXiv:2302.11123*.
+
+2.  Luo, L., Taylor, J. M. G., Wang, D., & He, K. (2024). Flexible Deep
+    Learning Techniques for Cox Models with Data Integration.
+
+# Package index
+
+## Low-Dimensional Cox KL Integration
+
+- [`coxkl()`](https://umkevinhe.github.io/survkl/reference/coxkl.md) :
+  Cox Proportional Hazards Model with KL Divergence for Data Integration
+
+- [`cv.coxkl()`](https://umkevinhe.github.io/survkl/reference/cv.coxkl.md)
+  :
+
+  Cross-Validated Selection of Integration Parameter （`eta`） for the
+  Cox–KL Model
+
+## High-Dimensional Cox KL Integration
+
+- [`coxkl_ridge()`](https://umkevinhe.github.io/survkl/reference/coxkl_ridge.md)
+  : Cox Proportional Hazards Model with Ridge Penalty and External
+  Information
+- [`coxkl_enet()`](https://umkevinhe.github.io/survkl/reference/coxkl_enet.md)
+  : Cox Proportional Hazards Model with KL Divergence for Data
+  Integration and Lasso & Elastic Net Penalty
+- [`cv.coxkl_ridge()`](https://umkevinhe.github.io/survkl/reference/cv.coxkl_ridge.md)
+  : Cross-Validation for CoxKL Ridge Model (eta tuning)
+- [`cv.coxkl_enet()`](https://umkevinhe.github.io/survkl/reference/cv.coxkl_enet.md)
+  : Cross-Validation for CoxKL Model with elastic net & lasso penalty
+
+## Plotting Functions
+
+- [`cv.plot()`](https://umkevinhe.github.io/survkl/reference/cv.plot.md)
+  : Plot Cross-Validation Results vs Eta
+
+- [`plot(`*`<coxkl>`*`)`](https://umkevinhe.github.io/survkl/reference/plot.coxkl.md)
+  :
+
+  Plot Model Performance vs Eta for `coxkl`
+
+- [`plot(`*`<coxkl_ridge>`*`)`](https://umkevinhe.github.io/survkl/reference/plot.coxkl_ridge.md)
+  :
+
+  Plot Model Performance vs Lambda for `coxkl_ridge`
+
+- [`plot(`*`<coxkl_enet>`*`)`](https://umkevinhe.github.io/survkl/reference/plot.coxkl_enet.md)
+  :
+
+  Plot Model Performance vs Lambda for `coxkl_enet`
+
+## Coefficient & Prediction
+
+- [`predict(`*`<coxkl>`*`)`](https://umkevinhe.github.io/survkl/reference/predict.coxkl.md)
+  : Predict Linear Predictors from a coxkl Object
+
+- [`predict(`*`<coxkl_ridge>`*`)`](https://umkevinhe.github.io/survkl/reference/predict.coxkl_ridge.md)
+  : Predict Linear Predictors from a coxkl_ridge Object
+
+- [`predict(`*`<coxkl_enet>`*`)`](https://umkevinhe.github.io/survkl/reference/predict.coxkl_enet.md)
+  : Predict Linear Predictors from a coxkl_enet Object
+
+- [`coef(`*`<coxkl>`*`)`](https://umkevinhe.github.io/survkl/reference/coef.coxkl.md)
+  :
+
+  Extract Coefficients from a `coxkl` Object
+
+- [`coef(`*`<coxkl_ridge>`*`)`](https://umkevinhe.github.io/survkl/reference/coef.coxkl_ridge.md)
+  :
+
+  Extract Coefficients from a `coxkl_ridge` Object
+
+- [`coef(`*`<coxkl_enet>`*`)`](https://umkevinhe.github.io/survkl/reference/coef.coxkl_enet.md)
+  :
+
+  Extract Coefficients from a `coxkl_enet` Object
+
+## Utilities
+
+- [`cal_surv_prob()`](https://umkevinhe.github.io/survkl/reference/cal_surv_prob.md)
+  : Calculate Survival Probabilities
+- [`loss_fn()`](https://umkevinhe.github.io/survkl/reference/loss_fn.md)
+  : Calculate the Log-Partial Likelihood for a Stratified Cox Model
+- [`generate_eta()`](https://umkevinhe.github.io/survkl/reference/generate_eta.md)
+  : Generate a Sequence of Tuning Parameters (eta)
+- [`test_eval()`](https://umkevinhe.github.io/survkl/reference/test_eval.md)
+  : Evaluate model performance on test data
+
+## Datasets
+
+- [`ExampleData_lowdim`](https://umkevinhe.github.io/survkl/reference/ExampleData_lowdim.md)
+  : Example low-dimensional survival data
+- [`ExampleData_highdim`](https://umkevinhe.github.io/survkl/reference/ExampleData_highdim.md)
+  : Example high-dimensional survival data
+- [`support`](https://umkevinhe.github.io/survkl/reference/support.md) :
+  Study to Understand Prognoses Preferences Outcomes and Risks of
+  Treatment
+
+# Articles
+
+### All vignettes
+
+- [Methods for Transfer-learning Based Integrated Cox
+  Models](https://umkevinhe.github.io/survkl/articles/Methods.md):
+- [survkl: Transfer-Learning Based Integrated Cox
+  Models](https://umkevinhe.github.io/survkl/articles/survkl.md):
