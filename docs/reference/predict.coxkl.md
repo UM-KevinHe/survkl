@@ -43,4 +43,4 @@ The linear predictors are computed as `as.matrix(newz) %*% beta`.
 
 ## See also
 
-[`coef.coxkl`](https://umkevinhe.github.io/survkl/reference/coef.coxkl.md)
+[`coef.coxkl`](https://um-kevinhe.github.io/survkl/reference/coef.coxkl.md)

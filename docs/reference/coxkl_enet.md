@@ -252,7 +252,7 @@ An object of class `"coxkl_enet"`, a list with components:
 ## Details
 
 Setting `lambda = 0` reduces to the unpenalized
-[`coxkl`](https://umkevinhe.github.io/survkl/reference/coxkl.md) model.
+[`coxkl`](https://um-kevinhe.github.io/survkl/reference/coxkl.md) model.
 
 When `lambda > 0`, the model fits a KL-regularized Cox objective with an
 elastic-net penalty: \$\$\ell\_{\mathrm{KL}}(\beta;\eta) \\-\\
@@ -274,7 +274,7 @@ path.
 
 ## See also
 
-[`coxkl`](https://umkevinhe.github.io/survkl/reference/coxkl.md)
+[`coxkl`](https://um-kevinhe.github.io/survkl/reference/coxkl.md)
 
 ## Examples
 

@@ -6,9 +6,9 @@
 
 - **Lingfeng Luo**. Author.
 
-- **Junyi Qiu**. Author.
-
 - **Xiaohan Liu**. Author.
+
+- **Junyi Qiu**. Author.
 
 - **Di Wang**. Author.
 
@@ -16,14 +16,14 @@
 
 ## Citation
 
-Shao Y, Luo L, Qiu J, Liu X, Wang D, He K (2025). *survkl: Estimate
+Shao Y, Luo L, Liu X, Qiu J, Wang D, He K (2025). *survkl: Estimate
 Survival Data with Data Intergration*. R package version 1.0.0,
-<https://umkevinhe.github.io/survkl>.
+<https://um-kevinhe.github.io/survkl/>.
 
     @Manual{,
       title = {survkl: Estimate Survival Data with Data Intergration},
-      author = {Yubo Shao and Lingfeng Luo and Junyi Qiu and Xiaohan Liu and Di Wang and Kevin He},
+      author = {Yubo Shao and Lingfeng Luo and Xiaohan Liu and Junyi Qiu and Di Wang and Kevin He},
       year = {2025},
       note = {R package version 1.0.0},
-      url = {https://umkevinhe.github.io/survkl},
+      url = {https://um-kevinhe.github.io/survkl/},
     }

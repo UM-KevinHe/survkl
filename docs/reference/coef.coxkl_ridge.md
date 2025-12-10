@@ -18,7 +18,7 @@ coef(object, lambda = NULL, ...)
 - object:
 
   An object of class `"coxkl_ridge"`, typically the result of
-  [`coxkl_ridge`](https://umkevinhe.github.io/survkl/reference/coxkl_ridge.md).
+  [`coxkl_ridge`](https://um-kevinhe.github.io/survkl/reference/coxkl_ridge.md).
 
 - lambda:
 

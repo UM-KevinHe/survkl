@@ -18,7 +18,7 @@ coef(object, lambda = NULL, ...)
 - object:
 
   An object of class `"coxkl_enet"`, typically the result of
-  [`coxkl_enet`](https://umkevinhe.github.io/survkl/reference/coxkl_enet.md).
+  [`coxkl_enet`](https://um-kevinhe.github.io/survkl/reference/coxkl_enet.md).
 
 - lambda:
 

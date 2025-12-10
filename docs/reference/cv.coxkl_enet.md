@@ -120,7 +120,7 @@ cv.coxkl_enet(
 - ...:
 
   Additional arguments passed to
-  [`coxkl_enet`](https://umkevinhe.github.io/survkl/reference/coxkl_enet.md).
+  [`coxkl_enet`](https://um-kevinhe.github.io/survkl/reference/coxkl_enet.md).
 
 ## Value
 
@@ -170,7 +170,7 @@ or `beta` (if `beta` given with length `ncol(z)`, `RS = z %*% beta`);
 For each candidate `eta`, a decreasing `lambda` path is used (generated
 from `nlambda`/`lambda.min.ratio` if `lambda = NULL`); CV folds are
 created by `get_fold`. Each fold fits
-[`coxkl_enet`](https://umkevinhe.github.io/survkl/reference/coxkl_enet.md)
+[`coxkl_enet`](https://um-kevinhe.github.io/survkl/reference/coxkl_enet.md)
 on the training split (full `lambda` path) and evaluates the chosen
 criterion on the test split.
 
@@ -213,7 +213,7 @@ cv_res <- cv.coxkl_enet(z = train_dat_highdim$z,
                         alpha = 1.0,
                         nfolds = 5, 
                         cv.criteria = "CIndex_pooled",
-                        message = T)
+                        message = TRUE)
 #> Warning: Stratum not provided. Treating all data as one stratum.
 #> Cross-validation over etas sequence:
 #>   |                                      |                              |   0%  |                                      |===                           |  10%  |                                      |======                        |  20%  |                                      |=========                     |  30%  |                                      |============                  |  40%  |                                      |===============               |  50%  |                                      |==================            |  60%  |                                      |=====================         |  70%  |                                      |========================      |  80%  |                                      |===========================   |  90%  |                                      |==============================| 100%

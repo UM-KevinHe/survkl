@@ -60,7 +60,7 @@ high-dimensional settings. Key features include:
   Provides multiple tuning criteria including
 
   - *Two based on C-index*  
-  - *Two based on Loss*: predicted deviance and **V&VH loss**.
+  - *Two based on Loss*: predicted deviance and *V&VH* loss.
 
 This vignette introduces the main functionalities of `survkl` and
 provides examples for both low- and high-dimensional modeling workflows.
@@ -116,6 +116,8 @@ dataset:
 data(ExampleData_lowdim)
 
 train  <- ExampleData_lowdim$train
+test   <- ExampleData_lowdim$test
+
 z      <- train$z
 delta  <- train$status
 time   <- train$time
@@ -129,11 +131,11 @@ beta_ext <- ExampleData_lowdim$beta_external_good
 ```
 
 We generate a sequence of eta values through the internal utility
-[`generate_eta()`](https://umkevinhe.github.io/survkl/reference/generate_eta.md),
+[`generate_eta()`](https://um-kevinhe.github.io/survkl/reference/generate_eta.md),
 and fit the KL-integrated model across this grid:
 
 ``` r
-eta_grid <- generate_eta(method = "exponential", n = 10, max_eta = 50)
+eta_grid <- generate_eta(method = "exponential", n = 100, max_eta = 30)
 fit_lowdim <- coxkl(
   z = z,
   delta = delta,
@@ -145,23 +147,23 @@ fit_lowdim <- coxkl(
 ```
 
 The S3 method [`coef()`](https://rdrr.io/r/stats/coef.html) provides a
-clean interface to extract estimated coefficients. If the requested η is
-between fitted values, linear interpolation is performed:
+clean interface to extract estimated coefficients. If the requested
+`eta` is between fitted values, linear interpolation is performed:
 
 ``` r
 coef(fit_lowdim, eta = 1)
 ```
 
-    ## Warning: Linear interpolation performed between eta = 0.900 and eta = 1.839 for
+    ## Warning: Linear interpolation performed between eta = 0.979 and eta = 1.040 for
     ## eta = 1.000.
 
     ##                1
-    ## [1,]  0.25032320
-    ## [2,] -0.39703180
-    ## [3,]  0.08661859
-    ## [4,] -0.58832784
-    ## [5,]  0.29433864
-    ## [6,] -0.55791424
+    ## [1,]  0.25018459
+    ## [2,] -0.39555046
+    ## [3,]  0.08825084
+    ## [4,] -0.58446411
+    ## [5,]  0.29503025
+    ## [6,] -0.55443656
 
 Users may instead supply an external risk score vector:
 
@@ -177,16 +179,15 @@ fit_lowdim_RS <- coxkl(
   etas = eta_grid
 )
 
-coef(fit_lowdim_RS)[1:10]
+coef(fit_lowdim_RS)[1:5]
 ```
 
-    ##  [1]  0.25982263 -0.49599768 -0.01972113 -0.84023506  0.24808718 -0.78551866
-    ##  [7]  0.25455640 -0.44210371  0.03600659 -0.70926840
+    ## [1]  0.25982263 -0.49599768 -0.01972113 -0.84023506  0.24808718
 
 Objects of class `coxkl` can be visualized using the S3 plotting method
 [`plot()`](https://rdrr.io/r/graphics/plot.default.html).  
 This function displays how model performance changes across the
-η–sequence used during fitting.
+`eta`–sequence used during fitting.
 
 Two types of performance criteria are supported:
 
@@ -200,7 +201,14 @@ If no test data are supplied, performance is computed using the training
 data stored in `object$data`:
 
 ``` r
-plot(fit_lowdim)    
+plot(
+  fit_lowdim,
+  test_z       = test$z,
+  test_time    = test$time,
+  test_delta   = test$status,
+  test_stratum = test$stratum,
+  criteria     = "loss"
+)    
 ```
 
     ## Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
@@ -239,7 +247,8 @@ cv_lowdim <- cv.coxkl(
 )
 ```
 
-The cross-validated performance curve can be visualized using cv.plot():
+The cross-validated performance curve can be visualized using
+[`cv.plot()`](https://um-kevinhe.github.io/survkl/reference/cv.plot.md):
 
 ``` r
 cv.plot(cv_lowdim)
@@ -248,14 +257,18 @@ cv.plot(cv_lowdim)
 ![Plot generated in survkl
 vignette](survkl_files/figure-html/unnamed-chunk-12-1.png)
 
-The solid purple curve shows cross-validated loss as a function of η
-(lower values indicate better predictive performance). The green dotted
-horizontal line represents the internal baseline, corresponding to η = 0
-(the model that does not borrow any external information). This
-visualization makes it easy to assess whether external information
-improves prediction. If the purple curve drops below the green line,
-then borrowing external information (i.e., using η \> 0) leads to better
-predictive performance.
+The solid purple curve displays the cross-validated loss across
+different values of `eta`. The green dotted horizontal line marks the
+internal baseline at `eta` = 0, representing the model that does not
+incorporate external information. The vertical dashed orange line
+indicates the optimal `eta` value, where the cross-validated loss is
+minimized.
+
+A comparison between the purple curve and the green baseline shows
+whether borrowing external information improves prediction performance.
+Whenever the purple curve falls below the green line, using external
+information (`eta` \> 0) yields better predictive accuracy than relying
+solely on the internal model.
 
 ### High-Dimensional Integration (Ridge, Elastic Net, and LASSO)
 
@@ -305,13 +318,7 @@ provided in `beta_external`:
 
 ``` r
 beta_external_hd <- ExampleData_highdim$beta_external
-beta_external_hd[1:10]
 ```
-
-    ##         Z1         Z2         Z3         Z4         Z5         Z6         Z7 
-    ##  0.3045000 -0.2823218  0.3324814 -0.2399085  0.2909258 -0.2894610  0.0000000 
-    ##         Z8         Z9        Z10 
-    ##  0.0000000  0.0000000  0.0000000
 
 These external coefficients are estimated from a separate dataset using
 only `Z1`–`Z6` and then expanded to a length-50 vector, with zeros for
@@ -321,9 +328,10 @@ only `Z1`–`Z6` and then expanded to a length-50 vector, with zeros for
 
 The function `coxkl_ridge` fits a KL-integrated Cox model with a ridge
 (L2) penalty on all predictors. External information is incorporated
-through a KL term weighted by `eta`, while the ridge penalty is
-controlled by a sequence of tuning parameters `lambda`. If `lambda` is
-not provided, a decreasing lambda path is generated automatically.
+through a KL term weighted by `eta` (an user-specified scalar), while
+the ridge penalty is controlled by a sequence of tuning parameters
+`lambda`. If `lambda` is not provided, a decreasing lambda path is
+generated automatically.
 
 We first fit a KL–ridge model for a fixed integration weight `eta` and
 an automatically generated lambda path:
@@ -383,32 +391,15 @@ interpolation along the lambda path.
 Objects of class `coxkl_ridge` can be visualized using the S3 plotting
 method [`plot()`](https://rdrr.io/r/graphics/plot.default.html):
 
-``` r
-plot(model_ridge)
-```
+By default, this plots (at given `eta`):
 
-![Plot generated in survkl
-vignette](survkl_files/figure-html/unnamed-chunk-18-1.png)
-
-By default, this plots:
-
-- **Loss** (`-2 * partial log-likelihood`) versus the penalty parameter
+- Loss (`-2 * partial log-likelihood`) versus the penalty parameter
   `lambda`,
 - x-axis on a reversed log10 scale (larger penalties on the left,
   smaller penalties on the right),
 - y-axis labeled as “Loss”.
-
-To display the C-index instead:
-
-``` r
-plot(model_ridge, criteria = "CIndex")
-```
-
-![Plot generated in survkl
-vignette](survkl_files/figure-html/unnamed-chunk-19-1.png)
-
-If an external test set is available, performance can be evaluated on
-the test data by passing it via the `test_*` arguments:
+- A vertical dashed orange line marks the optimal value of λ, where the
+  loss reaches its minimum on the evaluated grid.
 
 ``` r
 plot(
@@ -417,12 +408,12 @@ plot(
   test_time    = test_hd$time,
   test_delta   = test_hd$status,
   test_stratum = test_hd$stratum,
-  criteria     = "loss"
+  criteria     = "CIndex"
 )
 ```
 
 ![Plot generated in survkl
-vignette](survkl_files/figure-html/unnamed-chunk-20-1.png)
+vignette](survkl_files/figure-html/unnamed-chunk-18-1.png)
 
 The function `cv.coxkl_ridge` performs K-fold cross-validation to tune
 the integration parameter `eta` while internally scanning over a
@@ -452,7 +443,6 @@ cv_ridge_hd <- cv.coxkl_ridge(
   delta       = delta_hd,
   time        = time_hd,
   stratum     = strat_hd,
-  RS          = NULL,
   beta        = beta_external_hd,
   etas        = eta_grid_hd,
   nfolds      = 5,
@@ -469,19 +459,19 @@ cv_ridge_hd$integrated_stat.best_per_eta
 ```
 
     ##           eta       lambda     Loss
-    ## 1    0.000000 1.025724e+02 564.3216
-    ## 2    0.674849 3.624675e+01 561.0502
-    ## 3    1.800565 5.639777e+00 555.2522
-    ## 4    3.678373 6.166819e-01 549.1837
-    ## 5    6.810744 8.639301e-03 546.4052
-    ## 6   12.035855 8.698543e-03 546.4233
-    ## 7   20.751866 8.734028e-03 547.0925
-    ## 8   35.291047 8.755290e-03 547.7359
-    ## 9   59.543864 8.768033e-03 548.2108
-    ## 10 100.000000 8.775671e-03 548.5282
+    ## 1    0.000000 1.025724e+02 2.821608
+    ## 2    0.674849 3.624675e+01 2.805251
+    ## 3    1.800565 5.639777e+00 2.776261
+    ## 4    3.678373 6.166819e-01 2.745919
+    ## 5    6.810744 8.639301e-03 2.732026
+    ## 6   12.035855 8.698543e-03 2.732116
+    ## 7   20.751866 8.734028e-03 2.735462
+    ## 8   35.291047 8.755290e-03 2.738679
+    ## 9   59.543864 8.768033e-03 2.741054
+    ## 10 100.000000 8.775671e-03 2.742641
 
 As with low-dimensional models, the helper function
-[`cv.plot()`](https://umkevinhe.github.io/survkl/reference/cv.plot.md)
+[`cv.plot()`](https://um-kevinhe.github.io/survkl/reference/cv.plot.md)
 can be used to visualize performance versus `eta`:
 
 ``` r
@@ -489,26 +479,23 @@ cv.plot(cv_ridge_hd)
 ```
 
 ![Plot generated in survkl
-vignette](survkl_files/figure-html/unnamed-chunk-23-1.png)
+vignette](survkl_files/figure-html/unnamed-chunk-21-1.png)
 
 The plot shows:
 
-- a **purple curve** for the cross-validated performance across the
-  `eta` sequence (loss or C-index),
-- a **green dotted horizontal line** indicating the internal baseline at
+- a purple curve for the cross-validated performance across the `eta`
+  sequence (loss or C-index),
+- a green dotted horizontal line indicating the internal baseline at
   `eta = 0`,
-- a **green point** marking the baseline value.
-
-If the purple curve dips below the green line (for loss criteria) or
-rises above it (for C-index criteria), this indicates that borrowing
-external information (`eta > 0`) leads to improved predictive
-performance.
+- a green point marking the baseline value,
+- and a vertical dashed orange line indicating the optimal η, where the
+  cross-validated loss reaches its minimum.
 
 #### Elastic-Net / LASSO KL-Integrated Cox Model (`coxkl_enet`)
 
 The function `coxkl_enet` fits a KL-integrated Cox model with an
 elastic-net penalty, controlled by the mixing parameter `alpha`. When
-`alpha = 1`, the penalty reduces to **LASSO**, enabling coefficient
+`alpha = 1`, the penalty reduces to *LASSO*, enabling coefficient
 sparsity in addition to KL-based integration of external information.
 
 External knowledge may be incorporated either through external
@@ -518,7 +505,7 @@ this external signal, while the penalty parameter `lambda` controls the
 sparsity level. If `lambda` is not supplied, the function automatically
 generates a decreasing lambda sequence.
 
-We illustrate the workflow using **LASSO** (`alpha = 1`) with an
+We illustrate the workflow using *LASSO* (`alpha = 1`) with an
 automatically generated lambda path:
 
 ``` r
@@ -569,23 +556,9 @@ coef(model_enet, lambda = lambda_target)[1:5]
 
     ## [1] 0.00000000 0.00000000 0.00000000 0.00000000 0.07282693
 
-Similar, if the requested lambda is not exactly one of the fitted
-values, [`coef()`](https://rdrr.io/r/stats/coef.html) performs linear
-interpolation along the lambda path.
-
 Objects of class `coxkl_enet` can be visualized using the S3 method
 [`plot()`](https://rdrr.io/r/graphics/plot.default.html), and default is
 to plot loss versus `lambda`:
-
-``` r
-plot(model_enet)
-```
-
-![Plot generated in survkl
-vignette](survkl_files/figure-html/unnamed-chunk-27-1.png)
-
-When a test dataset is available, performance can be assessed on
-held-out data:
 
 ``` r
 plot(
@@ -599,7 +572,7 @@ plot(
 ```
 
 ![Plot generated in survkl
-vignette](survkl_files/figure-html/unnamed-chunk-28-1.png)
+vignette](survkl_files/figure-html/unnamed-chunk-25-1.png)
 
 Similar, the function `cv.coxkl_enet` extends the above fitting
 procedure by performing K-fold cross-validation over a supplied grid of
@@ -628,11 +601,11 @@ cv_enet_hd <- cv.coxkl_enet(
 ```
 
 CV results can be visualized using
-[`cv.plot()`](https://umkevinhe.github.io/survkl/reference/cv.plot.md):
+[`cv.plot()`](https://um-kevinhe.github.io/survkl/reference/cv.plot.md):
 
 ``` r
 cv.plot(cv_enet_hd)
 ```
 
 ![Plot generated in survkl
-vignette](survkl_files/figure-html/unnamed-chunk-30-1.png)
+vignette](survkl_files/figure-html/unnamed-chunk-27-1.png)

@@ -105,7 +105,7 @@ plot.coxkl <- function(object, test_z = NULL, test_time = NULL, test_delta = NUL
   df   <- data.frame(eta = etas, metric = as.numeric(metrics))
   ylab <- if (criteria == "CIndex") "C Index" else "Loss"
   
-  p <- ggplot2::ggplot(df, ggplot2::aes(x = eta, y = metric)) +
+  p_main <- ggplot2::ggplot(df, ggplot2::aes(x = eta, y = metric)) +
     ggplot2::geom_line(size = 1, color = "#7570B3") +
     ggplot2::geom_point(size = 2, color = "#7570B3") +
     ggplot2::geom_segment(
@@ -125,9 +125,33 @@ plot.coxkl <- function(object, test_z = NULL, test_time = NULL, test_delta = NUL
                max(c(df$metric, y0), na.rm = TRUE) * 1.005)
     )
   
-  return(p)
+  legend_df <- data.frame(
+    x = rep(c(0, 1), 2),
+    y = rep(1, 4),
+    Method = factor(rep(c("survkl", "Internal"), each = 2),
+                    levels = c("survkl", "Internal"))
+  )
+  
+  g_legend <- ggplot2::ggplot(legend_df, ggplot2::aes(x = x, y = y, color = Method, linetype = Method)) +
+    ggplot2::geom_line(linewidth = 1) +
+    ggplot2::geom_point(
+      data = subset(legend_df, Method == "Internal"),
+      ggplot2::aes(x = 0.5, y = 1, color = Method),
+      inherit.aes = FALSE, shape = 16, size = 2.4
+    ) +
+    ggplot2::scale_color_manual(values = c("survkl" = "#7570B3", "Internal" = "#1B9E77")) +
+    ggplot2::scale_linetype_manual(values = c("survkl" = "solid", "Internal" = "dotted")) +
+    ggplot2::theme_void(base_size = 13) +
+    ggplot2::theme(legend.position = "top",
+                   legend.title = ggplot2::element_blank(),
+                   legend.text = ggplot2::element_text(size = 14),
+                   legend.key.width = grid::unit(1.2, "lines"),
+                   legend.key.height = grid::unit(0.6, "lines")) +
+    ggplot2::guides(color = ggplot2::guide_legend(keywidth = 1.2, keyheight = 0.4, title = NULL),
+                    linetype = ggplot2::guide_legend(keywidth = 1.2, keyheight = 0.4, title = NULL))
+  
+  cowplot::plot_grid(cowplot::get_legend(g_legend), p_main, ncol = 1, rel_heights = c(0.08, 1))
 }
-
 
 
 
@@ -176,23 +200,40 @@ plot.coxkl_ridge <- function(object, test_z = NULL, test_time = NULL, test_delta
   criteria <- match.arg(criteria)
   if (!inherits(object, "coxkl_ridge")) stop("'object' must be of class 'coxkl_ridge'.", call. = FALSE)
   
-  lambdas <- object$lambda
-  beta_mat <- object$beta
-  z_train <- object$data$z
-  time_train <- object$data$time
-  delta_train <- object$data$delta
+  lambdas       <- object$lambda
+  beta_mat      <- object$beta
+  z_train       <- object$data$z
+  time_train    <- object$data$time
+  delta_train   <- object$data$delta
   stratum_train <- object$data$stratum
   
   using_train <- is.null(test_z) && is.null(test_time) && is.null(test_delta) && is.null(test_stratum)
   if (using_train) {
-    test_z <- z_train
-    test_time <- time_train
-    test_delta <- delta_train
+    test_z       <- z_train
+    test_time    <- time_train
+    test_delta   <- delta_train
     test_stratum <- stratum_train
   }
   
-  if (using_train && criteria == "loss") {
-    metrics <- -2 * object$likelihood
+  n_eval <- nrow(as.matrix(test_z))
+  
+  if (criteria == "loss") {
+    if (using_train) {
+      metrics <- (-2 * object$likelihood) / n_eval
+    } else {
+      raw_metrics <- sapply(seq_along(lambdas), function(i)
+        test_eval(
+          test_z       = test_z,
+          test_delta   = test_delta,
+          test_time    = test_time,
+          test_stratum = test_stratum,
+          betahat      = beta_mat[, i],
+          criteria     = "loss"
+        )
+      )
+      metrics <- as.numeric(raw_metrics) / n_eval
+    }
+    opt_idx <- which.min(metrics)
   } else {
     metrics <- sapply(seq_along(lambdas), function(i)
       test_eval(
@@ -201,26 +242,34 @@ plot.coxkl_ridge <- function(object, test_z = NULL, test_time = NULL, test_delta
         test_time    = test_time,
         test_stratum = test_stratum,
         betahat      = beta_mat[, i],
-        criteria     = criteria
+        criteria     = "CIndex"
       )
     )
+    opt_idx <- which.max(metrics)
   }
   
-  df <- data.frame(lambda = lambdas, metric = metrics)
+  df <- data.frame(lambda = lambdas, metric = as.numeric(metrics))
   df <- df[order(df$lambda, decreasing = TRUE), ]
-  ylab <- if (criteria == "CIndex") "C Index" else "Loss"
+  
+  opt_lambda <- df$lambda[opt_idx]
+  ylow  <- min(df$metric, na.rm = TRUE) * 0.995
+  yhigh <- max(df$metric, na.rm = TRUE) * 1.005
   
   ggplot(df, aes(x = lambda, y = metric)) +
     geom_line(size = 1, color = "#7570B3") +
     geom_point(size = 2, color = "#7570B3") +
-    scale_x_reverse(trans = "log10") +
-    labs(x = expression(lambda), y = ylab) +
-    coord_cartesian(
-      ylim = c(min(df$metric, na.rm = TRUE) * 0.995,
-               max(df$metric, na.rm = TRUE) * 1.005)
+    geom_segment(
+      data = data.frame(x = opt_lambda),
+      aes(x = x, xend = x, y = ylow, yend = yhigh),
+      inherit.aes = FALSE, color = "#D95F02", linewidth = 1, linetype = "dashed"
     ) +
+    scale_x_reverse(trans = "log10") +
+    labs(x = expression(lambda), y = if (criteria == "CIndex") "C Index" else "Loss") +
+    coord_cartesian(ylim = c(ylow, yhigh)) +
     theme_biometrics()
 }
+
+
 
 
 
@@ -276,23 +325,40 @@ plot.coxkl_enet <- function(object, test_z = NULL, test_time = NULL, test_delta 
   criteria <- match.arg(criteria)
   if (!inherits(object, "coxkl_enet")) stop("'object' must be of class 'coxkl_enet'.", call. = FALSE)
   
-  lambdas <- object$lambda
-  beta_mat <- object$beta
-  z_train <- object$data$z
-  time_train <- object$data$time
-  delta_train <- object$data$delta
+  lambdas       <- object$lambda
+  beta_mat      <- object$beta
+  z_train       <- object$data$z
+  time_train    <- object$data$time
+  delta_train   <- object$data$delta
   stratum_train <- object$data$stratum
   
   using_train <- is.null(test_z) && is.null(test_time) && is.null(test_delta) && is.null(test_stratum)
   if (using_train) {
-    test_z <- z_train
-    test_time <- time_train
-    test_delta <- delta_train
+    test_z       <- z_train
+    test_time    <- time_train
+    test_delta   <- delta_train
     test_stratum <- stratum_train
   }
   
-  if (using_train && criteria == "loss") {
-    metrics <- -2 * object$likelihood
+  n_eval <- nrow(as.matrix(test_z))
+  
+  if (criteria == "loss") {
+    if (using_train) {
+      metrics <- (-2 * object$likelihood) / n_eval
+    } else {
+      raw_metrics <- sapply(seq_along(lambdas), function(i)
+        test_eval(
+          test_z       = test_z,
+          test_delta   = test_delta,
+          test_time    = test_time,
+          test_stratum = test_stratum,
+          betahat      = beta_mat[, i],
+          criteria     = "loss"
+        )
+      )
+      metrics <- as.numeric(raw_metrics) / n_eval
+    }
+    opt_idx <- which.min(metrics)
   } else {
     metrics <- sapply(seq_along(lambdas), function(i)
       test_eval(
@@ -301,34 +367,35 @@ plot.coxkl_enet <- function(object, test_z = NULL, test_time = NULL, test_delta 
         test_time    = test_time,
         test_stratum = test_stratum,
         betahat      = beta_mat[, i],
-        criteria     = criteria
+        criteria     = "CIndex"
       )
     )
+    opt_idx <- which.max(metrics)
   }
   
-  df <- data.frame(lambda = lambdas, metric = metrics)
+  df <- data.frame(lambda = lambdas, metric = as.numeric(metrics))
   df <- df[order(df$lambda, decreasing = TRUE), ]
-  ylab <- if (criteria == "CIndex") "C Index" else "Loss"
+  
+  opt_lambda <- df$lambda[opt_idx]
+  ylow  <- min(df$metric, na.rm = TRUE) * 0.995
+  yhigh <- max(df$metric, na.rm = TRUE) * 1.005
   
   ggplot(df, aes(x = lambda, y = metric)) +
     geom_line(size = 1, color = "#7570B3") +
     geom_point(size = 2, color = "#7570B3") +
-    scale_x_reverse(trans = "log10") +
-    labs(x = expression(lambda), y = ylab) +
-    coord_cartesian(
-      ylim = c(min(df$metric, na.rm = TRUE) * 0.995,
-               max(df$metric, na.rm = TRUE) * 1.005)
+    geom_segment(
+      data = data.frame(x = opt_lambda),
+      aes(x = x, xend = x, y = ylow, yend = yhigh),
+      inherit.aes = FALSE, color = "#D95F02", linewidth = 1, linetype = "dashed"
     ) +
+    scale_x_reverse(trans = "log10") +
+    labs(x = expression(lambda), y = if (criteria == "CIndex") "C Index" else "Loss") +
+    coord_cartesian(ylim = c(ylow, yhigh)) +
     theme_biometrics()
 }
 
 
-#' Theme helper for biometrics-style plots (internal)
-#'
-#' @description
-#' Internal \code{ggplot2} theme used by plotting methods in this package.
-#'
-#' @return A \code{ggplot2} theme object.
+#' Internal theme for survkl plotting
 #'
 #' @keywords internal
 #' @noRd
@@ -345,9 +412,4 @@ theme_biometrics <- function() {
       legend.position = "none"
     )
 }
-
-
-
-
-
 

@@ -66,13 +66,13 @@ cv.coxkl(
 - tol:
 
   Convergence tolerance for the optimizer used inside
-  [`coxkl`](https://umkevinhe.github.io/survkl/reference/coxkl.md).
+  [`coxkl`](https://um-kevinhe.github.io/survkl/reference/coxkl.md).
   Default `1e-4`.
 
 - Mstop:
 
   Maximum number of Newton iterations used inside
-  [`coxkl`](https://umkevinhe.github.io/survkl/reference/coxkl.md).
+  [`coxkl`](https://um-kevinhe.github.io/survkl/reference/coxkl.md).
   Default `100`.
 
 - backtrack:
@@ -109,7 +109,7 @@ cv.coxkl(
 - ...:
 
   Additional arguments passed to
-  [`coxkl`](https://umkevinhe.github.io/survkl/reference/coxkl.md).
+  [`coxkl`](https://um-kevinhe.github.io/survkl/reference/coxkl.md).
 
 ## Value
 
@@ -178,8 +178,8 @@ cv_res <- cv.coxkl(z = train_dat_lowdim$z,
                    beta = beta_external_good_lowdim,
                    etas = etas,
                    nfolds = 5,
-                   criteria = c("LinPred"),   #"V&VH", "LinPred", "CIndex_pooled", "CIndex_foldaverage"
-                   message = T)
+                   criteria = c("LinPred"),
+                   message = TRUE)
 #> External beta information is used.
 #> Warning: Stratum not provided. Treating all data as one stratum.
 #> CV fold 1/5 starts...

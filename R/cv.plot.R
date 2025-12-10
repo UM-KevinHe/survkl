@@ -58,8 +58,8 @@
 #' @importFrom cowplot plot_grid get_legend
 #' @export
 cv.plot <- function(object,
-                    line_color = "#7570B3",      # CoxKL main curve (purple)
-                    baseline_color = "#1B9E77",  # Internal baseline & dot (green)
+                    line_color = "#7570B3",
+                    baseline_color = "#1B9E77",
                     ...) {
   if (inherits(object, "cv.coxkl")) {
     df <- object$internal_stat
@@ -90,7 +90,7 @@ cv.plot <- function(object,
   df$eta <- as.numeric(df$eta)
   df <- df[order(df$eta), , drop = FALSE]
   df$metric <- as.numeric(df[[metric_col]])
-
+  
   if (!any(df$eta == 0)) idx0 <- which.min(abs(df$eta - 0)) else idx0 <- which(df$eta == 0)[1]
   baseline_val <- df$metric[idx0]
   baseline_eta <- df$eta[idx0]
@@ -98,18 +98,29 @@ cv.plot <- function(object,
   xmin <- min(df$eta, na.rm = TRUE)
   xmax <- max(df$eta, na.rm = TRUE)
   
+  if (is_loss) opt_idx <- which.min(df$metric) else opt_idx <- which.max(df$metric)
+  opt_eta <- df$eta[opt_idx]
+  
+  ylow  <- min(c(df$metric, baseline_val), na.rm = TRUE) * 0.995
+  yhigh <- max(c(df$metric, baseline_val), na.rm = TRUE) * 1.005
+  
   g_main <- ggplot2::ggplot(df, ggplot2::aes(x = eta, y = metric, group = 1)) +
     ggplot2::geom_line(linewidth = 1, color = line_color) +
     ggplot2::geom_point(size = 1.3, color = line_color) +
-    ggplot2::geom_segment(  # green dotted baseline across full x-range
+    ggplot2::geom_segment(
       data = data.frame(xmin = xmin, xmax = xmax, y = baseline_val),
       ggplot2::aes(x = xmin, xend = xmax, y = y, yend = y),
       inherit.aes = FALSE, color = baseline_color, linetype = "dotted", linewidth = 1
     ) +
-    ggplot2::geom_point(    # green solid dot at eta≈0 baseline
+    ggplot2::geom_point(
       data = data.frame(eta = baseline_eta, metric = baseline_val),
       ggplot2::aes(x = eta, y = metric),
       inherit.aes = FALSE, color = baseline_color, shape = 16, size = 2.4
+    ) +
+    ggplot2::geom_segment(
+      data = data.frame(x = opt_eta),
+      ggplot2::aes(x = x, xend = x, y = ylow, yend = yhigh),
+      inherit.aes = FALSE, color = "#D95F02", linewidth = 1, linetype = "dashed"
     ) +
     ggplot2::labs(x = expression(eta), y = ylab) +
     ggplot2::theme_minimal(base_size = 13) +
@@ -119,14 +130,16 @@ cv.plot <- function(object,
                    axis.ticks.length = grid::unit(0.1, "cm"),
                    axis.ticks = ggplot2::element_line(color = "black"),
                    axis.text = ggplot2::element_text(size = 14),
-                   legend.position = "none")
+                   legend.position = "none") +
+    ggplot2::coord_cartesian(ylim = c(ylow, yhigh))
   
   legend_df <- data.frame(
     x = rep(c(0, 1), 2),
     y = rep(1, 4),
-    Method = factor(rep(c("CoxKL", "Internal"), each = 2),
-                    levels = c("CoxKL", "Internal"))
+    Method = factor(rep(c("survkl", "Internal"), each = 2),
+                    levels = c("survkl", "Internal"))
   )
+  
   g_legend <- ggplot2::ggplot(legend_df, ggplot2::aes(x = x, y = y, color = Method, linetype = Method)) +
     ggplot2::geom_line(linewidth = 1) +
     ggplot2::geom_point(
@@ -134,8 +147,8 @@ cv.plot <- function(object,
       ggplot2::aes(x = 0.5, y = 1, color = Method),
       inherit.aes = FALSE, shape = 16, size = 2.4
     ) +
-    ggplot2::scale_color_manual(values = c("CoxKL" = line_color, "Internal" = baseline_color)) +
-    ggplot2::scale_linetype_manual(values = c("CoxKL" = "solid", "Internal" = "dotted")) +
+    ggplot2::scale_color_manual(values = c("survkl" = line_color, "Internal" = baseline_color)) +
+    ggplot2::scale_linetype_manual(values = c("survkl" = "solid", "Internal" = "dotted")) +
     ggplot2::theme_void(base_size = 13) +
     ggplot2::theme(legend.position = "top",
                    legend.title = ggplot2::element_blank(),
@@ -147,3 +160,4 @@ cv.plot <- function(object,
   
   cowplot::plot_grid(cowplot::get_legend(g_legend), g_main, ncol = 1, rel_heights = c(0.08, 1))
 }
+

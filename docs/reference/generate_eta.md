@@ -5,7 +5,7 @@ Produces a numeric vector of `eta` values to be used in Cox–KL model.
 ## Usage
 
 ``` r
-generate_eta(method = "exponential", n = 10, max_eta = 5)
+generate_eta(method = "exponential", n = 10, max_eta = 5, min_eta = 0)
 ```
 
 ## Arguments
@@ -26,7 +26,7 @@ generate_eta(method = "exponential", n = 10, max_eta = 5)
 
 - min_eta:
 
-  Numeric, the minimum value of `eta` in the sequence. Default is 1.
+  Numeric, the minimum value of `eta` in the sequence. Default is 0.
 
 ## Value
 
@@ -41,8 +41,7 @@ Numeric vector of length `n` containing the generated `eta` values.
 
 - *Linear*: the current implementation calls
   `seq(min_eta, max_eta, length.out = n)` and therefore assumes a
-  numeric object `min_eta` exists in the calling environment. If
-  `min_eta` is not defined, this branch will error at runtime.
+  numeric object `min_eta` exists in the calling environment.
 
 Only the exact strings “linear” and “exponential” are supported; other
 values for `method` will result in an error because `eta_values` is
@@ -58,5 +57,5 @@ generate_eta(method = "exponential", n = 10, max_eta = 5)
 
 # Generate 5 linearly spaced eta values up to 3
 generate_eta(method = "linear", n = 5, max_eta = 3)
-#> Error in generate_eta(method = "linear", n = 5, max_eta = 3): object 'min_eta' not found
+#> [1] 0.00 0.75 1.50 2.25 3.00
 ```

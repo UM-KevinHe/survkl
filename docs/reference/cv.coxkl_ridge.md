@@ -114,7 +114,7 @@ cv.coxkl_ridge(
 - ...:
 
   Additional arguments passed to
-  [`coxkl_ridge`](https://umkevinhe.github.io/survkl/reference/coxkl_ridge.md).
+  [`coxkl_ridge`](https://um-kevinhe.github.io/survkl/reference/coxkl_ridge.md).
 
 ## Value
 
@@ -153,7 +153,7 @@ computes `RS = z %*% beta`). For each candidate `eta`, a `lambda` path
 is determined (generated if `lambda = NULL`, otherwise the supplied
 `lambda` values are sorted decreasingly). Cross-validation folds are
 created by `get_fold`. In each fold,
-[`coxkl_ridge`](https://umkevinhe.github.io/survkl/reference/coxkl_ridge.md)
+[`coxkl_ridge`](https://um-kevinhe.github.io/survkl/reference/coxkl_ridge.md)
 is fit on the training split across the full `lambda` path with
 `data_sorted = TRUE`, and the chosen criterion is evaluated on the test
 split and aggregated:
@@ -176,6 +176,7 @@ C-index). The function also computes an external baseline statistic from
 ## Examples
 
 ``` r
+# \donttest{
 data(ExampleData_highdim) 
 
 train_dat_highdim <- ExampleData_highdim$train
@@ -192,8 +193,9 @@ cv_res <- cv.coxkl_ridge(z = train_dat_highdim$z,
                          etas = etas,
                          nfolds = 5, 
                          cv.criteria = "CIndex_pooled",
-                         message = T)
+                         message = TRUE)
 #> Warning: Stratum not provided. Treating all data as one stratum.
 #> Cross-validation over eta sequence:
 #>   |                                      |                              |   0%  |                                      |===                           |  10%  |                                      |======                        |  20%  |                                      |=========                     |  30%  |                                      |============                  |  40%  |                                      |===============               |  50%  |                                      |==================            |  60%  |                                      |=====================         |  70%  |                                      |========================      |  80%  |                                      |===========================   |  90%  |                                      |==============================| 100%
+# }
 ```

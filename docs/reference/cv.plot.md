@@ -52,9 +52,9 @@ nearest `eta` present in the results).
 
 ## See also
 
-[`cv.coxkl`](https://umkevinhe.github.io/survkl/reference/cv.coxkl.md),
-[`cv.coxkl_ridge`](https://umkevinhe.github.io/survkl/reference/cv.coxkl_ridge.md),
-[`cv.coxkl_enet`](https://umkevinhe.github.io/survkl/reference/cv.coxkl_enet.md)
+[`cv.coxkl`](https://um-kevinhe.github.io/survkl/reference/cv.coxkl.md),
+[`cv.coxkl_ridge`](https://um-kevinhe.github.io/survkl/reference/cv.coxkl_ridge.md),
+[`cv.coxkl_enet`](https://um-kevinhe.github.io/survkl/reference/cv.coxkl_enet.md)
 
 ## Examples
 
@@ -76,8 +76,8 @@ cv_res <- cv.coxkl(z = train_dat_lowdim$z,
                    beta = beta_external_good_lowdim,
                    etas = etas,
                    nfolds = 5,
-                   criteria = c("LinPred"),   #"V&VH", "LinPred", "CIndex_pooled", "CIndex_foldaverage"
-                   message = T)
+                   criteria = c("LinPred"), 
+                   message = TRUE)
 #> External beta information is used.
 #> Warning: Stratum not provided. Treating all data as one stratum.
 #> CV fold 1/5 starts...

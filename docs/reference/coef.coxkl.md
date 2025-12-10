@@ -18,7 +18,7 @@ coef(object, eta = NULL, ...)
 - object:
 
   An object of class `"coxkl"`, typically the result of
-  [`coxkl`](https://umkevinhe.github.io/survkl/reference/coxkl.md).
+  [`coxkl`](https://um-kevinhe.github.io/survkl/reference/coxkl.md).
 
 - eta:
 

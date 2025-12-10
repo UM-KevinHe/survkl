@@ -64,6 +64,6 @@ train_dat_highdim \<- ExampleData_highdim\$train beta_external_highdim
 
 model_ridge \<- coxkl_ridge(z = train_dat_highdim\$z, delta =
 train_dat_highdim\$status, time = train_dat_highdim\$time, stratum =
-NULL, RS = NULL, beta = beta_external_highdim, message = T)
+NULL, RS = NULL, beta = beta_external_highdim, message = TRUE)
 
 plot(model_ridge)

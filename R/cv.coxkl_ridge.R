@@ -292,7 +292,7 @@ cv.coxkl_ridge <- function(z, delta, time, stratum = NULL, RS = NULL, beta = NUL
   results_df <- do.call(rbind, results_list)
   
   if (cv.criteria %in% c("V&VH", "LinPred")) {
-    results_df$Loss <- -2 * results_df$score
+    results_df$Loss <- -2 * results_df$score  / n
     results_df$score <- NULL
     best_per_eta <- do.call(rbind, lapply(split(results_df, results_df$eta), function(df) {
       df[which.min(df$Loss), , drop = FALSE]

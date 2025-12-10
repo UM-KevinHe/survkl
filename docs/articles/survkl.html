@@ -127,8 +127,8 @@ Provides multiple tuning criteria including</p>
 <em>Two based on C-index</em><br>
 </li>
 <li>
-<em>Two based on Loss</em>: predicted deviance and <strong>V&amp;VH
-loss</strong>.</li>
+<em>Two based on Loss</em>: predicted deviance and <em>V&amp;VH</em>
+loss.</li>
 </ul>
 </li>
 </ul>
@@ -157,7 +157,7 @@ GitHub:</p>
 example datasets included in the package.</p>
 <p>First, load the package:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://umkevinhe.github.io/survkl">survkl</a></span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://um-kevinhe.github.io/survkl/">survkl</a></span><span class="op">)</span></span></code></pre></div>
 <div class="section level3">
 <h3 id="low-dimensional-integration">Low-Dimensional Integration<a class="anchor" aria-label="anchor" href="#low-dimensional-integration"></a>
 </h3>
@@ -183,6 +183,8 @@ simulated dataset:</p>
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">ExampleData_lowdim</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">train</span>  <span class="op">&lt;-</span> <span class="va">ExampleData_lowdim</span><span class="op">$</span><span class="va">train</span></span>
+<span><span class="va">test</span>   <span class="op">&lt;-</span> <span class="va">ExampleData_lowdim</span><span class="op">$</span><span class="va">test</span></span>
+<span></span>
 <span><span class="va">z</span>      <span class="op">&lt;-</span> <span class="va">train</span><span class="op">$</span><span class="va">z</span></span>
 <span><span class="va">delta</span>  <span class="op">&lt;-</span> <span class="va">train</span><span class="op">$</span><span class="va">status</span></span>
 <span><span class="va">time</span>   <span class="op">&lt;-</span> <span class="va">train</span><span class="op">$</span><span class="va">time</span></span>
@@ -194,7 +196,7 @@ simulated dataset:</p>
 <code><a href="../reference/generate_eta.html">generate_eta()</a></code>, and fit the KL-integrated model across this
 grid:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">eta_grid</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/generate_eta.html">generate_eta</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"exponential"</span>, n <span class="op">=</span> <span class="fl">10</span>, max_eta <span class="op">=</span> <span class="fl">50</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">eta_grid</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/generate_eta.html">generate_eta</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"exponential"</span>, n <span class="op">=</span> <span class="fl">100</span>, max_eta <span class="op">=</span> <span class="fl">30</span><span class="op">)</span></span>
 <span><span class="va">fit_lowdim</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/coxkl.html">coxkl</a></span><span class="op">(</span></span>
 <span>  z <span class="op">=</span> <span class="va">z</span>,</span>
 <span>  delta <span class="op">=</span> <span class="va">delta</span>,</span>
@@ -204,19 +206,19 @@ grid:</p>
 <span>  etas <span class="op">=</span> <span class="va">eta_grid</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>The S3 method <code><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef()</a></code> provides a clean interface to
-extract estimated coefficients. If the requested η is between fitted
-values, linear interpolation is performed:</p>
+extract estimated coefficients. If the requested <code>eta</code> is
+between fitted values, linear interpolation is performed:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">fit_lowdim</span>, eta <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## Warning: Linear interpolation performed between eta = 0.900 and eta = 1.839 for</span></span>
+<pre><code><span><span class="co">## Warning: Linear interpolation performed between eta = 0.979 and eta = 1.040 for</span></span>
 <span><span class="co">## eta = 1.000.</span></span></code></pre>
 <pre><code><span><span class="co">##                1</span></span>
-<span><span class="co">## [1,]  0.25032320</span></span>
-<span><span class="co">## [2,] -0.39703180</span></span>
-<span><span class="co">## [3,]  0.08661859</span></span>
-<span><span class="co">## [4,] -0.58832784</span></span>
-<span><span class="co">## [5,]  0.29433864</span></span>
-<span><span class="co">## [6,] -0.55791424</span></span></code></pre>
+<span><span class="co">## [1,]  0.25018459</span></span>
+<span><span class="co">## [2,] -0.39555046</span></span>
+<span><span class="co">## [3,]  0.08825084</span></span>
+<span><span class="co">## [4,] -0.58446411</span></span>
+<span><span class="co">## [5,]  0.29503025</span></span>
+<span><span class="co">## [6,] -0.55443656</span></span></code></pre>
 <p>Users may instead supply an external risk score vector:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">RS_ext</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">z</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">beta_ext</span><span class="op">)</span></span>
@@ -230,13 +232,12 @@ values, linear interpolation is performed:</p>
 <span>  etas <span class="op">=</span> <span class="va">eta_grid</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">fit_lowdim_RS</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span></span></code></pre></div>
-<pre><code><span><span class="co">##  [1]  0.25982263 -0.49599768 -0.01972113 -0.84023506  0.24808718 -0.78551866</span></span>
-<span><span class="co">##  [7]  0.25455640 -0.44210371  0.03600659 -0.70926840</span></span></code></pre>
+<span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">fit_lowdim_RS</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span></span></code></pre></div>
+<pre><code><span><span class="co">## [1]  0.25982263 -0.49599768 -0.01972113 -0.84023506  0.24808718</span></span></code></pre>
 <p>Objects of class <code>coxkl</code> can be visualized using the S3
 plotting method <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code>.<br>
 This function displays how model performance changes across the
-η–sequence used during fitting.</p>
+<code>eta</code>–sequence used during fitting.</p>
 <p>Two types of performance criteria are supported:</p>
 <ul>
 <li><p><code>"loss"</code><br>
@@ -248,7 +249,14 @@ size)</p></li>
 <p>If no test data are supplied, performance is computed using the
 training data stored in <code>object$data</code>:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit_lowdim</span><span class="op">)</span>    </span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span></span>
+<span>  <span class="va">fit_lowdim</span>,</span>
+<span>  test_z       <span class="op">=</span> <span class="va">test</span><span class="op">$</span><span class="va">z</span>,</span>
+<span>  test_time    <span class="op">=</span> <span class="va">test</span><span class="op">$</span><span class="va">time</span>,</span>
+<span>  test_delta   <span class="op">=</span> <span class="va">test</span><span class="op">$</span><span class="va">status</span>,</span>
+<span>  test_stratum <span class="op">=</span> <span class="va">test</span><span class="op">$</span><span class="va">stratum</span>,</span>
+<span>  criteria     <span class="op">=</span> <span class="st">"loss"</span></span>
+<span><span class="op">)</span>    </span></code></pre></div>
 <pre><code><span><span class="co">## Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.</span></span>
 <span><span class="co">## <span style="color: #00BBBB;">ℹ</span> Please use `linewidth` instead.</span></span>
 <span><span class="co">## <span style="color: #00BBBB;">ℹ</span> The deprecated feature was likely used in the <span style="color: #0000BB;">survkl</span> package.</span></span>
@@ -289,18 +297,21 @@ criterion:</p>
 <span>  criteria <span class="op">=</span> <span class="st">"V&amp;VH"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>The cross-validated performance curve can be visualized using
-cv.plot():</p>
+<code><a href="../reference/cv.plot.html">cv.plot()</a></code>:</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/cv.plot.html">cv.plot</a></span><span class="op">(</span><span class="va">cv_lowdim</span><span class="op">)</span></span></code></pre></div>
 <p><img src="survkl_files/figure-html/unnamed-chunk-12-1.png" class="r-plt" alt="Plot generated in survkl vignette" width="700"></p>
-<p>The solid purple curve shows cross-validated loss as a function of η
-(lower values indicate better predictive performance). The green dotted
-horizontal line represents the internal baseline, corresponding to η = 0
-(the model that does not borrow any external information). This
-visualization makes it easy to assess whether external information
-improves prediction. If the purple curve drops below the green line,
-then borrowing external information (i.e., using η &gt; 0) leads to
-better predictive performance.</p>
+<p>The solid purple curve displays the cross-validated loss across
+different values of <code>eta</code>. The green dotted horizontal line
+marks the internal baseline at <code>eta</code> = 0, representing the
+model that does not incorporate external information. The vertical
+dashed orange line indicates the optimal <code>eta</code> value, where
+the cross-validated loss is minimized.</p>
+<p>A comparison between the purple curve and the green baseline shows
+whether borrowing external information improves prediction performance.
+Whenever the purple curve falls below the green line, using external
+information (<code>eta</code> &gt; 0) yields better predictive accuracy
+than relying solely on the internal model.</p>
 </div>
 </div>
 <div class="section level3">
@@ -350,12 +361,7 @@ and will be discussed in a separate subsection.)</p>
 noise variables. Externally derived coefficients are provided in
 <code>beta_external</code>:</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">beta_external_hd</span> <span class="op">&lt;-</span> <span class="va">ExampleData_highdim</span><span class="op">$</span><span class="va">beta_external</span></span>
-<span><span class="va">beta_external_hd</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span></span></code></pre></div>
-<pre><code><span><span class="co">##         Z1         Z2         Z3         Z4         Z5         Z6         Z7 </span></span>
-<span><span class="co">##  0.3045000 -0.2823218  0.3324814 -0.2399085  0.2909258 -0.2894610  0.0000000 </span></span>
-<span><span class="co">##         Z8         Z9        Z10 </span></span>
-<span><span class="co">##  0.0000000  0.0000000  0.0000000</span></span></code></pre>
+<code class="sourceCode R"><span><span class="va">beta_external_hd</span> <span class="op">&lt;-</span> <span class="va">ExampleData_highdim</span><span class="op">$</span><span class="va">beta_external</span></span></code></pre></div>
 <p>These external coefficients are estimated from a separate dataset
 using only <code>Z1</code>–<code>Z6</code> and then expanded to a
 length-50 vector, with zeros for <code>Z7</code>–<code>Z50</code>.</p>
@@ -366,13 +372,14 @@ length-50 vector, with zeros for <code>Z7</code>–<code>Z50</code>.</p>
 </h4>
 <p>The function <code>coxkl_ridge</code> fits a KL-integrated Cox model
 with a ridge (L2) penalty on all predictors. External information is
-incorporated through a KL term weighted by <code>eta</code>, while the
-ridge penalty is controlled by a sequence of tuning parameters
-<code>lambda</code>. If <code>lambda</code> is not provided, a
-decreasing lambda path is generated automatically.</p>
+incorporated through a KL term weighted by <code>eta</code> (an
+user-specified scalar), while the ridge penalty is controlled by a
+sequence of tuning parameters <code>lambda</code>. If
+<code>lambda</code> is not provided, a decreasing lambda path is
+generated automatically.</p>
 <p>We first fit a KL–ridge model for a fixed integration weight
 <code>eta</code> and an automatically generated lambda path:</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">model_ridge</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/coxkl_ridge.html">coxkl_ridge</a></span><span class="op">(</span></span>
 <span>  z        <span class="op">=</span> <span class="va">z_hd</span>,</span>
 <span>  delta    <span class="op">=</span> <span class="va">delta_hd</span>,</span>
@@ -403,7 +410,7 @@ the lambda path,</li>
 </ul>
 <p>The S3 method <code><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef()</a></code> extracts the estimated
 coefficients:</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># All lambdas (columns ordered in decreasing lambda)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">model_ridge</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span>  <span class="co"># first 5 lambdas</span></span></code></pre></div>
 <pre><code><span><span class="co">##          82.0989     74.8055     68.1599     62.1048     56.5876</span></span>
@@ -413,7 +420,7 @@ coefficients:</p>
 <span><span class="co">## [4,] -0.05680339 -0.06147303 -0.06646655 -0.07179722 -0.07747730</span></span>
 <span><span class="co">## [5,]  0.10912724  0.11518227  0.12137484  0.12769148  0.13411779</span></span></code></pre>
 <p>To focus on a specific value of <code>lambda</code>:</p>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">lambda_target</span> <span class="op">&lt;-</span> <span class="va">model_ridge</span><span class="op">$</span><span class="va">lambda</span><span class="op">[</span><span class="fl">5</span><span class="op">]</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">model_ridge</span>, lambda <span class="op">=</span> <span class="va">lambda_target</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1]  0.05588316 -0.11129985  0.06321089 -0.07747730  0.13411779</span></span></code></pre>
@@ -422,34 +429,26 @@ coefficients:</p>
 path.</p>
 <p>Objects of class <code>coxkl_ridge</code> can be visualized using the
 S3 plotting method <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code>:</p>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">model_ridge</span><span class="op">)</span></span></code></pre></div>
-<p><img src="survkl_files/figure-html/unnamed-chunk-18-1.png" class="r-plt" alt="Plot generated in survkl vignette" width="700"></p>
-<p>By default, this plots:</p>
+<p>By default, this plots (at given <code>eta</code>):</p>
 <ul>
-<li>
-<strong>Loss</strong> (<code>-2 * partial log-likelihood</code>)
-versus the penalty parameter <code>lambda</code>,</li>
+<li>Loss (<code>-2 * partial log-likelihood</code>) versus the penalty
+parameter <code>lambda</code>,</li>
 <li>x-axis on a reversed log10 scale (larger penalties on the left,
 smaller penalties on the right),</li>
 <li>y-axis labeled as “Loss”.</li>
+<li>A vertical dashed orange line marks the optimal value of λ, where
+the loss reaches its minimum on the evaluated grid.</li>
 </ul>
-<p>To display the C-index instead:</p>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">model_ridge</span>, criteria <span class="op">=</span> <span class="st">"CIndex"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="survkl_files/figure-html/unnamed-chunk-19-1.png" class="r-plt" alt="Plot generated in survkl vignette" width="700"></p>
-<p>If an external test set is available, performance can be evaluated on
-the test data by passing it via the <code>test_*</code> arguments:</p>
-<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span></span>
 <span>  <span class="va">model_ridge</span>,</span>
 <span>  test_z       <span class="op">=</span> <span class="va">test_hd</span><span class="op">$</span><span class="va">z</span>,</span>
 <span>  test_time    <span class="op">=</span> <span class="va">test_hd</span><span class="op">$</span><span class="va">time</span>,</span>
 <span>  test_delta   <span class="op">=</span> <span class="va">test_hd</span><span class="op">$</span><span class="va">status</span>,</span>
 <span>  test_stratum <span class="op">=</span> <span class="va">test_hd</span><span class="op">$</span><span class="va">stratum</span>,</span>
-<span>  criteria     <span class="op">=</span> <span class="st">"loss"</span></span>
+<span>  criteria     <span class="op">=</span> <span class="st">"CIndex"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p><img src="survkl_files/figure-html/unnamed-chunk-20-1.png" class="r-plt" alt="Plot generated in survkl vignette" width="700"></p>
+<p><img src="survkl_files/figure-html/unnamed-chunk-18-1.png" class="r-plt" alt="Plot generated in survkl vignette" width="700"></p>
 <p>The function <code>cv.coxkl_ridge</code> performs K-fold
 cross-validation to tune the integration parameter <code>eta</code>
 while internally scanning over a <code>lambda</code> path for each
@@ -476,7 +475,7 @@ folds.</li>
 </ul>
 <p>Example: tuning <code>eta</code> using 5-fold cross-validation and
 the <code>"V&amp;VH"</code> criterion:</p>
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">eta_grid_hd</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/generate_eta.html">generate_eta</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"exponential"</span>, n <span class="op">=</span> <span class="fl">10</span>, max_eta <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span>
 <span></span>
@@ -485,7 +484,6 @@ the <code>"V&amp;VH"</code> criterion:</p>
 <span>  delta       <span class="op">=</span> <span class="va">delta_hd</span>,</span>
 <span>  time        <span class="op">=</span> <span class="va">time_hd</span>,</span>
 <span>  stratum     <span class="op">=</span> <span class="va">strat_hd</span>,</span>
-<span>  RS          <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  beta        <span class="op">=</span> <span class="va">beta_external_hd</span>,</span>
 <span>  etas        <span class="op">=</span> <span class="va">eta_grid_hd</span>,</span>
 <span>  nfolds      <span class="op">=</span> <span class="fl">5</span>,</span>
@@ -494,37 +492,35 @@ the <code>"V&amp;VH"</code> criterion:</p>
 <span><span class="op">)</span></span></code></pre></div>
 <p>The best <code>lambda</code> for each <code>eta</code> (according to
 the chosen criterion) is provided by:</p>
-<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cv_ridge_hd</span><span class="op">$</span><span class="va">integrated_stat.best_per_eta</span></span></code></pre></div>
 <pre><code><span><span class="co">##           eta       lambda     Loss</span></span>
-<span><span class="co">## 1    0.000000 1.025724e+02 564.3216</span></span>
-<span><span class="co">## 2    0.674849 3.624675e+01 561.0502</span></span>
-<span><span class="co">## 3    1.800565 5.639777e+00 555.2522</span></span>
-<span><span class="co">## 4    3.678373 6.166819e-01 549.1837</span></span>
-<span><span class="co">## 5    6.810744 8.639301e-03 546.4052</span></span>
-<span><span class="co">## 6   12.035855 8.698543e-03 546.4233</span></span>
-<span><span class="co">## 7   20.751866 8.734028e-03 547.0925</span></span>
-<span><span class="co">## 8   35.291047 8.755290e-03 547.7359</span></span>
-<span><span class="co">## 9   59.543864 8.768033e-03 548.2108</span></span>
-<span><span class="co">## 10 100.000000 8.775671e-03 548.5282</span></span></code></pre>
+<span><span class="co">## 1    0.000000 1.025724e+02 2.821608</span></span>
+<span><span class="co">## 2    0.674849 3.624675e+01 2.805251</span></span>
+<span><span class="co">## 3    1.800565 5.639777e+00 2.776261</span></span>
+<span><span class="co">## 4    3.678373 6.166819e-01 2.745919</span></span>
+<span><span class="co">## 5    6.810744 8.639301e-03 2.732026</span></span>
+<span><span class="co">## 6   12.035855 8.698543e-03 2.732116</span></span>
+<span><span class="co">## 7   20.751866 8.734028e-03 2.735462</span></span>
+<span><span class="co">## 8   35.291047 8.755290e-03 2.738679</span></span>
+<span><span class="co">## 9   59.543864 8.768033e-03 2.741054</span></span>
+<span><span class="co">## 10 100.000000 8.775671e-03 2.742641</span></span></code></pre>
 <p>As with low-dimensional models, the helper function
 <code><a href="../reference/cv.plot.html">cv.plot()</a></code> can be used to visualize performance versus
 <code>eta</code>:</p>
-<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/cv.plot.html">cv.plot</a></span><span class="op">(</span><span class="va">cv_ridge_hd</span><span class="op">)</span></span></code></pre></div>
-<p><img src="survkl_files/figure-html/unnamed-chunk-23-1.png" class="r-plt" alt="Plot generated in survkl vignette" width="700"></p>
+<p><img src="survkl_files/figure-html/unnamed-chunk-21-1.png" class="r-plt" alt="Plot generated in survkl vignette" width="700"></p>
 <p>The plot shows:</p>
 <ul>
-<li>a <strong>purple curve</strong> for the cross-validated performance
-across the <code>eta</code> sequence (loss or C-index),</li>
-<li>a <strong>green dotted horizontal line</strong> indicating the
-internal baseline at <code>eta = 0</code>,</li>
-<li>a <strong>green point</strong> marking the baseline value.</li>
+<li>a purple curve for the cross-validated performance across the
+<code>eta</code> sequence (loss or C-index),</li>
+<li>a green dotted horizontal line indicating the internal baseline at
+<code>eta = 0</code>,</li>
+<li>a green point marking the baseline value,</li>
+<li>and a vertical dashed orange line indicating the optimal η, where
+the cross-validated loss reaches its minimum.</li>
 </ul>
-<p>If the purple curve dips below the green line (for loss criteria) or
-rises above it (for C-index criteria), this indicates that borrowing
-external information (<code>eta &gt; 0</code>) leads to improved
-predictive performance.</p>
 </div>
 <div class="section level4">
 <h4 id="elastic-net-lasso-kl-integrated-cox-model-coxkl_enet">Elastic-Net / LASSO KL-Integrated Cox Model
@@ -533,8 +529,8 @@ predictive performance.</p>
 <p>The function <code>coxkl_enet</code> fits a KL-integrated Cox model
 with an elastic-net penalty, controlled by the mixing parameter
 <code>alpha</code>. When <code>alpha = 1</code>, the penalty reduces to
-<strong>LASSO</strong>, enabling coefficient sparsity in addition to
-KL-based integration of external information.</p>
+<em>LASSO</em>, enabling coefficient sparsity in addition to KL-based
+integration of external information.</p>
 <p>External knowledge may be incorporated either through external
 coefficients (<code>beta</code>) or an externally computed risk score
 (<code>RS</code>). The integration weight <code>eta</code> determines
@@ -542,10 +538,10 @@ how strongly the model borrows from this external signal, while the
 penalty parameter <code>lambda</code> controls the sparsity level. If
 <code>lambda</code> is not supplied, the function automatically
 generates a decreasing lambda sequence.</p>
-<p>We illustrate the workflow using <strong>LASSO</strong>
+<p>We illustrate the workflow using <em>LASSO</em>
 (<code>alpha = 1</code>) with an automatically generated lambda
 path:</p>
-<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">model_enet</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/coxkl_enet.html">coxkl_enet</a></span><span class="op">(</span></span>
 <span>  z        <span class="op">=</span> <span class="va">z_hd</span>,</span>
 <span>  delta    <span class="op">=</span> <span class="va">delta_hd</span>,</span>
@@ -575,7 +571,7 @@ the lambda path,</li>
 </ul>
 <p>The S3 method <code><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef()</a></code> extracts the estimated
 coefficients:</p>
-<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">model_enet</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span></span></code></pre></div>
 <pre><code><span><span class="co">##    0.0853     0.0796     0.0742     0.0692     0.0645</span></span>
 <span><span class="co">## Z1      0 0.00000000 0.00000000 0.00000000 0.00000000</span></span>
@@ -585,22 +581,14 @@ coefficients:</p>
 <span><span class="co">## Z5      0 0.01945713 0.03849402 0.05620049 0.07282693</span></span></code></pre>
 <p>To extract coefficients corresponding to a specific
 <code>lambda</code>:</p>
-<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">lambda_target</span> <span class="op">&lt;-</span> <span class="va">model_enet</span><span class="op">$</span><span class="va">lambda</span><span class="op">[</span><span class="fl">5</span><span class="op">]</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">model_enet</span>, lambda <span class="op">=</span> <span class="va">lambda_target</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] 0.00000000 0.00000000 0.00000000 0.00000000 0.07282693</span></span></code></pre>
-<p>Similar, if the requested lambda is not exactly one of the fitted
-values, <code><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef()</a></code> performs linear interpolation along the
-lambda path.</p>
 <p>Objects of class <code>coxkl_enet</code> can be visualized using the
 S3 method <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code>, and default is to plot loss versus
 <code>lambda</code>:</p>
-<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">model_enet</span><span class="op">)</span></span></code></pre></div>
-<p><img src="survkl_files/figure-html/unnamed-chunk-27-1.png" class="r-plt" alt="Plot generated in survkl vignette" width="700"></p>
-<p>When a test dataset is available, performance can be assessed on
-held-out data:</p>
-<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span></span>
 <span>  <span class="va">model_enet</span>,</span>
 <span>  test_z <span class="op">=</span> <span class="va">test_hd</span><span class="op">$</span><span class="va">z</span>,</span>
@@ -609,11 +597,11 @@ held-out data:</p>
 <span>  test_stratum <span class="op">=</span> <span class="va">test_hd</span><span class="op">$</span><span class="va">stratum</span>,</span>
 <span>  criteria <span class="op">=</span> <span class="st">"loss"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p><img src="survkl_files/figure-html/unnamed-chunk-28-1.png" class="r-plt" alt="Plot generated in survkl vignette" width="700"></p>
+<p><img src="survkl_files/figure-html/unnamed-chunk-25-1.png" class="r-plt" alt="Plot generated in survkl vignette" width="700"></p>
 <p>Similar, the function <code>cv.coxkl_enet</code> extends the above
 fitting procedure by performing K-fold cross-validation over a supplied
 grid of eta values:</p>
-<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">eta_grid_hd</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/generate_eta.html">generate_eta</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"exponential"</span>,</span>
@@ -634,9 +622,9 @@ grid of eta values:</p>
 <span>  message <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>CV results can be visualized using <code><a href="../reference/cv.plot.html">cv.plot()</a></code>:</p>
-<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/cv.plot.html">cv.plot</a></span><span class="op">(</span><span class="va">cv_enet_hd</span><span class="op">)</span></span></code></pre></div>
-<p><img src="survkl_files/figure-html/unnamed-chunk-30-1.png" class="r-plt" alt="Plot generated in survkl vignette" width="700"></p>
+<p><img src="survkl_files/figure-html/unnamed-chunk-27-1.png" class="r-plt" alt="Plot generated in survkl vignette" width="700"></p>
 </div>
 </div>
 </div>
@@ -647,7 +635,7 @@ grid of eta values:</p>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Yubo Shao, Lingfeng Luo, Junyi Qiu, Xiaohan Liu, Di Wang, Kevin He.</p>
+  <p>Developed by Yubo Shao, Lingfeng Luo, Xiaohan Liu, Junyi Qiu, Di Wang, Kevin He.</p>
 </div>
 
 <div class="pkgdown-footer-right">
