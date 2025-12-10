@@ -161,41 +161,18 @@ using the same criterion for comparison.
 ## Examples
 
 ``` r
-data(Exampledata_lowdim)
-#> Warning: data set 'Exampledata_lowdim' not found
+data(ExampleData_lowdim)
 
 train_dat_lowdim <- ExampleData_lowdim$train
 beta_external_good_lowdim <- ExampleData_lowdim$beta_external_good
 
 etas <- generate_eta(method = "exponential", n = 10, max_eta = 5)
-etas <- sample(etas)
 
 cv_res <- cv.coxkl(z = train_dat_lowdim$z,
                    delta = train_dat_lowdim$status,
                    time = train_dat_lowdim$time,
-                   stratum = NULL,
-                   RS = NULL,
                    beta = beta_external_good_lowdim,
-                   etas = etas,
-                   nfolds = 5,
-                   criteria = c("LinPred"),
-                   message = TRUE)
-#> External beta information is used.
+                   etas = etas)
 #> Warning: Stratum not provided. Treating all data as one stratum.
-#> CV fold 1/5 starts...
-#> Cross-validation over eta sequence:
-#>   |                                      |                              |   0%  |                                      |===                           |  10%  |                                      |======                        |  20%  |                                      |=========                     |  30%  |                                      |============                  |  40%  |                                      |===============               |  50%  |                                      |==================            |  60%  |                                      |=====================         |  70%  |                                      |========================      |  80%  |                                      |===========================   |  90%  |                                      |==============================| 100%
-#> CV fold 2/5 starts...
-#> Cross-validation over eta sequence:
-#>   |                                      |                              |   0%  |                                      |===                           |  10%  |                                      |======                        |  20%  |                                      |=========                     |  30%  |                                      |============                  |  40%  |                                      |===============               |  50%  |                                      |==================            |  60%  |                                      |=====================         |  70%  |                                      |========================      |  80%  |                                      |===========================   |  90%  |                                      |==============================| 100%
-#> CV fold 3/5 starts...
-#> Cross-validation over eta sequence:
-#>   |                                      |                              |   0%  |                                      |===                           |  10%  |                                      |======                        |  20%  |                                      |=========                     |  30%  |                                      |============                  |  40%  |                                      |===============               |  50%  |                                      |==================            |  60%  |                                      |=====================         |  70%  |                                      |========================      |  80%  |                                      |===========================   |  90%  |                                      |==============================| 100%
-#> CV fold 4/5 starts...
-#> Cross-validation over eta sequence:
-#>   |                                      |                              |   0%  |                                      |===                           |  10%  |                                      |======                        |  20%  |                                      |=========                     |  30%  |                                      |============                  |  40%  |                                      |===============               |  50%  |                                      |==================            |  60%  |                                      |=====================         |  70%  |                                      |========================      |  80%  |                                      |===========================   |  90%  |                                      |==============================| 100%
-#> CV fold 5/5 starts...
-#> Cross-validation over eta sequence:
-#>   |                                      |                              |   0%  |                                      |===                           |  10%  |                                      |======                        |  20%  |                                      |=========                     |  30%  |                                      |============                  |  40%  |                                      |===============               |  50%  |                                      |==================            |  60%  |                                      |=====================         |  70%  |                                      |========================      |  80%  |                                      |===========================   |  90%  |                                      |==============================| 100%
                     
 ```

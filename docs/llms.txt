@@ -57,6 +57,7 @@ If you encounter problems or bugs, please contact us:
 - <ybshao@umich.edu>
 - <lfluo@umich.edu>
 - <xhliuu@umich.edu>
+- <junyiqiu@umich.edu>
 - <kevinhe@umich.edu>
 
 ------------------------------------------------------------------------

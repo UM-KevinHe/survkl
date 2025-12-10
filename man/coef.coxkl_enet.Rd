@@ -28,20 +28,18 @@ linear interpolation is performed between nearest neighbors; out-of-range
 requests error.
 }
 \examples{
-data(ExampleData_highdim) 
+data(ExampleData_highdim)
 
 train_dat_highdim <- ExampleData_highdim$train
 beta_external_highdim <- ExampleData_highdim$beta_external
 
+
 enet_model <- coxkl_enet(z = train_dat_highdim$z,
                          delta = train_dat_highdim$status,
                          time = train_dat_highdim$time,
-                         stratum = NULL,
-                         RS = NULL,
                          beta = beta_external_highdim,
-                         eta = 0,
-                         alpha = 1.0,
-                         message = TRUE)
-coef(enet_model)                         
+                         eta = 1,
+                         alpha = 1.0)
+coef(enet_model)[1:5, 1:10]
    
 }

@@ -233,8 +233,6 @@ choose the integration parameter. It supports four criteria:
 Below is an example using the default `"V&VH"` criterion:
 
 ``` r
-set.seed(1)
-
 cv_lowdim <- cv.coxkl(
   z        = z,
   delta    = delta,
@@ -243,8 +241,8 @@ cv_lowdim <- cv.coxkl(
   beta     = beta_ext,
   etas     = eta_grid,
   nfolds   = 5,
-  criteria = "V&VH"
-)
+  criteria = "V&VH",
+  seed = 1)
 ```
 
 The cross-validated performance curve can be visualized using
@@ -342,11 +340,8 @@ model_ridge <- coxkl_ridge(
   delta    = delta_hd,
   time     = time_hd,
   stratum  = strat_hd,
-  RS       = NULL,
   beta     = beta_external_hd,   # external coefficients (length 50)
-  eta      = 1,                  # KL integration weight
-  lambda   = NULL,               # automatically generate a lambda sequence
-  message  = FALSE
+  eta      = 1                  # KL integration weight
 )
 ```
 
@@ -435,8 +430,7 @@ Example: tuning `eta` using 5-fold cross-validation and the `"V&VH"`
 criterion:
 
 ``` r
-set.seed(1)
-eta_grid_hd <- generate_eta(method = "exponential", n = 10, max_eta = 100)
+eta_grid_hd <- generate_eta(method = "exponential", n = 50, max_eta = 100)
 
 cv_ridge_hd <- cv.coxkl_ridge(
   z           = z_hd,
@@ -447,8 +441,7 @@ cv_ridge_hd <- cv.coxkl_ridge(
   etas        = eta_grid_hd,
   nfolds      = 5,
   cv.criteria = "V&VH",
-  message     = FALSE
-)
+  seed = 1)
 ```
 
 The best `lambda` for each `eta` (according to the chosen criterion) is
@@ -458,17 +451,57 @@ provided by:
 cv_ridge_hd$integrated_stat.best_per_eta
 ```
 
-    ##           eta       lambda     Loss
-    ## 1    0.000000 1.025724e+02 2.821608
-    ## 2    0.674849 3.624675e+01 2.805251
-    ## 3    1.800565 5.639777e+00 2.776261
-    ## 4    3.678373 6.166819e-01 2.745919
-    ## 5    6.810744 8.639301e-03 2.732026
-    ## 6   12.035855 8.698543e-03 2.732116
-    ## 7   20.751866 8.734028e-03 2.735462
-    ## 8   35.291047 8.755290e-03 2.738679
-    ## 9   59.543864 8.768033e-03 2.741054
-    ## 10 100.000000 8.775671e-03 2.742641
+    ##             eta       lambda     Loss
+    ## 1    0.00000000 1.025724e+02 2.821608
+    ## 2    0.09953651 9.834014e+01 2.818411
+    ## 3    0.20888146 9.449421e+01 2.815652
+    ## 4    0.32900138 7.554877e+01 2.813131
+    ## 5    0.46095806 5.515441e+01 2.810267
+    ## 6    0.60591790 4.034998e+01 2.806921
+    ## 7    0.76516225 2.957942e+01 2.803008
+    ## 8    0.94009872 2.029238e+01 2.798498
+    ## 9    1.13227362 1.545093e+01 2.793370
+    ## 10   1.34338567 1.071272e+01 2.787729
+    ## 11   1.57530093 7.423356e+00 2.781748
+    ## 12   1.83006939 5.642671e+00 2.775576
+    ## 13   2.10994303 3.906313e+00 2.769394
+    ## 14   2.41739573 2.703155e+00 2.763368
+    ## 15   2.75514517 1.869880e+00 2.757622
+    ## 16   3.12617683 1.293037e+00 2.752276
+    ## 17   3.53377037 7.421110e-01 2.747417
+    ## 18   3.98152865 3.879752e-01 2.743117
+    ## 19   4.47340953 1.057312e-01 2.739418
+    ## 20   5.01376093 8.595137e-03 2.736400
+    ## 21   5.60735916 8.612383e-03 2.734238
+    ## 22   6.25945124 8.628077e-03 2.732777
+    ## 23   6.97580122 8.642360e-03 2.731864
+    ## 24   7.76274115 8.655359e-03 2.731377
+    ## 25   8.62722703 8.667188e-03 2.731219
+    ## 26   9.57690034 8.677955e-03 2.731312
+    ## 27  10.62015555 8.687754e-03 2.731591
+    ## 28  11.76621431 8.696673e-03 2.732009
+    ## 29  13.02520701 8.704790e-03 2.732525
+    ## 30  14.40826229 8.712178e-03 2.733107
+    ## 31  15.92760542 8.718903e-03 2.733730
+    ## 32  17.59666636 8.725024e-03 2.734376
+    ## 33  19.43019846 8.730595e-03 2.735029
+    ## 34  21.44440891 8.735666e-03 2.735677
+    ## 35  23.65710197 8.740282e-03 2.736313
+    ## 36  26.08783632 8.744483e-03 2.736929
+    ## 37  28.75809801 8.748307e-03 2.737521
+    ## 38  31.69149033 8.751788e-03 2.738086
+    ## 39  34.91394249 8.754956e-03 2.738622
+    ## 40  38.45393876 8.757841e-03 2.739128
+    ## 41  42.34277030 8.760466e-03 2.739603
+    ## 42  46.61481175 8.762856e-03 2.740048
+    ## 43  51.30782504 8.765031e-03 2.740464
+    ## 44  56.46329322 8.767011e-03 2.740851
+    ## 45  62.12678712 8.768813e-03 2.741211
+    ## 46  68.34836818 8.770454e-03 2.741544
+    ## 47  75.18303094 8.771947e-03 2.741852
+    ## 48  82.69118918 8.773307e-03 2.742137
+    ## 49  90.93920990 8.774544e-03 2.742399
+    ## 50 100.00000000 8.775671e-03 2.742641
 
 As with low-dimensional models, the helper function
 [`cv.plot()`](https://um-kevinhe.github.io/survkl/reference/cv.plot.md)
@@ -514,16 +547,11 @@ model_enet <- coxkl_enet(
   delta    = delta_hd,
   time     = time_hd,
   stratum  = strat_hd,
-  RS       = NULL,
   beta     = beta_external_hd,   
   eta      = 1,                 
-  alpha    = 1,                  # LASSO penalty
-  lambda   = NULL,              
-  message  = TRUE
+  alpha    = 1                  # LASSO penalty
 )
 ```
-
-    ## External beta information is used.
 
 The fitted object stores, for each lambda value:
 
@@ -579,10 +607,8 @@ procedure by performing K-fold cross-validation over a supplied grid of
 eta values:
 
 ``` r
-set.seed(1)
-
 eta_grid_hd <- generate_eta(method = "exponential",
-                            n = 10,
+                            n = 50,
                             max_eta = 100)
 
 cv_enet_hd <- cv.coxkl_enet(
@@ -590,13 +616,12 @@ cv_enet_hd <- cv.coxkl_enet(
   delta = delta_hd,
   time = time_hd,
   stratum = strat_hd,
-  RS = NULL,
   beta = beta_external_hd,
   etas = eta_grid_hd,
   alpha = 1, # LASSO
   nfolds = 5,
   cv.criteria = "V&VH",
-  message = FALSE
+  seed = 1
 )
 ```
 

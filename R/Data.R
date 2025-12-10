@@ -271,7 +271,7 @@
 #'   time     = internal_data$time,
 #'   beta     = beta_external,
 #'   stratum  = NULL,
-#'   etas = seq(0, 10, by = 1)
+#'   etas = generate_eta(method = "exponential", n = 50, max_eta = 50)
 #' )
 #' cv.plot(result1)
 #' }

@@ -38,25 +38,24 @@ one value of `eta`, sorted in ascending order.
 ## Examples
 
 ``` r
-data(Exampledata_lowdim)
-#> Warning: data set 'Exampledata_lowdim' not found
+data(ExampleData_lowdim)
 
 train_dat_lowdim <- ExampleData_lowdim$train
 beta_external_good_lowdim <- ExampleData_lowdim$beta_external_good
+eta_list <- generate_eta(method = "exponential", n = 5, max_eta = 5)
 
 model <- coxkl(z = train_dat_lowdim$z,
                delta = train_dat_lowdim$status,
                time = train_dat_lowdim$time,
                stratum = train_dat_lowdim$stratum,
-               RS = NULL,
                beta = beta_external_good_lowdim,
-               etas = c(0:5))
+               etas = eta_list)
 coef(model)
-#>                0           1          2          3          4          5
-#> [1,]  0.25982263  0.25018262  0.2475909  0.2463857  0.2456895  0.2452363
-#> [2,] -0.49599768 -0.39552949 -0.3674863 -0.3544124 -0.3468634 -0.3419523
-#> [3,] -0.01972113  0.08827353  0.1221091  0.1386403  0.1484398  0.1549244
-#> [4,] -0.84023506 -0.58441069 -0.5018446 -0.4608359 -0.4362843 -0.4199306
-#> [5,]  0.24808718  0.29504012  0.3074159  0.3129777  0.3161117  0.3181155
-#> [6,] -0.78551866 -0.55438847 -0.4798686 -0.4427800 -0.4205425 -0.4057148
+#>                0       0.1092      0.4545     1.5466          5
+#> [1,]  0.25982263  0.257655537  0.25342872  0.2484849  0.2452363
+#> [2,] -0.49599768 -0.474154973 -0.43022578 -0.3771785 -0.3419523
+#> [3,] -0.01972113  0.002327028  0.04893181  0.1101809  0.1549244
+#> [4,] -0.84023506 -0.788594162 -0.67862767 -0.5311457 -0.4199306
+#> [5,]  0.24808718  0.258493491  0.27915167  0.3031994  0.3181155
+#> [6,] -0.78551866 -0.738669998 -0.63932919 -0.5063335 -0.4057148
 ```

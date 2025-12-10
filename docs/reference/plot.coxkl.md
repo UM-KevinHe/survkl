@@ -68,25 +68,28 @@ adds a dotted horizontal reference line at the value corresponding to
 ## Examples
 
 ``` r
-data(Exampledata_lowdim)
-#> Warning: data set 'Exampledata_lowdim' not found
+data(ExampleData_lowdim)
 
-train_dat_lowdim <- ExampleData_lowdim$train
+train_dat_lowdim  <- ExampleData_lowdim$train
+test_dat_lowdim   <- ExampleData_lowdim$test
 beta_external_good_lowdim <- ExampleData_lowdim$beta_external_good
+eta_grid <- generate_eta(method = "exponential", n = 100, max_eta = 30)
 
 model <- coxkl(z = train_dat_lowdim$z,
                delta = train_dat_lowdim$status,
                time = train_dat_lowdim$time,
                stratum = train_dat_lowdim$stratum,
-               RS = NULL,
                beta = beta_external_good_lowdim,
-               etas = c(0:5))
-     
-plot(model)      
+               etas = eta_grid)
+plot(model,
+     test_z = test_dat_lowdim$z, 
+     test_time = test_dat_lowdim$time, 
+     test_delta = test_dat_lowdim$status, 
+     test_stratum = test_dat_lowdim$stratum, 
+     criteria = "loss")
 #> Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
 #> ℹ Please use `linewidth` instead.
 #> ℹ The deprecated feature was likely used in the survkl package.
 #>   Please report the issue to the authors.
 
-     
 ```

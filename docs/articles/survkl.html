@@ -284,9 +284,7 @@ criteria:</p>
 <p>Below is an example using the default <code>"V&amp;VH"</code>
 criterion:</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">cv_lowdim</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cv.coxkl.html">cv.coxkl</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">cv_lowdim</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cv.coxkl.html">cv.coxkl</a></span><span class="op">(</span></span>
 <span>  z        <span class="op">=</span> <span class="va">z</span>,</span>
 <span>  delta    <span class="op">=</span> <span class="va">delta</span>,</span>
 <span>  time     <span class="op">=</span> <span class="va">time</span>,</span>
@@ -294,8 +292,8 @@ criterion:</p>
 <span>  beta     <span class="op">=</span> <span class="va">beta_ext</span>,</span>
 <span>  etas     <span class="op">=</span> <span class="va">eta_grid</span>,</span>
 <span>  nfolds   <span class="op">=</span> <span class="fl">5</span>,</span>
-<span>  criteria <span class="op">=</span> <span class="st">"V&amp;VH"</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+<span>  criteria <span class="op">=</span> <span class="st">"V&amp;VH"</span>,</span>
+<span>  seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
 <p>The cross-validated performance curve can be visualized using
 <code><a href="../reference/cv.plot.html">cv.plot()</a></code>:</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
@@ -385,11 +383,8 @@ generated automatically.</p>
 <span>  delta    <span class="op">=</span> <span class="va">delta_hd</span>,</span>
 <span>  time     <span class="op">=</span> <span class="va">time_hd</span>,</span>
 <span>  stratum  <span class="op">=</span> <span class="va">strat_hd</span>,</span>
-<span>  RS       <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  beta     <span class="op">=</span> <span class="va">beta_external_hd</span>,   <span class="co"># external coefficients (length 50)</span></span>
-<span>  eta      <span class="op">=</span> <span class="fl">1</span>,                  <span class="co"># KL integration weight</span></span>
-<span>  lambda   <span class="op">=</span> <span class="cn">NULL</span>,               <span class="co"># automatically generate a lambda sequence</span></span>
-<span>  message  <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  eta      <span class="op">=</span> <span class="fl">1</span>                  <span class="co"># KL integration weight</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>The fitted object stores, for each lambda value:</p>
 <ul>
@@ -476,8 +471,7 @@ folds.</li>
 <p>Example: tuning <code>eta</code> using 5-fold cross-validation and
 the <code>"V&amp;VH"</code> criterion:</p>
 <div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
-<span><span class="va">eta_grid_hd</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/generate_eta.html">generate_eta</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"exponential"</span>, n <span class="op">=</span> <span class="fl">10</span>, max_eta <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">eta_grid_hd</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/generate_eta.html">generate_eta</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"exponential"</span>, n <span class="op">=</span> <span class="fl">50</span>, max_eta <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">cv_ridge_hd</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cv.coxkl_ridge.html">cv.coxkl_ridge</a></span><span class="op">(</span></span>
 <span>  z           <span class="op">=</span> <span class="va">z_hd</span>,</span>
@@ -488,23 +482,62 @@ the <code>"V&amp;VH"</code> criterion:</p>
 <span>  etas        <span class="op">=</span> <span class="va">eta_grid_hd</span>,</span>
 <span>  nfolds      <span class="op">=</span> <span class="fl">5</span>,</span>
 <span>  cv.criteria <span class="op">=</span> <span class="st">"V&amp;VH"</span>,</span>
-<span>  message     <span class="op">=</span> <span class="cn">FALSE</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+<span>  seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
 <p>The best <code>lambda</code> for each <code>eta</code> (according to
 the chosen criterion) is provided by:</p>
 <div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cv_ridge_hd</span><span class="op">$</span><span class="va">integrated_stat.best_per_eta</span></span></code></pre></div>
-<pre><code><span><span class="co">##           eta       lambda     Loss</span></span>
-<span><span class="co">## 1    0.000000 1.025724e+02 2.821608</span></span>
-<span><span class="co">## 2    0.674849 3.624675e+01 2.805251</span></span>
-<span><span class="co">## 3    1.800565 5.639777e+00 2.776261</span></span>
-<span><span class="co">## 4    3.678373 6.166819e-01 2.745919</span></span>
-<span><span class="co">## 5    6.810744 8.639301e-03 2.732026</span></span>
-<span><span class="co">## 6   12.035855 8.698543e-03 2.732116</span></span>
-<span><span class="co">## 7   20.751866 8.734028e-03 2.735462</span></span>
-<span><span class="co">## 8   35.291047 8.755290e-03 2.738679</span></span>
-<span><span class="co">## 9   59.543864 8.768033e-03 2.741054</span></span>
-<span><span class="co">## 10 100.000000 8.775671e-03 2.742641</span></span></code></pre>
+<pre><code><span><span class="co">##             eta       lambda     Loss</span></span>
+<span><span class="co">## 1    0.00000000 1.025724e+02 2.821608</span></span>
+<span><span class="co">## 2    0.09953651 9.834014e+01 2.818411</span></span>
+<span><span class="co">## 3    0.20888146 9.449421e+01 2.815652</span></span>
+<span><span class="co">## 4    0.32900138 7.554877e+01 2.813131</span></span>
+<span><span class="co">## 5    0.46095806 5.515441e+01 2.810267</span></span>
+<span><span class="co">## 6    0.60591790 4.034998e+01 2.806921</span></span>
+<span><span class="co">## 7    0.76516225 2.957942e+01 2.803008</span></span>
+<span><span class="co">## 8    0.94009872 2.029238e+01 2.798498</span></span>
+<span><span class="co">## 9    1.13227362 1.545093e+01 2.793370</span></span>
+<span><span class="co">## 10   1.34338567 1.071272e+01 2.787729</span></span>
+<span><span class="co">## 11   1.57530093 7.423356e+00 2.781748</span></span>
+<span><span class="co">## 12   1.83006939 5.642671e+00 2.775576</span></span>
+<span><span class="co">## 13   2.10994303 3.906313e+00 2.769394</span></span>
+<span><span class="co">## 14   2.41739573 2.703155e+00 2.763368</span></span>
+<span><span class="co">## 15   2.75514517 1.869880e+00 2.757622</span></span>
+<span><span class="co">## 16   3.12617683 1.293037e+00 2.752276</span></span>
+<span><span class="co">## 17   3.53377037 7.421110e-01 2.747417</span></span>
+<span><span class="co">## 18   3.98152865 3.879752e-01 2.743117</span></span>
+<span><span class="co">## 19   4.47340953 1.057312e-01 2.739418</span></span>
+<span><span class="co">## 20   5.01376093 8.595137e-03 2.736400</span></span>
+<span><span class="co">## 21   5.60735916 8.612383e-03 2.734238</span></span>
+<span><span class="co">## 22   6.25945124 8.628077e-03 2.732777</span></span>
+<span><span class="co">## 23   6.97580122 8.642360e-03 2.731864</span></span>
+<span><span class="co">## 24   7.76274115 8.655359e-03 2.731377</span></span>
+<span><span class="co">## 25   8.62722703 8.667188e-03 2.731219</span></span>
+<span><span class="co">## 26   9.57690034 8.677955e-03 2.731312</span></span>
+<span><span class="co">## 27  10.62015555 8.687754e-03 2.731591</span></span>
+<span><span class="co">## 28  11.76621431 8.696673e-03 2.732009</span></span>
+<span><span class="co">## 29  13.02520701 8.704790e-03 2.732525</span></span>
+<span><span class="co">## 30  14.40826229 8.712178e-03 2.733107</span></span>
+<span><span class="co">## 31  15.92760542 8.718903e-03 2.733730</span></span>
+<span><span class="co">## 32  17.59666636 8.725024e-03 2.734376</span></span>
+<span><span class="co">## 33  19.43019846 8.730595e-03 2.735029</span></span>
+<span><span class="co">## 34  21.44440891 8.735666e-03 2.735677</span></span>
+<span><span class="co">## 35  23.65710197 8.740282e-03 2.736313</span></span>
+<span><span class="co">## 36  26.08783632 8.744483e-03 2.736929</span></span>
+<span><span class="co">## 37  28.75809801 8.748307e-03 2.737521</span></span>
+<span><span class="co">## 38  31.69149033 8.751788e-03 2.738086</span></span>
+<span><span class="co">## 39  34.91394249 8.754956e-03 2.738622</span></span>
+<span><span class="co">## 40  38.45393876 8.757841e-03 2.739128</span></span>
+<span><span class="co">## 41  42.34277030 8.760466e-03 2.739603</span></span>
+<span><span class="co">## 42  46.61481175 8.762856e-03 2.740048</span></span>
+<span><span class="co">## 43  51.30782504 8.765031e-03 2.740464</span></span>
+<span><span class="co">## 44  56.46329322 8.767011e-03 2.740851</span></span>
+<span><span class="co">## 45  62.12678712 8.768813e-03 2.741211</span></span>
+<span><span class="co">## 46  68.34836818 8.770454e-03 2.741544</span></span>
+<span><span class="co">## 47  75.18303094 8.771947e-03 2.741852</span></span>
+<span><span class="co">## 48  82.69118918 8.773307e-03 2.742137</span></span>
+<span><span class="co">## 49  90.93920990 8.774544e-03 2.742399</span></span>
+<span><span class="co">## 50 100.00000000 8.775671e-03 2.742641</span></span></code></pre>
 <p>As with low-dimensional models, the helper function
 <code><a href="../reference/cv.plot.html">cv.plot()</a></code> can be used to visualize performance versus
 <code>eta</code>:</p>
@@ -547,14 +580,10 @@ path:</p>
 <span>  delta    <span class="op">=</span> <span class="va">delta_hd</span>,</span>
 <span>  time     <span class="op">=</span> <span class="va">time_hd</span>,</span>
 <span>  stratum  <span class="op">=</span> <span class="va">strat_hd</span>,</span>
-<span>  RS       <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  beta     <span class="op">=</span> <span class="va">beta_external_hd</span>,   </span>
 <span>  eta      <span class="op">=</span> <span class="fl">1</span>,                 </span>
-<span>  alpha    <span class="op">=</span> <span class="fl">1</span>,                  <span class="co"># LASSO penalty</span></span>
-<span>  lambda   <span class="op">=</span> <span class="cn">NULL</span>,              </span>
-<span>  message  <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  alpha    <span class="op">=</span> <span class="fl">1</span>                  <span class="co"># LASSO penalty</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## External beta information is used.</span></span></code></pre>
 <p>The fitted object stores, for each lambda value:</p>
 <ul>
 <li>
@@ -571,7 +600,7 @@ the lambda path,</li>
 </ul>
 <p>The S3 method <code><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef()</a></code> extracts the estimated
 coefficients:</p>
-<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">model_enet</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span></span></code></pre></div>
 <pre><code><span><span class="co">##    0.0853     0.0796     0.0742     0.0692     0.0645</span></span>
 <span><span class="co">## Z1      0 0.00000000 0.00000000 0.00000000 0.00000000</span></span>
@@ -581,14 +610,14 @@ coefficients:</p>
 <span><span class="co">## Z5      0 0.01945713 0.03849402 0.05620049 0.07282693</span></span></code></pre>
 <p>To extract coefficients corresponding to a specific
 <code>lambda</code>:</p>
-<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">lambda_target</span> <span class="op">&lt;-</span> <span class="va">model_enet</span><span class="op">$</span><span class="va">lambda</span><span class="op">[</span><span class="fl">5</span><span class="op">]</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">model_enet</span>, lambda <span class="op">=</span> <span class="va">lambda_target</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] 0.00000000 0.00000000 0.00000000 0.00000000 0.07282693</span></span></code></pre>
 <p>Objects of class <code>coxkl_enet</code> can be visualized using the
 S3 method <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code>, and default is to plot loss versus
 <code>lambda</code>:</p>
-<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span></span>
 <span>  <span class="va">model_enet</span>,</span>
 <span>  test_z <span class="op">=</span> <span class="va">test_hd</span><span class="op">$</span><span class="va">z</span>,</span>
@@ -601,11 +630,9 @@ S3 method <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="ex
 <p>Similar, the function <code>cv.coxkl_enet</code> extends the above
 fitting procedure by performing K-fold cross-validation over a supplied
 grid of eta values:</p>
-<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">eta_grid_hd</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/generate_eta.html">generate_eta</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"exponential"</span>,</span>
-<span>                            n <span class="op">=</span> <span class="fl">10</span>,</span>
+<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">eta_grid_hd</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/generate_eta.html">generate_eta</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"exponential"</span>,</span>
+<span>                            n <span class="op">=</span> <span class="fl">50</span>,</span>
 <span>                            max_eta <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">cv_enet_hd</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cv.coxkl_enet.html">cv.coxkl_enet</a></span><span class="op">(</span></span>
@@ -613,16 +640,15 @@ grid of eta values:</p>
 <span>  delta <span class="op">=</span> <span class="va">delta_hd</span>,</span>
 <span>  time <span class="op">=</span> <span class="va">time_hd</span>,</span>
 <span>  stratum <span class="op">=</span> <span class="va">strat_hd</span>,</span>
-<span>  RS <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  beta <span class="op">=</span> <span class="va">beta_external_hd</span>,</span>
 <span>  etas <span class="op">=</span> <span class="va">eta_grid_hd</span>,</span>
 <span>  alpha <span class="op">=</span> <span class="fl">1</span>, <span class="co"># LASSO</span></span>
 <span>  nfolds <span class="op">=</span> <span class="fl">5</span>,</span>
 <span>  cv.criteria <span class="op">=</span> <span class="st">"V&amp;VH"</span>,</span>
-<span>  message <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  seed <span class="op">=</span> <span class="fl">1</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>CV results can be visualized using <code><a href="../reference/cv.plot.html">cv.plot()</a></code>:</p>
-<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/cv.plot.html">cv.plot</a></span><span class="op">(</span><span class="va">cv_enet_hd</span><span class="op">)</span></span></code></pre></div>
 <p><img src="survkl_files/figure-html/unnamed-chunk-27-1.png" class="r-plt" alt="Plot generated in survkl vignette" width="700"></p>
 </div>

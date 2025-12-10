@@ -50,6 +50,10 @@ plot(
 
   Additional arguments (ignored).
 
+## Value
+
+A `ggplot` object showing the performance curve.
+
 ## Details
 
 When `criteria = "loss"` and no test data are supplied, the plotted
@@ -57,13 +61,30 @@ values are `-2 * object$likelihood` (no normalization). When test data
 are provided, performance is computed via `test_eval(..., criteria)`.
 The x-axis is shown in decreasing `lambda` with a reversed log10 scale.
 
-data(ExampleData_highdim)
+## Examples
 
-train_dat_highdim \<- ExampleData_highdim\$train beta_external_highdim
-\<- ExampleData_highdim\$beta_external
+``` r
+data(ExampleData_highdim) 
 
-model_ridge \<- coxkl_ridge(z = train_dat_highdim\$z, delta =
-train_dat_highdim\$status, time = train_dat_highdim\$time, stratum =
-NULL, RS = NULL, beta = beta_external_highdim, message = TRUE)
+train_dat_highdim <- ExampleData_highdim$train
+test_dat_highdim <- ExampleData_highdim$test
+beta_external_highdim <- ExampleData_highdim$beta_external
 
-plot(model_ridge)
+
+model_ridge <- coxkl_ridge(z = train_dat_highdim$z,
+                           delta = train_dat_highdim$status,
+                           time = train_dat_highdim$time,
+                           beta = beta_external_highdim,
+                           eta = 1)
+#> Warning: Stratum information not provided. All data is assumed to originate from a single stratum!
+
+plot(
+  model_ridge,
+  test_z       = test_dat_highdim$z,
+  test_time    = test_dat_highdim$time,
+  test_delta   = test_dat_highdim$status,
+  test_stratum = test_dat_highdim$stratum,
+  criteria     = "CIndex"
+)
+
+```

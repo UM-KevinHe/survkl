@@ -19,18 +19,18 @@
 #' Each column corresponds to one value of \code{eta}, sorted in ascending order.
 #'
 #' @examples
-#' data(Exampledata_lowdim)
+#' data(ExampleData_lowdim)
 #' 
 #' train_dat_lowdim <- ExampleData_lowdim$train
 #' beta_external_good_lowdim <- ExampleData_lowdim$beta_external_good
+#' eta_list <- generate_eta(method = "exponential", n = 5, max_eta = 5)
 #' 
 #' model <- coxkl(z = train_dat_lowdim$z,
 #'                delta = train_dat_lowdim$status,
 #'                time = train_dat_lowdim$time,
 #'                stratum = train_dat_lowdim$stratum,
-#'                RS = NULL,
 #'                beta = beta_external_good_lowdim,
-#'                etas = c(0:5))
+#'                etas = eta_list)
 #' coef(model)
 #'
 #' @exportS3Method coef coxkl
@@ -121,11 +121,9 @@ coef.coxkl <- function(object, eta = NULL, ...) {
 #' model_ridge <- coxkl_ridge(z = train_dat_highdim$z,
 #'                            delta = train_dat_highdim$status,
 #'                            time = train_dat_highdim$time,
-#'                            stratum = NULL,
-#'                            RS = NULL,
 #'                            beta = beta_external_highdim,
-#'                            message = TRUE)
-#' coef(model_ridge)
+#'                            eta = 1)
+#' coef(model_ridge)[1:5, 1:10]
 #'
 #' @exportS3Method coef coxkl_ridge
 coef.coxkl_ridge <- function(object, lambda = NULL, ...) {
@@ -208,21 +206,19 @@ coef.coxkl_ridge <- function(object, lambda = NULL, ...) {
 #' value of \code{lambda}, sorted in \emph{descending} order.
 #' 
 #' @examples
-#' data(ExampleData_highdim) 
+#' data(ExampleData_highdim)
 #' 
 #' train_dat_highdim <- ExampleData_highdim$train
 #' beta_external_highdim <- ExampleData_highdim$beta_external
 #' 
+#' 
 #' enet_model <- coxkl_enet(z = train_dat_highdim$z,
 #'                          delta = train_dat_highdim$status,
 #'                          time = train_dat_highdim$time,
-#'                          stratum = NULL,
-#'                          RS = NULL,
 #'                          beta = beta_external_highdim,
-#'                          eta = 0,
-#'                          alpha = 1.0,
-#'                          message = TRUE)
-#' coef(enet_model)                         
+#'                          eta = 1,
+#'                          alpha = 1.0)
+#' coef(enet_model)[1:5, 1:10]
 #'    
 #' @exportS3Method coef coxkl_enet
 coef.coxkl_enet <- function(object, lambda = NULL, ...) {

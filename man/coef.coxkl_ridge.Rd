@@ -36,10 +36,8 @@ beta_external_highdim <- ExampleData_highdim$beta_external
 model_ridge <- coxkl_ridge(z = train_dat_highdim$z,
                            delta = train_dat_highdim$status,
                            time = train_dat_highdim$time,
-                           stratum = NULL,
-                           RS = NULL,
                            beta = beta_external_highdim,
-                           message = TRUE)
-coef(model_ridge)
+                           eta = 1)
+coef(model_ridge)[1:5, 1:10]
 
 }

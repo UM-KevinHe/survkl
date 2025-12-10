@@ -92,24 +92,45 @@ If no test data are provided, the curve uses the training data stored in <code>o
 
 </dl></div>
     <div class="section level2">
+    <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
+    <p>A <code>ggplot</code> object showing the performance curve.</p>
+    </div>
+    <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>When <code>criteria = "loss"</code> and no test data are supplied, the plotted values are
 <code>-2 * object$likelihood</code> (no normalization). When test data are provided,
 performance is computed via <code>test_eval(..., criteria)</code>. The x-axis is shown
 in decreasing <code>lambda</code> with a reversed log10 scale.</p>
-<p>data(ExampleData_highdim)</p>
-<p>train_dat_highdim &lt;- ExampleData_highdim$train
-beta_external_highdim &lt;- ExampleData_highdim$beta_external</p>
-<p>model_ridge &lt;- coxkl_ridge(z = train_dat_highdim$z,
-delta = train_dat_highdim$status,
-time = train_dat_highdim$time,
-stratum = NULL,
-RS = NULL,
-beta = beta_external_highdim,
-message = TRUE)</p>
-<p>plot(model_ridge)</p>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">ExampleData_highdim</span><span class="op">)</span> </span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">train_dat_highdim</span> <span class="op">&lt;-</span> <span class="va">ExampleData_highdim</span><span class="op">$</span><span class="va">train</span></span></span>
+<span class="r-in"><span><span class="va">test_dat_highdim</span> <span class="op">&lt;-</span> <span class="va">ExampleData_highdim</span><span class="op">$</span><span class="va">test</span></span></span>
+<span class="r-in"><span><span class="va">beta_external_highdim</span> <span class="op">&lt;-</span> <span class="va">ExampleData_highdim</span><span class="op">$</span><span class="va">beta_external</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">model_ridge</span> <span class="op">&lt;-</span> <span class="fu"><a href="coxkl_ridge.html">coxkl_ridge</a></span><span class="op">(</span>z <span class="op">=</span> <span class="va">train_dat_highdim</span><span class="op">$</span><span class="va">z</span>,</span></span>
+<span class="r-in"><span>                           delta <span class="op">=</span> <span class="va">train_dat_highdim</span><span class="op">$</span><span class="va">status</span>,</span></span>
+<span class="r-in"><span>                           time <span class="op">=</span> <span class="va">train_dat_highdim</span><span class="op">$</span><span class="va">time</span>,</span></span>
+<span class="r-in"><span>                           beta <span class="op">=</span> <span class="va">beta_external_highdim</span>,</span></span>
+<span class="r-in"><span>                           eta <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Stratum information not provided. All data is assumed to originate from a single stratum!</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="va">model_ridge</span>,</span></span>
+<span class="r-in"><span>  test_z       <span class="op">=</span> <span class="va">test_dat_highdim</span><span class="op">$</span><span class="va">z</span>,</span></span>
+<span class="r-in"><span>  test_time    <span class="op">=</span> <span class="va">test_dat_highdim</span><span class="op">$</span><span class="va">time</span>,</span></span>
+<span class="r-in"><span>  test_delta   <span class="op">=</span> <span class="va">test_dat_highdim</span><span class="op">$</span><span class="va">status</span>,</span></span>
+<span class="r-in"><span>  test_stratum <span class="op">=</span> <span class="va">test_dat_highdim</span><span class="op">$</span><span class="va">stratum</span>,</span></span>
+<span class="r-in"><span>  criteria     <span class="op">=</span> <span class="st">"CIndex"</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="plot.coxkl_ridge-1.png" alt="" width="700" height="433"></span>
+<span class="r-in"><span></span></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 

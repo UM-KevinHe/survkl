@@ -99,23 +99,17 @@ The function also computes an external baseline statistic from \code{RS} using t
 same criterion for comparison.
 }
 \examples{
-data(Exampledata_lowdim)
+data(ExampleData_lowdim)
 
 train_dat_lowdim <- ExampleData_lowdim$train
 beta_external_good_lowdim <- ExampleData_lowdim$beta_external_good
 
 etas <- generate_eta(method = "exponential", n = 10, max_eta = 5)
-etas <- sample(etas)
 
 cv_res <- cv.coxkl(z = train_dat_lowdim$z,
                    delta = train_dat_lowdim$status,
                    time = train_dat_lowdim$time,
-                   stratum = NULL,
-                   RS = NULL,
                    beta = beta_external_good_lowdim,
-                   etas = etas,
-                   nfolds = 5,
-                   criteria = c("LinPred"),
-                   message = TRUE)
+                   etas = etas)
                     
 }

@@ -217,7 +217,6 @@ the per-<code>eta</code> optimum, corresponding coefficients, and an external ba
 <span class="r-in"><span><span class="va">beta_external_highdim</span> <span class="op">&lt;-</span> <span class="va">ExampleData_highdim</span><span class="op">$</span><span class="va">beta_external</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">etas</span> <span class="op">&lt;-</span> <span class="fu"><a href="generate_eta.html">generate_eta</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"exponential"</span>, n <span class="op">=</span> <span class="fl">10</span>, max_eta <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">etas</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="va">etas</span><span class="op">)</span> </span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">cv_res</span> <span class="op">&lt;-</span> <span class="fu">cv.coxkl_enet</span><span class="op">(</span>z <span class="op">=</span> <span class="va">train_dat_highdim</span><span class="op">$</span><span class="va">z</span>,</span></span>
 <span class="r-in"><span>                        delta <span class="op">=</span> <span class="va">train_dat_highdim</span><span class="op">$</span><span class="va">status</span>,</span></span>
@@ -226,13 +225,8 @@ the per-<code>eta</code> optimum, corresponding coefficients, and an external ba
 <span class="r-in"><span>                        RS <span class="op">=</span> <span class="cn">NULL</span>,</span></span>
 <span class="r-in"><span>                        beta <span class="op">=</span> <span class="va">beta_external_highdim</span>,</span></span>
 <span class="r-in"><span>                        etas <span class="op">=</span> <span class="va">etas</span>,</span></span>
-<span class="r-in"><span>                        alpha <span class="op">=</span> <span class="fl">1.0</span>,</span></span>
-<span class="r-in"><span>                        nfolds <span class="op">=</span> <span class="fl">5</span>, </span></span>
-<span class="r-in"><span>                        cv.criteria <span class="op">=</span> <span class="st">"CIndex_pooled"</span>,</span></span>
-<span class="r-in"><span>                        message <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span>                        alpha <span class="op">=</span> <span class="fl">1.0</span><span class="op">)</span></span></span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Stratum not provided. Treating all data as one stratum.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Cross-validation over etas sequence:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   |                                      |                              |   0%  |                                      |===                           |  10%  |                                      |======                        |  20%  |                                      |=========                     |  30%  |                                      |============                  |  40%  |                                      |===============               |  50%  |                                      |==================            |  60%  |                                      |=====================         |  70%  |                                      |========================      |  80%  |                                      |===========================   |  90%  |                                      |==============================| 100%</span>
 <span class="r-in"><span>   </span></span>
 </code></pre></div>
     </div>

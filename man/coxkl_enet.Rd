@@ -182,12 +182,9 @@ beta_external_highdim <- ExampleData_highdim$beta_external
 model_enet <- coxkl_enet(z = train_dat_highdim$z,
                          delta = train_dat_highdim$status,
                          time = train_dat_highdim$time,
-                         stratum = NULL,
-                         RS = NULL,
                          beta = beta_external_highdim,
                          eta = 0,
-                         alpha = 1.0,
-                         message = TRUE)
+                         alpha = 1.0)
 
 }
 \seealso{

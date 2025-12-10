@@ -29,6 +29,9 @@
 
 \item{...}{Additional arguments (ignored).}
 }
+\value{
+A \code{ggplot} object showing the performance curve.
+}
 \description{
 Plots model performance across the \code{lambda} sequence. Performance is
 loss (\code{-2} times partial log-likelihood) or concordance index (C-index).
@@ -39,19 +42,28 @@ When \code{criteria = "loss"} and no test data are supplied, the plotted values 
 \code{-2 * object$likelihood} (no normalization). When test data are provided,
 performance is computed via \code{test_eval(..., criteria)}. The x-axis is shown
 in decreasing \code{lambda} with a reversed log10 scale.
-
-data(ExampleData_highdim)
+}
+\examples{
+data(ExampleData_highdim) 
 
 train_dat_highdim <- ExampleData_highdim$train
+test_dat_highdim <- ExampleData_highdim$test
 beta_external_highdim <- ExampleData_highdim$beta_external
 
-model_ridge <- coxkl_ridge(z = train_dat_highdim$z,
-delta = train_dat_highdim$status,
-time = train_dat_highdim$time,
-stratum = NULL,
-RS = NULL,
-beta = beta_external_highdim,
-message = TRUE)
 
-plot(model_ridge)
+model_ridge <- coxkl_ridge(z = train_dat_highdim$z,
+                           delta = train_dat_highdim$status,
+                           time = train_dat_highdim$time,
+                           beta = beta_external_highdim,
+                           eta = 1)
+
+plot(
+  model_ridge,
+  test_z       = test_dat_highdim$z,
+  test_time    = test_dat_highdim$time,
+  test_delta   = test_dat_highdim$status,
+  test_stratum = test_dat_highdim$stratum,
+  criteria     = "CIndex"
+)
+
 }

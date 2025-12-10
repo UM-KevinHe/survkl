@@ -67,20 +67,20 @@ The x-axis is shown in decreasing `lambda` with a reversed log10 scale.
 data(ExampleData_highdim) 
 
 train_dat_highdim <- ExampleData_highdim$train
+test_dat_highdim <- ExampleData_highdim$test
 beta_external_highdim <- ExampleData_highdim$beta_external
 
 model_enet <- coxkl_enet(z = train_dat_highdim$z,
                          delta = train_dat_highdim$status,
                          time = train_dat_highdim$time,
-                         stratum = NULL,
-                         RS = NULL,
                          beta = beta_external_highdim,
-                         eta = 0,
-                         alpha = 1.0,
-                         message = TRUE)
-#> External beta information is used.
-#> Warning: Stratum information not provided. All data is assumed to originate from a single stratum!
-                         
-plot(model_enet)
+                         eta = 1,
+                         alpha = 1.0)
+plot(model_enet,
+     test_z = test_dat_highdim$z,
+     test_time = test_dat_highdim$time,
+     test_delta = test_dat_highdim$status,
+     test_stratum = test_dat_highdim$stratum,
+     criteria = "loss")
 
 ```

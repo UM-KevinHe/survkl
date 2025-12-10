@@ -189,8 +189,6 @@ It supports four criteria:
 Below is an example using the default `"V&VH"` criterion:
 
 ```{r}
-set.seed(1)
-
 cv_lowdim <- cv.coxkl(
   z        = z,
   delta    = delta,
@@ -199,8 +197,8 @@ cv_lowdim <- cv.coxkl(
   beta     = beta_ext,
   etas     = eta_grid,
   nfolds   = 5,
-  criteria = "V&VH"
-)
+  criteria = "V&VH",
+  seed = 1)
 ```
 
 The cross-validated performance curve can be visualized using `cv.plot()`:
@@ -274,11 +272,8 @@ model_ridge <- coxkl_ridge(
   delta    = delta_hd,
   time     = time_hd,
   stratum  = strat_hd,
-  RS       = NULL,
   beta     = beta_external_hd,   # external coefficients (length 50)
-  eta      = 1,                  # KL integration weight
-  lambda   = NULL,               # automatically generate a lambda sequence
-  message  = FALSE
+  eta      = 1                  # KL integration weight
 )
 ```
 The fitted object stores, for each lambda value:
@@ -343,8 +338,7 @@ Supported criteria are:
 Example: tuning `eta` using 5-fold cross-validation and the `"V&VH"` criterion:
 
 ```{r}
-set.seed(1)
-eta_grid_hd <- generate_eta(method = "exponential", n = 10, max_eta = 100)
+eta_grid_hd <- generate_eta(method = "exponential", n = 50, max_eta = 100)
 
 cv_ridge_hd <- cv.coxkl_ridge(
   z           = z_hd,
@@ -355,8 +349,7 @@ cv_ridge_hd <- cv.coxkl_ridge(
   etas        = eta_grid_hd,
   nfolds      = 5,
   cv.criteria = "V&VH",
-  message     = FALSE
-)
+  seed = 1)
 ```
 
 
@@ -399,12 +392,9 @@ model_enet <- coxkl_enet(
   delta    = delta_hd,
   time     = time_hd,
   stratum  = strat_hd,
-  RS       = NULL,
   beta     = beta_external_hd,   
   eta      = 1,                 
-  alpha    = 1,                  # LASSO penalty
-  lambda   = NULL,              
-  message  = TRUE
+  alpha    = 1                  # LASSO penalty
 )
 ```
 
@@ -443,10 +433,8 @@ plot(
 
 Similar, the function `cv.coxkl_enet` extends the above fitting procedure by performing K-fold cross-validation over a supplied grid of eta values:
 ```{r}
-set.seed(1)
-
 eta_grid_hd <- generate_eta(method = "exponential",
-                            n = 10,
+                            n = 50,
                             max_eta = 100)
 
 cv_enet_hd <- cv.coxkl_enet(
@@ -454,13 +442,12 @@ cv_enet_hd <- cv.coxkl_enet(
   delta = delta_hd,
   time = time_hd,
   stratum = strat_hd,
-  RS = NULL,
   beta = beta_external_hd,
   etas = eta_grid_hd,
   alpha = 1, # LASSO
   nfolds = 5,
   cv.criteria = "V&VH",
-  message = FALSE
+  seed = 1
 )
 ```
 CV results can be visualized using `cv.plot()`:

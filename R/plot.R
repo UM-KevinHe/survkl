@@ -27,21 +27,26 @@
 #' @return A \code{ggplot} object showing the performance curve.
 #' 
 #' @examples
-#' data(Exampledata_lowdim)
+#' data(ExampleData_lowdim)
 #' 
-#' train_dat_lowdim <- ExampleData_lowdim$train
+#' train_dat_lowdim  <- ExampleData_lowdim$train
+#' test_dat_lowdim   <- ExampleData_lowdim$test
 #' beta_external_good_lowdim <- ExampleData_lowdim$beta_external_good
+#' eta_grid <- generate_eta(method = "exponential", n = 100, max_eta = 30)
 #' 
 #' model <- coxkl(z = train_dat_lowdim$z,
 #'                delta = train_dat_lowdim$status,
 #'                time = train_dat_lowdim$time,
 #'                stratum = train_dat_lowdim$stratum,
-#'                RS = NULL,
 #'                beta = beta_external_good_lowdim,
-#'                etas = c(0:5))
-#'      
-#' plot(model)      
-#'      
+#'                etas = eta_grid)
+#' plot(model,
+#'      test_z = test_dat_lowdim$z, 
+#'      test_time = test_dat_lowdim$time, 
+#'      test_delta = test_dat_lowdim$status, 
+#'      test_stratum = test_dat_lowdim$stratum, 
+#'      criteria = "loss")
+#' 
 #' @importFrom ggplot2 ggplot aes geom_line geom_point geom_segment labs coord_cartesian
 #' @importFrom ggplot2 theme_minimal theme element_blank element_line element_text
 #' @importFrom grid unit
@@ -176,20 +181,29 @@ plot.coxkl <- function(object, test_z = NULL, test_time = NULL, test_delta = NUL
 #' performance is computed via \code{test_eval(..., criteria)}. The x-axis is shown
 #' in decreasing \code{lambda} with a reversed log10 scale.
 #' 
+#' @return A \code{ggplot} object showing the performance curve.
+#' @examples
 #' data(ExampleData_highdim) 
 #' 
 #' train_dat_highdim <- ExampleData_highdim$train
+#' test_dat_highdim <- ExampleData_highdim$test
 #' beta_external_highdim <- ExampleData_highdim$beta_external
+#' 
 #' 
 #' model_ridge <- coxkl_ridge(z = train_dat_highdim$z,
 #'                            delta = train_dat_highdim$status,
 #'                            time = train_dat_highdim$time,
-#'                            stratum = NULL,
-#'                            RS = NULL,
 #'                            beta = beta_external_highdim,
-#'                            message = TRUE)
-#'  
-#' plot(model_ridge)
+#'                            eta = 1)
+#'
+#' plot(
+#'   model_ridge,
+#'   test_z       = test_dat_highdim$z,
+#'   test_time    = test_dat_highdim$time,
+#'   test_delta   = test_dat_highdim$status,
+#'   test_stratum = test_dat_highdim$stratum,
+#'   criteria     = "CIndex"
+#' )
 #' 
 #' @importFrom ggplot2 ggplot aes geom_line geom_point labs coord_cartesian scale_x_reverse
 #' @importFrom ggplot2 theme_minimal theme element_blank element_line element_text
@@ -302,19 +316,21 @@ plot.coxkl_ridge <- function(object, test_z = NULL, test_time = NULL, test_delta
 #' data(ExampleData_highdim) 
 #' 
 #' train_dat_highdim <- ExampleData_highdim$train
+#' test_dat_highdim <- ExampleData_highdim$test
 #' beta_external_highdim <- ExampleData_highdim$beta_external
 #' 
 #' model_enet <- coxkl_enet(z = train_dat_highdim$z,
 #'                          delta = train_dat_highdim$status,
 #'                          time = train_dat_highdim$time,
-#'                          stratum = NULL,
-#'                          RS = NULL,
 #'                          beta = beta_external_highdim,
-#'                          eta = 0,
-#'                          alpha = 1.0,
-#'                          message = TRUE)
-#'                          
-#' plot(model_enet)
+#'                          eta = 1,
+#'                          alpha = 1.0)
+#' plot(model_enet,
+#'      test_z = test_dat_highdim$z,
+#'      test_time = test_dat_highdim$time,
+#'      test_delta = test_dat_highdim$status,
+#'      test_stratum = test_dat_highdim$stratum,
+#'      criteria = "loss")
 #'
 #' @importFrom ggplot2 ggplot aes geom_line geom_point labs coord_cartesian scale_x_reverse
 #' @importFrom ggplot2 theme_minimal theme element_blank element_line element_text

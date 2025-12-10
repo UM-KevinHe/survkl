@@ -85,7 +85,6 @@
 #' beta_external_highdim <- ExampleData_highdim$beta_external
 #' 
 #' etas <- generate_eta(method = "exponential", n = 10, max_eta = 100)
-#' etas <- sample(etas) 
 #' 
 #' cv_res <- cv.coxkl_enet(z = train_dat_highdim$z,
 #'                         delta = train_dat_highdim$status,
@@ -94,10 +93,7 @@
 #'                         RS = NULL,
 #'                         beta = beta_external_highdim,
 #'                         etas = etas,
-#'                         alpha = 1.0,
-#'                         nfolds = 5, 
-#'                         cv.criteria = "CIndex_pooled",
-#'                         message = TRUE)
+#'                         alpha = 1.0)
 #'    
 #' @importFrom utils txtProgressBar setTxtProgressBar
 #' @export

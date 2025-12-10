@@ -56,10 +56,7 @@
 #' model_ridge <- coxkl_ridge(z = train_dat_highdim$z,
 #'                            delta = train_dat_highdim$status,
 #'                            time = train_dat_highdim$time,
-#'                            stratum = NULL,
-#'                            RS = NULL,
-#'                            beta = beta_external_highdim,
-#'                            message = TRUE)
+#'                            beta = beta_external_highdim)
 #' 
 #' @importFrom utils txtProgressBar setTxtProgressBar
 #' 

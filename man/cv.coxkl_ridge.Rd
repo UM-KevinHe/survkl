@@ -110,16 +110,10 @@ train_dat_highdim <- ExampleData_highdim$train
 beta_external_highdim <- ExampleData_highdim$beta_external
 
 etas <- generate_eta(method = "exponential", n = 10, max_eta = 100)
-etas <- sample(etas)
 cv_res <- cv.coxkl_ridge(z = train_dat_highdim$z,
                          delta = train_dat_highdim$status,
                          time = train_dat_highdim$time,
-                         stratum = NULL,
-                         RS = NULL,
                          beta = beta_external_highdim,
-                         etas = etas,
-                         nfolds = 5, 
-                         cv.criteria = "CIndex_pooled",
-                         message = TRUE)
+                         etas = etas)
 }
 }

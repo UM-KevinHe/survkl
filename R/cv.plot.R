@@ -37,20 +37,17 @@
 #' train_dat_lowdim <- ExampleData_lowdim$train
 #' beta_external_good_lowdim <- ExampleData_lowdim$beta_external_good
 #' 
-#' etas <- generate_eta(method = "exponential", n = 10, max_eta = 5)
-#' etas <- sample(etas)
-#' 
+#' etas <- generate_eta(method = "exponential", n = 100, max_eta = 30)
 #' cv_res <- cv.coxkl(z = train_dat_lowdim$z,
 #'                    delta = train_dat_lowdim$status,
 #'                    time = train_dat_lowdim$time,
-#'                    stratum = NULL,
-#'                    RS = NULL,
+#'                    stratrum = train_dat_lowdim$stratum,
 #'                    beta = beta_external_good_lowdim,
 #'                    etas = etas,
 #'                    nfolds = 5,
-#'                    criteria = c("LinPred"), 
-#'                    message = TRUE)
-#' 
+#'                    criteria = c("V&VH"),
+#'                    seed = 1)
+#' cv.plot(cv_res)
 #' 
 #' @importFrom ggplot2 ggplot aes geom_line geom_point geom_segment labs theme_minimal theme
 #' @importFrom ggplot2 element_blank element_line element_text
