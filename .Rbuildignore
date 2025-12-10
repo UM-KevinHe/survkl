@@ -3,6 +3,7 @@
 ^src/.*\.tmp$
 ^\.github$
 ^\.github/
+^\.RDataTmp$
 
 ^LICENSE\.md$
 

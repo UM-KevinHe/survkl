@@ -29,6 +29,7 @@
 #' probability for subject \code{i} evaluated at the \code{j}-th sorted time
 #' point.
 #'
+#' @importFrom stats ave
 #' @export
 cal_surv_prob <- function(z, delta, time, beta, stratum) {
   if (missing(stratum)) {

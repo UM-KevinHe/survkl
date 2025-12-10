@@ -76,7 +76,7 @@
 #'                    beta = beta_external_good_lowdim,
 #'                    etas = etas,
 #'                    nfolds = 5,
-#'                    criteria = c("LinPred"),   #"V&VH", "LinPred", "CIndex_pooled", "CIndex_foldaverage"
+#'                    criteria = c("LinPred"),
 #'                    message = TRUE)
 #'                     
 #' @importFrom utils txtProgressBar setTxtProgressBar

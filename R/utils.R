@@ -226,6 +226,7 @@ subsetG <- function(g, nz) { # nz: index of non-constant features
 }
 
 # reorder group index of features
+#' @importFrom stats relevel
 reorderG <- function(g, m) {
   og <- g
   lev <- attr(g, 'levels')
