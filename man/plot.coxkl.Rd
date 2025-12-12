@@ -5,7 +5,7 @@
 \title{Plot Model Performance vs Eta for \code{coxkl}}
 \usage{
 \method{plot}{coxkl}(
-  object,
+  x,
   test_z = NULL,
   test_time = NULL,
   test_delta = NULL,
@@ -15,7 +15,7 @@
 )
 }
 \arguments{
-\item{object}{A fitted model object of class \code{"coxkl"}.}
+\item{x}{A fitted model object of class \code{"coxkl"}.}
 
 \item{test_z}{Optional numeric matrix of test covariates.}
 
@@ -36,11 +36,11 @@ A \code{ggplot} object showing the performance curve.
 Plots model performance across the \code{eta} sequence. Performance is either
 loss (\code{-2} times partial log-likelihood) or concordance index (C-index).
 If no test data are provided, the curve is computed on the training data stored
-in \code{object$data}.
+in \code{x$data}.
 }
 \details{
 When \code{criteria = "loss"} and no test data are supplied, the plotted values are
-\code{(-2 * object$likelihood) / n}, where \code{n} is the number of rows in the
+\code{(-2 * x$likelihood) / n}, where \code{n} is the number of rows in the
 (training) data. When test data are provided, performance is computed via
 \code{test_eval(..., criteria = "loss")} and divided by the test sample size.
 For \code{criteria = "CIndex"}, performance is computed via

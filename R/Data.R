@@ -223,7 +223,7 @@
 #' 
 #' 
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' data(support)
 #' set.seed(123)
 #'
@@ -258,7 +258,7 @@
 #' internal_data <- data[idx_int, ]
 #' test_data      <- data[idx_test, ]
 #'
-#' library(survival)
+#' # library(survival)
 #' ext_cox <- coxph(
 #'   Surv(time, death) ~ age_50 + age_50_59 + age_70 + diabetes + male,
 #'   data = external_data

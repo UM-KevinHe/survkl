@@ -49,10 +49,10 @@
 #'                    seed = 1)
 #' cv.plot(cv_res)
 #' 
-#' @importFrom ggplot2 ggplot aes geom_line geom_point geom_segment labs theme_minimal theme
-#' @importFrom ggplot2 element_blank element_line element_text
+#' @importFrom ggplot2 ggplot scale_color_manual scale_linetype_manual guides guide_legend coord_cartesian aes geom_line geom_point geom_segment labs theme_minimal theme element_blank element_line element_text
 #' @importFrom grid unit
 #' @importFrom cowplot plot_grid get_legend
+#' @importFrom rlang .data
 #' @export
 cv.plot <- function(object,
                     line_color = "#7570B3",
@@ -101,22 +101,22 @@ cv.plot <- function(object,
   ylow  <- min(c(df$metric, baseline_val), na.rm = TRUE) * 0.995
   yhigh <- max(c(df$metric, baseline_val), na.rm = TRUE) * 1.005
   
-  g_main <- ggplot2::ggplot(df, ggplot2::aes(x = eta, y = metric, group = 1)) +
-    ggplot2::geom_line(linewidth = 1, color = line_color) +
-    ggplot2::geom_point(size = 1.3, color = line_color) +
-    ggplot2::geom_segment(
+  g_main <- ggplot(df, aes(x = .data$eta, y = .data$metric, group = 1)) +
+    geom_line(linewidth = 1, color = line_color) +
+    geom_point(size = 1.3, color = line_color) +
+    geom_segment(
       data = data.frame(xmin = xmin, xmax = xmax, y = baseline_val),
-      ggplot2::aes(x = xmin, xend = xmax, y = y, yend = y),
+      aes(x = .data$xmin, xend = .data$xmax, y = .data$y, yend = .data$y),
       inherit.aes = FALSE, color = baseline_color, linetype = "dotted", linewidth = 1
     ) +
-    ggplot2::geom_point(
+    geom_point(
       data = data.frame(eta = baseline_eta, metric = baseline_val),
-      ggplot2::aes(x = eta, y = metric),
+      aes(x = .data$eta, y = .data$metric),
       inherit.aes = FALSE, color = baseline_color, shape = 16, size = 2.4
     ) +
     ggplot2::geom_segment(
       data = data.frame(x = opt_eta),
-      ggplot2::aes(x = x, xend = x, y = ylow, yend = yhigh),
+      ggplot2::aes(x = .data$x, xend = .data$x, y = ylow, yend = yhigh),
       inherit.aes = FALSE, color = "#D95F02", linewidth = 1, linetype = "dashed"
     ) +
     ggplot2::labs(x = expression(eta), y = ylab) +
@@ -137,11 +137,14 @@ cv.plot <- function(object,
                     levels = c("survkl", "Internal"))
   )
   
-  g_legend <- ggplot2::ggplot(legend_df, ggplot2::aes(x = x, y = y, color = Method, linetype = Method)) +
+  internal_df <- legend_df[legend_df$Method == "Internal", , drop = FALSE]
+  
+  g_legend <- ggplot2::ggplot(legend_df, ggplot2::aes(x = .data$x, y = .data$y, 
+                                                      color = .data$Method, linetype = .data$Method)) +
     ggplot2::geom_line(linewidth = 1) +
     ggplot2::geom_point(
-      data = subset(legend_df, Method == "Internal"),
-      ggplot2::aes(x = 0.5, y = 1, color = Method),
+      data = internal_df,
+      ggplot2::aes(x = 0.5, y = 1, color = .data$Method),
       inherit.aes = FALSE, shape = 16, size = 2.4
     ) +
     ggplot2::scale_color_manual(values = c("survkl" = line_color, "Internal" = baseline_color)) +

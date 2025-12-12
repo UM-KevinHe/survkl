@@ -4,9 +4,9 @@
 #' Plots model performance across the \code{eta} sequence. Performance is either
 #' loss (\code{-2} times partial log-likelihood) or concordance index (C-index).
 #' If no test data are provided, the curve is computed on the training data stored
-#' in \code{object$data}.
+#' in \code{x$data}.
 #'
-#' @param object A fitted model object of class \code{"coxkl"}.
+#' @param x A fitted model object of class \code{"coxkl"}.
 #' @param test_z Optional numeric matrix of test covariates.
 #' @param test_time Optional numeric vector of test survival times.
 #' @param test_delta Optional numeric vector of test event indicators.
@@ -16,7 +16,7 @@
 #' 
 #' @details
 #' When \code{criteria = "loss"} and no test data are supplied, the plotted values are
-#' \code{(-2 * object$likelihood) / n}, where \code{n} is the number of rows in the
+#' \code{(-2 * x$likelihood) / n}, where \code{n} is the number of rows in the
 #' (training) data. When test data are provided, performance is computed via
 #' \code{test_eval(..., criteria = "loss")} and divided by the test sample size.
 #' For \code{criteria = "CIndex"}, performance is computed via
@@ -47,21 +47,21 @@
 #'      test_stratum = test_dat_lowdim$stratum, 
 #'      criteria = "loss")
 #' 
-#' @importFrom ggplot2 ggplot aes geom_line geom_point geom_segment labs coord_cartesian
-#' @importFrom ggplot2 theme_minimal theme element_blank element_line element_text
+#' @importFrom ggplot2 ggplot aes geom_line geom_point geom_segment labs coord_cartesian theme_minimal theme element_blank element_line element_text scale_color_manual scale_linetype_manual guides guide_legend
 #' @importFrom grid unit
+#' @importFrom rlang .data
 #' @exportS3Method plot coxkl
-plot.coxkl <- function(object, test_z = NULL, test_time = NULL, test_delta = NULL,
+plot.coxkl <- function(x, test_z = NULL, test_time = NULL, test_delta = NULL,
                        test_stratum = NULL, criteria = c("loss", "CIndex"), ...) {
   criteria <- match.arg(criteria)
-  if (!inherits(object, "coxkl")) stop("'object' must be of class 'coxkl'.", call. = FALSE)
+  if (!inherits(x, "coxkl")) stop("'x' must be of class 'coxkl'.", call. = FALSE)
   
-  etas          <- object$eta
-  beta_mat      <- object$beta
-  z_train       <- object$data$z
-  time_train    <- object$data$time
-  delta_train   <- object$data$delta
-  stratum_train <- object$data$stratum
+  etas          <- x$eta
+  beta_mat      <- x$beta
+  z_train       <- x$data$z
+  time_train    <- x$data$time
+  delta_train   <- x$data$delta
+  stratum_train <- x$data$stratum
   
   using_train <- is.null(test_z) && is.null(test_time) && is.null(test_delta) && is.null(test_stratum)
   if (using_train) {
@@ -75,7 +75,7 @@ plot.coxkl <- function(object, test_z = NULL, test_time = NULL, test_delta = NUL
   
   if (criteria == "loss") {
     if (using_train) {
-      metrics <- (-2 * object$likelihood) / n_eval
+      metrics <- (-2 * x$likelihood) / n_eval
     } else {
       raw_metrics <- sapply(seq_along(etas), function(i)
         test_eval(
@@ -110,17 +110,17 @@ plot.coxkl <- function(object, test_z = NULL, test_time = NULL, test_delta = NUL
   df   <- data.frame(eta = etas, metric = as.numeric(metrics))
   ylab <- if (criteria == "CIndex") "C Index" else "Loss"
   
-  p_main <- ggplot2::ggplot(df, ggplot2::aes(x = eta, y = metric)) +
+  p_main <- ggplot2::ggplot(df, ggplot2::aes(x = .data$eta, y = .data$metric)) +
     ggplot2::geom_line(size = 1, color = "#7570B3") +
     ggplot2::geom_point(size = 2, color = "#7570B3") +
     ggplot2::geom_segment(
       data = data.frame(x0 = x0, y0 = y0, xmax = xmax),
-      ggplot2::aes(x = x0, xend = xmax, y = y0, yend = y0),
+      ggplot2::aes(x = .data$x0, xend = .data$xmax, y = .data$y0, yend = .data$y0),
       inherit.aes = FALSE, color = "#1B9E77", linetype = "dotted", linewidth = 1
     ) +
     ggplot2::geom_point(
       data = data.frame(x0 = x0, y0 = y0),
-      ggplot2::aes(x = x0, y = y0),
+      ggplot2::aes(x = .data$x0, y = .data$y0),
       inherit.aes = FALSE, color = "#1B9E77", shape = 16, size = 3
     ) +
     ggplot2::labs(x = expression(eta), y = ylab) +
@@ -137,11 +137,14 @@ plot.coxkl <- function(object, test_z = NULL, test_time = NULL, test_delta = NUL
                     levels = c("survkl", "Internal"))
   )
   
-  g_legend <- ggplot2::ggplot(legend_df, ggplot2::aes(x = x, y = y, color = Method, linetype = Method)) +
+  internal_df <- legend_df[legend_df$Method == "Internal", , drop = FALSE]
+  
+  g_legend <- ggplot2::ggplot(legend_df, ggplot2::aes(x = .data$x, y = .data$y, 
+                                                      color = .data$Method, linetype = .data$Method)) +
     ggplot2::geom_line(linewidth = 1) +
     ggplot2::geom_point(
-      data = subset(legend_df, Method == "Internal"),
-      ggplot2::aes(x = 0.5, y = 1, color = Method),
+      data = internal_df,
+      ggplot2::aes(x = 0.5, y = 1, color = .data$Method),
       inherit.aes = FALSE, shape = 16, size = 2.4
     ) +
     ggplot2::scale_color_manual(values = c("survkl" = "#7570B3", "Internal" = "#1B9E77")) +
@@ -165,9 +168,9 @@ plot.coxkl <- function(object, test_z = NULL, test_time = NULL, test_delta = NUL
 #' @description
 #' Plots model performance across the \code{lambda} sequence. Performance is
 #' loss (\code{-2} times partial log-likelihood) or concordance index (C-index).
-#' If no test data are provided, the curve uses the training data stored in \code{object$data}.
+#' If no test data are provided, the curve uses the training data stored in \code{x$data}.
 #'
-#' @param object A fitted model object of class \code{"coxkl_ridge"}.
+#' @param x A fitted model object of class \code{"coxkl_ridge"}.
 #' @param test_z Optional numeric matrix of test covariates.
 #' @param test_time Optional numeric vector of test survival times.
 #' @param test_delta Optional numeric vector of test event indicators.
@@ -177,7 +180,7 @@ plot.coxkl <- function(object, test_z = NULL, test_time = NULL, test_delta = NUL
 #' 
 #' @details
 #' When \code{criteria = "loss"} and no test data are supplied, the plotted values are
-#' \code{-2 * object$likelihood} (no normalization). When test data are provided,
+#' \code{-2 * x$likelihood} (no normalization). When test data are provided,
 #' performance is computed via \code{test_eval(..., criteria)}. The x-axis is shown
 #' in decreasing \code{lambda} with a reversed log10 scale.
 #' 
@@ -205,21 +208,21 @@ plot.coxkl <- function(object, test_z = NULL, test_time = NULL, test_delta = NUL
 #'   criteria     = "CIndex"
 #' )
 #' 
-#' @importFrom ggplot2 ggplot aes geom_line geom_point labs coord_cartesian scale_x_reverse
-#' @importFrom ggplot2 theme_minimal theme element_blank element_line element_text
+#' @importFrom ggplot2 ggplot geom_segment aes geom_line geom_point labs coord_cartesian scale_x_reverse theme_minimal theme element_blank element_line element_text
 #' @importFrom grid unit
+#' @importFrom rlang .data
 #' @exportS3Method plot coxkl_ridge
-plot.coxkl_ridge <- function(object, test_z = NULL, test_time = NULL, test_delta = NULL,
+plot.coxkl_ridge <- function(x, test_z = NULL, test_time = NULL, test_delta = NULL,
                              test_stratum = NULL, criteria = c("loss", "CIndex"), ...) {
   criteria <- match.arg(criteria)
-  if (!inherits(object, "coxkl_ridge")) stop("'object' must be of class 'coxkl_ridge'.", call. = FALSE)
+  if (!inherits(x, "coxkl_ridge")) stop("'x' must be of class 'coxkl_ridge'.", call. = FALSE)
   
-  lambdas       <- object$lambda
-  beta_mat      <- object$beta
-  z_train       <- object$data$z
-  time_train    <- object$data$time
-  delta_train   <- object$data$delta
-  stratum_train <- object$data$stratum
+  lambdas       <- x$lambda
+  beta_mat      <- x$beta
+  z_train       <- x$data$z
+  time_train    <- x$data$time
+  delta_train   <- x$data$delta
+  stratum_train <- x$data$stratum
   
   using_train <- is.null(test_z) && is.null(test_time) && is.null(test_delta) && is.null(test_stratum)
   if (using_train) {
@@ -233,7 +236,7 @@ plot.coxkl_ridge <- function(object, test_z = NULL, test_time = NULL, test_delta
   
   if (criteria == "loss") {
     if (using_train) {
-      metrics <- (-2 * object$likelihood) / n_eval
+      metrics <- (-2 * x$likelihood) / n_eval
     } else {
       raw_metrics <- sapply(seq_along(lambdas), function(i)
         test_eval(
@@ -269,12 +272,12 @@ plot.coxkl_ridge <- function(object, test_z = NULL, test_time = NULL, test_delta
   ylow  <- min(df$metric, na.rm = TRUE) * 0.995
   yhigh <- max(df$metric, na.rm = TRUE) * 1.005
   
-  ggplot(df, aes(x = lambda, y = metric)) +
+  ggplot(df, aes(x = .data$lambda, y = .data$metric)) +
     geom_line(size = 1, color = "#7570B3") +
     geom_point(size = 2, color = "#7570B3") +
     geom_segment(
       data = data.frame(x = opt_lambda),
-      aes(x = x, xend = x, y = ylow, yend = yhigh),
+      aes(x = .data$x, xend = .data$x, y = ylow, yend = yhigh),
       inherit.aes = FALSE, color = "#D95F02", linewidth = 1, linetype = "dashed"
     ) +
     scale_x_reverse(trans = "log10") +
@@ -293,9 +296,9 @@ plot.coxkl_ridge <- function(object, test_z = NULL, test_time = NULL, test_delta
 #' @description
 #' Plots model performance across the \code{lambda} sequence. Performance is
 #' loss (\code{-2} times partial log-likelihood) or concordance index (C-index).
-#' If no test data are provided, the curve uses the training data stored in \code{object$data}.
+#' If no test data are provided, the curve uses the training data stored in \code{x$data}.
 #'
-#' @param object A fitted model object of class \code{"coxkl_enet"}.
+#' @param x A fitted model object of class \code{"coxkl_enet"}.
 #' @param test_z Optional numeric matrix of test covariates.
 #' @param test_time Optional numeric vector of test survival times.
 #' @param test_delta Optional numeric vector of test event indicators.
@@ -306,7 +309,7 @@ plot.coxkl_ridge <- function(object, test_z = NULL, test_time = NULL, test_delta
 #' 
 #' @details
 #' When \code{criteria = "loss"} and no test data are supplied, the plotted values are
-#' \code{-2 * object$likelihood} (no normalization). When test data are provided,
+#' \code{-2 * x$likelihood} (no normalization). When test data are provided,
 #' performance is computed via \code{test_eval(..., criteria)}. The x-axis is shown
 #' in decreasing \code{lambda} with a reversed log10 scale.
 #'
@@ -332,21 +335,20 @@ plot.coxkl_ridge <- function(object, test_z = NULL, test_time = NULL, test_delta
 #'      test_stratum = test_dat_highdim$stratum,
 #'      criteria = "loss")
 #'
-#' @importFrom ggplot2 ggplot aes geom_line geom_point labs coord_cartesian scale_x_reverse
-#' @importFrom ggplot2 theme_minimal theme element_blank element_line element_text
+#' @importFrom ggplot2 ggplot aes geom_segment geom_line geom_point labs coord_cartesian scale_x_reverse theme_minimal theme element_blank element_line element_text
 #' @importFrom grid unit
 #' @exportS3Method plot coxkl_enet
-plot.coxkl_enet <- function(object, test_z = NULL, test_time = NULL, test_delta = NULL,
+plot.coxkl_enet <- function(x, test_z = NULL, test_time = NULL, test_delta = NULL,
                             test_stratum = NULL, criteria = c("loss", "CIndex"), ...) {
   criteria <- match.arg(criteria)
-  if (!inherits(object, "coxkl_enet")) stop("'object' must be of class 'coxkl_enet'.", call. = FALSE)
+  if (!inherits(x, "coxkl_enet")) stop("'x' must be of class 'coxkl_enet'.", call. = FALSE)
   
-  lambdas       <- object$lambda
-  beta_mat      <- object$beta
-  z_train       <- object$data$z
-  time_train    <- object$data$time
-  delta_train   <- object$data$delta
-  stratum_train <- object$data$stratum
+  lambdas       <- x$lambda
+  beta_mat      <- x$beta
+  z_train       <- x$data$z
+  time_train    <- x$data$time
+  delta_train   <- x$data$delta
+  stratum_train <- x$data$stratum
   
   using_train <- is.null(test_z) && is.null(test_time) && is.null(test_delta) && is.null(test_stratum)
   if (using_train) {
@@ -360,7 +362,7 @@ plot.coxkl_enet <- function(object, test_z = NULL, test_time = NULL, test_delta 
   
   if (criteria == "loss") {
     if (using_train) {
-      metrics <- (-2 * object$likelihood) / n_eval
+      metrics <- (-2 * x$likelihood) / n_eval
     } else {
       raw_metrics <- sapply(seq_along(lambdas), function(i)
         test_eval(
@@ -396,12 +398,12 @@ plot.coxkl_enet <- function(object, test_z = NULL, test_time = NULL, test_delta 
   ylow  <- min(df$metric, na.rm = TRUE) * 0.995
   yhigh <- max(df$metric, na.rm = TRUE) * 1.005
   
-  ggplot(df, aes(x = lambda, y = metric)) +
+  ggplot(df, aes(x = .data$lambda, y = .data$metric)) +
     geom_line(size = 1, color = "#7570B3") +
     geom_point(size = 2, color = "#7570B3") +
     geom_segment(
       data = data.frame(x = opt_lambda),
-      aes(x = x, xend = x, y = ylow, yend = yhigh),
+      aes(x = .data$x, xend = .data$x, y = ylow, yend = yhigh),
       inherit.aes = FALSE, color = "#D95F02", linewidth = 1, linetype = "dashed"
     ) +
     scale_x_reverse(trans = "log10") +

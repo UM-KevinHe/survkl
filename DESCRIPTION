@@ -16,21 +16,17 @@ Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
-License: GPL-3
+License: GPL-3 | file LICENSE
 LinkingTo:
     Rcpp,
     RcppArmadillo
 Imports:
     Rcpp,
-    splines,
     ggplot2,
-    ggpubr,
     stats,
-    tibble,
-    rlang,
-    survival,
-    RcppParallel,
-    cowplot
+    cowplot,
+    Matrix,
+    rlang
 Depends:
     R (>= 4.0)
 Suggests:

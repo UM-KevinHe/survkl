@@ -5,7 +5,7 @@
 \title{Plot Model Performance vs Lambda for \code{coxkl_enet}}
 \usage{
 \method{plot}{coxkl_enet}(
-  object,
+  x,
   test_z = NULL,
   test_time = NULL,
   test_delta = NULL,
@@ -15,7 +15,7 @@
 )
 }
 \arguments{
-\item{object}{A fitted model object of class \code{"coxkl_enet"}.}
+\item{x}{A fitted model object of class \code{"coxkl_enet"}.}
 
 \item{test_z}{Optional numeric matrix of test covariates.}
 
@@ -35,11 +35,11 @@ A \code{ggplot} object showing the performance curve.
 \description{
 Plots model performance across the \code{lambda} sequence. Performance is
 loss (\code{-2} times partial log-likelihood) or concordance index (C-index).
-If no test data are provided, the curve uses the training data stored in \code{object$data}.
+If no test data are provided, the curve uses the training data stored in \code{x$data}.
 }
 \details{
 When \code{criteria = "loss"} and no test data are supplied, the plotted values are
-\code{-2 * object$likelihood} (no normalization). When test data are provided,
+\code{-2 * x$likelihood} (no normalization). When test data are provided,
 performance is computed via \code{test_eval(..., criteria)}. The x-axis is shown
 in decreasing \code{lambda} with a reversed log10 scale.
 }

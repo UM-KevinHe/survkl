@@ -21,7 +21,8 @@
 #'
 #' @seealso \code{\link{coef.coxkl}}
 #'
-#' @exportS3Method stats::predict coxkl
+#' @importFrom stats coef
+#' @exportS3Method predict coxkl
 predict.coxkl <- function(object, newz, eta = NULL, ...) {
   if (!inherits(object, "coxkl")) stop("'object' must be of class 'coxkl'.", call. = FALSE)
   if (missing(newz)) stop("Argument 'newz' must be provided.", call. = FALSE)
@@ -63,7 +64,8 @@ predict.coxkl <- function(object, newz, eta = NULL, ...) {
 #'
 #' @seealso \code{\link{coef.coxkl_ridge}}
 #'
-#' @exportS3Method stats::predict coxkl_ridge
+#' @importFrom stats coef
+#' @exportS3Method predict coxkl_ridge
 predict.coxkl_ridge <- function(object, newz, lambda = NULL, ...) {
   if (!inherits(object, "coxkl_ridge")) stop("'object' must be of class 'coxkl_ridge'.", call. = FALSE)
   if (missing(newz)) stop("Argument 'newz' must be provided.", call. = FALSE)
@@ -105,8 +107,8 @@ predict.coxkl_ridge <- function(object, newz, lambda = NULL, ...) {
 #' Each column corresponds to one \code{lambda}, sorted in descending order.
 #'
 #' @seealso \code{\link{coef.coxkl_enet}}
-#'
-#' @exportS3Method stats::predict coxkl_enet
+#' @importFrom stats coef
+#' @exportS3Method predict coxkl_enet
 predict.coxkl_enet <- function(object, newz, lambda = NULL, ...) {
   if (!inherits(object, "coxkl_enet")) stop("'object' must be of class 'coxkl_enet'.", call. = FALSE)
   if (missing(newz)) stop("Argument 'newz' must be provided.", call. = FALSE)

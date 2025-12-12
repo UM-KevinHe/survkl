@@ -87,7 +87,7 @@ covariates for activities of daily living. Therefore, surrogate activities
 of daily living were removed. See details in the R package (casebase) by Bhatnagar et al. (2020).
 }
 \examples{
-\donttest{
+\dontrun{
 data(support)
 set.seed(123)
 
@@ -122,7 +122,7 @@ external_data <- data[idx_ext, ]
 internal_data <- data[idx_int, ]
 test_data      <- data[idx_test, ]
 
-library(survival)
+# library(survival)
 ext_cox <- coxph(
   Surv(time, death) ~ age_50 + age_50_59 + age_70 + diabetes + male,
   data = external_data
