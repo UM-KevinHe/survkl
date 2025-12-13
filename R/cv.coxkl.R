@@ -1,4 +1,4 @@
-#' Cross-Validated Selection of Integration Parameter （`eta`） for the Cox–KL Model
+#' Cross-Validated Selection of Integration Parameter (`eta`) for the Cox–KL Model
 #'
 #' Performs K-fold cross-validation to select the integration parameter `eta`
 #' for the Cox–KL model. Each fold fits the model on a training split and

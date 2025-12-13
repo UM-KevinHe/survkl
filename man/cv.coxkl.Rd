@@ -2,7 +2,7 @@
 % Please edit documentation in R/cv.coxkl.R
 \name{cv.coxkl}
 \alias{cv.coxkl}
-\title{Cross-Validated Selection of Integration Parameter （\code{eta}） for the Cox–KL Model}
+\title{Cross-Validated Selection of Integration Parameter (\code{eta}) for the Cox–KL Model}
 \usage{
 cv.coxkl(
   z,
