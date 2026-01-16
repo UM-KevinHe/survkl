@@ -19,7 +19,8 @@ RoxygenNote: 7.3.3
 License: GPL-3 | file LICENSE
 LinkingTo:
     Rcpp,
-    RcppArmadillo
+    RcppArmadillo,
+    RcppParallel
 Imports:
     Rcpp,
     ggplot2,
