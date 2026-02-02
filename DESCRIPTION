@@ -10,8 +10,7 @@ Authors@R: c(
     person("Di","Wang",role=c("aut"),email="dwwang@umich.edu"),
     person("Kevin","He",role=c("aut"),email="kevinhe@umich.edu")
   )
-Description: 
-    For more information, see Wang et al. (2023) <https://doi.org/10.48550/arXiv.2302.11123>.
+Description: For more information, see Wang et al. (2023) <https://doi.org/10.48550/arXiv.2302.11123>.
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)

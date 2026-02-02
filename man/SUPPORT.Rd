@@ -53,7 +53,7 @@ malignancy. }
 }
 \source{
 Available at the following website:
-\url{https://biostat.app.vumc.org/wiki/Main/SupportDesc}.
+\url{https://archive.ics.uci.edu/dataset/880/support2}.
 }
 \usage{
 data(support)
