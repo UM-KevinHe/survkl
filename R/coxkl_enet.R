@@ -124,7 +124,7 @@
 coxkl_enet <- function(z, delta, time, stratum = NULL, RS = NULL, beta = NULL, eta = NULL,
                        alpha = NULL, lambda = NULL, nlambda = 100, lambda.min.ratio = ifelse(n < p, 0.05, 1e-03), 
                        lambda.early.stop = FALSE, tol = 1.0e-4, Mstop = 1000, max.total.iter = (Mstop * nlambda), 
-                       group = 1:ncol(z), group.multiplier = NULL, standardize = T, 
+                       group = 1:ncol(z), group.multiplier = NULL, standardize = TRUE, 
                        nvar.max = ncol(z), group.max = length(unique(group)), stop.loss.ratio = 1e-3, 
                        actSet = TRUE, actIter = Mstop, actGroupNum = sum(unique(group) != 0), actSetRemove = F,
                        returnX = FALSE, trace.lambda = FALSE, message = FALSE, data_sorted = FALSE, ...){
@@ -190,7 +190,7 @@ coxkl_enet <- function(z, delta, time, stratum = NULL, RS = NULL, beta = NULL, e
   n.each_stratum <- as.numeric(table(stratum))
   
   initial.group <- group
-  if (standardize == T){
+  if (standardize == TRUE){
     std.Z <- newZG.Std(z, group, group.multiplier)
   } else {
     std.Z <- newZG.Unstd(z, group, group.multiplier)
@@ -273,7 +273,7 @@ coxkl_enet <- function(z, delta, time, stratum = NULL, RS = NULL, beta = NULL, e
   if (std.Z$reorder == TRUE){  # original order of beta
     beta <- beta[std.Z$ord.inv, , drop = F]
   }
-  if (standardize == T) {
+  if (standardize == TRUE) {
     original.beta <- matrix(0, nrow = length(std.Z$scale), ncol = ncol(beta))
     original.beta[std.Z$nz, ] <- beta / std.Z$scale[std.Z$nz]
     beta <- original.beta
