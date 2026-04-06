@@ -126,7 +126,7 @@ coxkl_enet <- function(z, delta, time, stratum = NULL, RS = NULL, beta = NULL, e
                        lambda.early.stop = FALSE, tol = 1.0e-4, Mstop = 1000, max.total.iter = (Mstop * nlambda), 
                        group = 1:ncol(z), group.multiplier = NULL, standardize = TRUE, 
                        nvar.max = ncol(z), group.max = length(unique(group)), stop.loss.ratio = 1e-3, 
-                       actSet = TRUE, actIter = Mstop, actGroupNum = sum(unique(group) != 0), actSetRemove = F,
+                       actSet = TRUE, actIter = Mstop, actGroupNum = sum(unique(group) != 0), actSetRemove = FALSE,
                        returnX = FALSE, trace.lambda = FALSE, message = FALSE, data_sorted = FALSE, ...){
   
   if (is.null(alpha)){
@@ -195,7 +195,7 @@ coxkl_enet <- function(z, delta, time, stratum = NULL, RS = NULL, beta = NULL, e
   } else {
     std.Z <- newZG.Unstd(z, group, group.multiplier)
   }
-  Z <- std.Z$std.Z[, , drop = F]
+  Z <- std.Z$std.Z[, , drop = FALSE]
   group <- std.Z$g  
   group.multiplier <- std.Z$m 
   
@@ -271,7 +271,7 @@ coxkl_enet <- function(z, delta, time, stratum = NULL, RS = NULL, beta = NULL, e
   beta <- unorthogonalize(beta, std.Z$std.Z, group)
   rownames(beta) <- colnames(Z)
   if (std.Z$reorder == TRUE){  # original order of beta
-    beta <- beta[std.Z$ord.inv, , drop = F]
+    beta <- beta[std.Z$ord.inv, , drop = FALSE]
   }
   if (standardize == TRUE) {
     original.beta <- matrix(0, nrow = length(std.Z$scale), ncol = ncol(beta))

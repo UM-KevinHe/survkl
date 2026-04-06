@@ -87,58 +87,58 @@ covariates for activities of daily living. Therefore, surrogate activities
 of daily living were removed. See details in the R package (casebase) by Bhatnagar et al. (2020).
 }
 \examples{
-\dontrun{
-data(support)
-set.seed(123)
+if (requireNamespace("survival", quietly = TRUE)) {
+  data(support)
+  set.seed(123)
 
-support <- support[support$ca \%in\% c("metastatic"),]
-time <- support$d.time
-death <- support$death
-diabetes <- model.matrix(~factor(support$diabetes))[,-1]
-#sex: female as the reference group
-sex <- model.matrix(~support$sex)[,-1]
-#age: continuous variable
-age <-support$age
-age[support$age<=50] <- "<50"
-age[support$age>50 & support$age<=60] <- "50-59"
-age[support$age>60 & support$age<70] <- "60-69"
-age[support$age>=70] <- "70+"
-age <- factor(age, levels = c("60-69", "<50", "50-59", "70+"))
-z_age <- model.matrix(~age)[,-1]
-z <- data.frame(z_age, sex, diabetes)
-colnames(z) <- c("age_50", "age_50_59", "age_70", "diabetes", "male")
-data <- data.frame(time, death, z)
+  support <- support[support$ca \%in\% "metastatic", ]
+  time <- support$d.time
+  death <- support$death
+  diabetes <- model.matrix(~ factor(support$diabetes))[, -1]
+  # sex: female as the reference group
+  sex <- model.matrix(~ support$sex)[, -1]
+  # age: continuous variable
+  age <- support$age
+  age[support$age <= 50] <- "<50"
+  age[support$age > 50 & support$age <= 60] <- "50-59"
+  age[support$age > 60 & support$age < 70] <- "60-69"
+  age[support$age >= 70] <- "70+"
+  age <- factor(age, levels = c("60-69", "<50", "50-59", "70+"))
+  z_age <- model.matrix(~ age)[, -1]
+  z <- data.frame(z_age, sex, diabetes)
+  colnames(z) <- c("age_50", "age_50_59", "age_70", "diabetes", "male")
+  dat <- data.frame(time, death, z)
 
-n <- nrow(data)
-n_ext  <- floor(0.87 * n)
-n_int  <- floor(0.03 * n)
-n_test <- n - n_ext - n_int
-idx      <- sample(seq_len(n))
-idx_ext <- idx[       1:n_ext]
-idx_int <- idx[(n_ext + 1):(n_ext + n_int)]
-idx_test<- idx[(n_ext + n_int + 1):n]
+  n <- nrow(dat)
+  n_ext  <- floor(0.87 * n)
+  n_int  <- floor(0.03 * n)
+  n_test <- n - n_ext - n_int
+  idx <- sample(seq_len(n))
+  idx_ext  <- idx[1:n_ext]
+  idx_int  <- idx[(n_ext + 1):(n_ext + n_int)]
+  idx_test <- idx[(n_ext + n_int + 1):n]
 
-external_data <- data[idx_ext, ]
-internal_data <- data[idx_int, ]
-test_data      <- data[idx_test, ]
+  external_data <- dat[idx_ext, ]
+  internal_data <- dat[idx_int, ]
+  test_data <- dat[idx_test, ]
 
-# library(survival)
-ext_cox <- coxph(
-  Surv(time, death) ~ age_50 + age_50_59 + age_70 + diabetes + male,
-  data = external_data
-)
-beta_external <- coef(ext_cox)
+  ext_cox <- survival::coxph(
+    survival::Surv(time, death) ~ age_50 + age_50_59 + age_70 + diabetes + male,
+    data = external_data
+  )
+  beta_external <- coef(ext_cox)
 
-result1 <- cv.coxkl(
-  z        = internal_data[, c("age_50", "age_50_59", "age_70", "diabetes", "male")],
-  delta    = internal_data$death,
-  time     = internal_data$time,
-  beta     = beta_external,
-  stratum  = NULL,
-  etas = generate_eta(method = "exponential", n = 50, max_eta = 50)
-)
-cv.plot(result1)
+  result1 <- cv.coxkl(
+    z = internal_data[, c("age_50", "age_50_59", "age_70", "diabetes", "male")],
+    delta = internal_data$death,
+    time = internal_data$time,
+    beta = beta_external,
+    stratum = NULL,
+    etas = generate_eta(method = "exponential", n = 50, max_eta = 50)
+  )
+  cv.plot(result1)
 }
+
 }
 \references{
 Bhatnagar, S., Turgeon, M., Islam, J., Hanley, J. A., and Saarela, O. (2020) casebase: Fitting Flexible Smooth-in-Time
