@@ -10,7 +10,7 @@ Authors@R: c(
     person("Di","Wang",role=c("aut"),email="dwwang@umich.edu"),
     person("Kevin","He",role=c("aut"),email="kevinhe@umich.edu")
   )
-Description: This package provides flexible and efficient tools for integrating external risk scores into Cox proportional hazards models while accounting for population heterogeneity. The package enables robust estimation, improved predictive accuracy, and user-friendly workflows for modern survival analysis. For more information, see Wang et al. (2023) <doi:10.48550/arXiv.2302.11123>.
+Description: Provides flexible and efficient tools for integrating external risk scores into Cox proportional hazards models while accounting for population heterogeneity. Enables robust estimation, improved predictive accuracy, and user-friendly workflows for modern survival analysis. For more information, see Wang et al. (2023) <doi:10.48550/arXiv.2302.11123>.
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
