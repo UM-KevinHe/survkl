@@ -70,12 +70,14 @@ provides examples for both low- and high-dimensional modeling workflows.
 You can install from CRAN:
 
 ``` r
+
 install.packages("survkl")
 ```
 
 Or install the development version of `survkl` from GitHub:
 
 ``` r
+
 require(devtools)
 require(remotes)
 remotes::install_github("UM-KevinHe/survkl", ref = "main")
@@ -89,6 +91,7 @@ example datasets included in the package.
 First, load the package:
 
 ``` r
+
 library(survkl)
 ```
 
@@ -113,6 +116,7 @@ We illustrate the workflow using the built-in low-dimensional simulated
 dataset:
 
 ``` r
+
 data(ExampleData_lowdim)
 
 train  <- ExampleData_lowdim$train
@@ -127,6 +131,7 @@ strat  <- train$stratum
 and externally derived coefficients beta_external:
 
 ``` r
+
 beta_ext <- ExampleData_lowdim$beta_external_good
 ```
 
@@ -135,6 +140,7 @@ We generate a sequence of eta values through the internal utility
 and fit the KL-integrated model across this grid:
 
 ``` r
+
 eta_grid <- generate_eta(method = "exponential", n = 100, max_eta = 30)
 fit_lowdim <- coxkl(
   z = z,
@@ -151,6 +157,7 @@ clean interface to extract estimated coefficients. If the requested
 `eta` is between fitted values, linear interpolation is performed:
 
 ``` r
+
 coef(fit_lowdim, eta = 1)
 ```
 
@@ -168,6 +175,7 @@ coef(fit_lowdim, eta = 1)
 Users may instead supply an external risk score vector:
 
 ``` r
+
 RS_ext <- as.matrix(z) %*% as.matrix(beta_ext)
 
 fit_lowdim_RS <- coxkl(
@@ -201,6 +209,7 @@ If no test data are supplied, performance is computed using the training
 data stored in `object$data`:
 
 ``` r
+
 plot(
   fit_lowdim,
   test_z       = test$z,
@@ -215,7 +224,7 @@ plot(
     ## ℹ Please use `linewidth` instead.
     ## ℹ The deprecated feature was likely used in the survkl package.
     ##   Please report the issue to the authors.
-    ## This warning is displayed once every 8 hours.
+    ## This warning is displayed once per session.
     ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
     ## generated.
 
@@ -233,6 +242,7 @@ choose the integration parameter. It supports four criteria:
 Below is an example using the default `"V&VH"` criterion:
 
 ``` r
+
 cv_lowdim <- cv.coxkl(
   z        = z,
   delta    = delta,
@@ -249,6 +259,7 @@ The cross-validated performance curve can be visualized using
 [`cv.plot()`](https://um-kevinhe.github.io/survkl/reference/cv.plot.md):
 
 ``` r
+
 cv.plot(cv_lowdim)
 ```
 
@@ -299,6 +310,7 @@ discussed in a separate subsection.)
 We use the built-in high-dimensional simulated dataset:
 
 ``` r
+
 data(ExampleData_highdim)
 
 train_hd  <- ExampleData_highdim$train
@@ -315,6 +327,7 @@ and 44 AR(1) noise variables. Externally derived coefficients are
 provided in `beta_external`:
 
 ``` r
+
 beta_external_hd <- ExampleData_highdim$beta_external
 ```
 
@@ -335,6 +348,7 @@ We first fit a KL–ridge model for a fixed integration weight `eta` and
 an automatically generated lambda path:
 
 ``` r
+
 model_ridge <- coxkl_ridge(
   z        = z_hd,
   delta    = delta_hd,
@@ -359,6 +373,7 @@ The S3 method [`coef()`](https://rdrr.io/r/stats/coef.html) extracts the
 estimated coefficients:
 
 ``` r
+
 # All lambdas (columns ordered in decreasing lambda)
 coef(model_ridge)[1:5, 1:5]  # first 5 lambdas
 ```
@@ -373,6 +388,7 @@ coef(model_ridge)[1:5, 1:5]  # first 5 lambdas
 To focus on a specific value of `lambda`:
 
 ``` r
+
 lambda_target <- model_ridge$lambda[5]
 coef(model_ridge, lambda = lambda_target)[1:5]
 ```
@@ -397,6 +413,7 @@ By default, this plots (at given `eta`):
   loss reaches its minimum on the evaluated grid.
 
 ``` r
+
 plot(
   model_ridge,
   test_z       = test_hd$z,
@@ -430,6 +447,7 @@ Example: tuning `eta` using 5-fold cross-validation and the `"V&VH"`
 criterion:
 
 ``` r
+
 eta_grid_hd <- generate_eta(method = "exponential", n = 50, max_eta = 100)
 
 cv_ridge_hd <- cv.coxkl_ridge(
@@ -448,6 +466,7 @@ The best `lambda` for each `eta` (according to the chosen criterion) is
 provided by:
 
 ``` r
+
 cv_ridge_hd$integrated_stat.best_per_eta
 ```
 
@@ -508,6 +527,7 @@ As with low-dimensional models, the helper function
 can be used to visualize performance versus `eta`:
 
 ``` r
+
 cv.plot(cv_ridge_hd)
 ```
 
@@ -542,6 +562,7 @@ We illustrate the workflow using *LASSO* (`alpha = 1`) with an
 automatically generated lambda path:
 
 ``` r
+
 model_enet <- coxkl_enet(
   z        = z_hd,
   delta    = delta_hd,
@@ -565,6 +586,7 @@ The S3 method [`coef()`](https://rdrr.io/r/stats/coef.html) extracts the
 estimated coefficients:
 
 ``` r
+
 coef(model_enet)[1:5, 1:5]
 ```
 
@@ -578,6 +600,7 @@ coef(model_enet)[1:5, 1:5]
 To extract coefficients corresponding to a specific `lambda`:
 
 ``` r
+
 lambda_target <- model_enet$lambda[5]
 coef(model_enet, lambda = lambda_target)[1:5]
 ```
@@ -589,6 +612,7 @@ Objects of class `coxkl_enet` can be visualized using the S3 method
 to plot loss versus `lambda`:
 
 ``` r
+
 plot(
   model_enet,
   test_z = test_hd$z,
@@ -607,6 +631,7 @@ procedure by performing K-fold cross-validation over a supplied grid of
 eta values:
 
 ``` r
+
 eta_grid_hd <- generate_eta(method = "exponential",
                             n = 50,
                             max_eta = 100)
@@ -629,6 +654,7 @@ CV results can be visualized using
 [`cv.plot()`](https://um-kevinhe.github.io/survkl/reference/cv.plot.md):
 
 ``` r
+
 cv.plot(cv_enet_hd)
 ```
 

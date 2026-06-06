@@ -7,8 +7,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Methods for Transfer-learning Based Integrated Cox Models • survkl</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Methods for Transfer-learning Based Integrated Cox Models">
 </head>
@@ -62,8 +62,272 @@
 
     
     
-<p>This vignette is under construction.</p>
-  </main>
+<p>The <code>survkl</code> package implements a transfer-learning
+procedure that integrates external summary information with newly
+collected time-to-event data under a Cox proportional hazards model.
+This vignette summarizes the underlying methodology: the internal Cox
+model, the external summary information, the partial likelihood-based
+Kullback–Leibler (KL) transfer-learning objective, and the regularized
+extension for high-dimensional data.</p>
+<div class="section level2">
+<h2 id="cox-proportional-hazards-model-for-the-target-cohort">Cox Proportional Hazards Model for the Target Cohort<a class="anchor" aria-label="anchor" href="#cox-proportional-hazards-model-for-the-target-cohort"></a>
+</h2>
+<p>Let
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>D</mi><mi>i</mi></msub><annotation encoding="application/x-tex">D_i</annotation></semantics></math>
+denote the death time and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>C</mi><mi>i</mi></msub><annotation encoding="application/x-tex">C_i</annotation></semantics></math>
+the censoring time for patient
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi><mo>=</mo><mn>1</mn><mo>,</mo><mi>…</mi><mo>,</mo><mi>n</mi></mrow><annotation encoding="application/x-tex">i = 1, \ldots, n</annotation></semantics></math>,
+where
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>n</mi><annotation encoding="application/x-tex">n</annotation></semantics></math>
+is the total sample size of the target (internal) cohort. The observed
+survival time is
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>T</mi><mi>i</mi></msub><mo>=</mo><mrow><mi mathvariant="normal">min</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">{</mo><msub><mi>D</mi><mi>i</mi></msub><mo>,</mo><msub><mi>C</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">}</mo></mrow><annotation encoding="application/x-tex">T_i = \min\{D_i, C_i\}</annotation></semantics></math>,
+and the death indicator is
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>δ</mi><mi>i</mi></msub><mo>=</mo><mi>𝕀</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>D</mi><mi>i</mi></msub><mo>≤</mo><msub><mi>C</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\delta_i = \mathbb{I}(D_i \le C_i)</annotation></semantics></math>.
+Let
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>Z</mi><mi>i</mi></msub><mo>=</mo><mo stretchy="false" form="prefix">(</mo><msub><mi>Z</mi><mrow><mi>i</mi><mn>1</mn></mrow></msub><mo>,</mo><mi>…</mi><mo>,</mo><msub><mi>Z</mi><mrow><mi>i</mi><mi>p</mi></mrow></msub><msup><mo stretchy="false" form="postfix">)</mo><mi>⊤</mi></msup></mrow><annotation encoding="application/x-tex">Z_i = (Z_{i1}, \ldots, Z_{ip})^\top</annotation></semantics></math>
+be a
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>p</mi><annotation encoding="application/x-tex">p</annotation></semantics></math>-dimensional
+covariate vector for the
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>-th
+patient. We assume that, conditional on
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>Z</mi><mi>i</mi></msub><annotation encoding="application/x-tex">Z_i</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>D</mi><mi>i</mi></msub><annotation encoding="application/x-tex">D_i</annotation></semantics></math>
+is independently censored by
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>C</mi><mi>i</mi></msub><annotation encoding="application/x-tex">C_i</annotation></semantics></math>.
+Consider the Cox proportional hazards model</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>λ</mi><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo>∣</mo><msub><mi>Z</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msub><mi>λ</mi><mn>0</mn></msub><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo><mspace width="0.167em"></mspace><mrow><mi mathvariant="normal">exp</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">{</mo><mi>g</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>Z</mi><mi>i</mi></msub><mo>,</mo><mi>β</mi><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="postfix">}</mo><mo>,</mo></mrow><annotation encoding="application/x-tex">
+\lambda(t \mid Z_i) = \lambda_0(t)\,\exp\{g(Z_i, \beta)\},
+</annotation></semantics></math></p>
+<p>where
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>λ</mi><mn>0</mn></msub><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\lambda_0(t)</annotation></semantics></math>
+is an arbitrarily unspecified baseline hazard function,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>g</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>Z</mi><mi>i</mi></msub><mo>,</mo><mi>β</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">g(Z_i, \beta)</annotation></semantics></math>
+specifies the log-relative-risk relationship between the covariates
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>Z</mi><mi>i</mi></msub><annotation encoding="application/x-tex">Z_i</annotation></semantics></math>
+and the hazard function, and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>β</mi><mo>∈</mo><msup><mi>ℝ</mi><mi>p</mi></msup></mrow><annotation encoding="application/x-tex">\beta \in \mathbb{R}^p</annotation></semantics></math>
+is a vector of regression parameters. Under the standard linear
+specification,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>g</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>Z</mi><mi>i</mi></msub><mo>,</mo><mi>β</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msubsup><mi>Z</mi><mi>i</mi><mi>⊤</mi></msubsup><mi>β</mi></mrow><annotation encoding="application/x-tex">g(Z_i, \beta) = Z_i^\top \beta</annotation></semantics></math>.
+The log-partial likelihood is given by</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ℓ</mi><mo stretchy="false" form="prefix">(</mo><mi>β</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><msub><mi>δ</mi><mi>i</mi></msub><mrow><mo stretchy="true" form="prefix">[</mo><mi>g</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>Z</mi><mi>i</mi></msub><mo>,</mo><mi>β</mi><mo stretchy="false" form="postfix">)</mo><mo>−</mo><mi mathvariant="normal">log</mi><mrow><mo stretchy="true" form="prefix">{</mo><munderover><mo>∑</mo><mrow><mi>l</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><msub><mi>Y</mi><mi>l</mi></msub><mo stretchy="false" form="prefix">(</mo><msub><mi>T</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">)</mo><mspace width="0.167em"></mspace><mi mathvariant="normal">exp</mi><mo stretchy="false" form="prefix">{</mo><mi>g</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>Z</mi><mi>l</mi></msub><mo>,</mo><mi>β</mi><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="postfix">}</mo><mo stretchy="true" form="postfix">}</mo></mrow><mo stretchy="true" form="postfix">]</mo></mrow><mo>,</mo></mrow><annotation encoding="application/x-tex">
+\ell(\beta)
+= \sum_{i=1}^{n} \delta_i
+\left[
+g(Z_i, \beta)
+- \log\left\{ \sum_{l=1}^{n} Y_l(T_i)\,\exp\{g(Z_l, \beta)\} \right\}
+\right],
+</annotation></semantics></math></p>
+<p>where
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>Y</mi><mi>l</mi></msub><mo stretchy="false" form="prefix">(</mo><msub><mi>T</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mi>𝕀</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>T</mi><mi>l</mi></msub><mo>≥</mo><msub><mi>T</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">Y_l(T_i) = \mathbb{I}(T_l \ge T_i)</annotation></semantics></math>
+is the at-risk indicator.</p>
+</div>
+<div class="section level2">
+<h2 id="external-summary-information">External Summary Information<a class="anchor" aria-label="anchor" href="#external-summary-information"></a>
+</h2>
+<p>To account for privacy constraints, we consider scenarios where only
+external summary information is available, rather than individual-level
+external data. For example, suppose the estimated coefficients
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mover><mi>β</mi><mo accent="true">̃</mo></mover><annotation encoding="application/x-tex">\tilde{\beta}</annotation></semantics></math>
+are available from a published Cox model; a risk score can then be
+computed as
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover><mi>g</mi><mo accent="true">̃</mo></mover><mo stretchy="false" form="prefix">(</mo><msub><mi>Z</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msubsup><mi>Z</mi><mi>i</mi><mi>⊤</mi></msubsup><mover><mi>β</mi><mo accent="true">̃</mo></mover></mrow><annotation encoding="application/x-tex">\tilde{g}(Z_i) = Z_i^\top \tilde{\beta}</annotation></semantics></math>
+for the
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>-th
+subject in the target cohort. The proposed transfer-learning procedure
+is flexible and can incorporate various forms of external summary
+information, including estimated risk scores from machine-learning
+algorithms and clinically derived risk groupings.</p>
+</div>
+<div class="section level2">
+<h2 id="partial-likelihood-based-transfer-learning">Partial Likelihood-Based Transfer Learning<a class="anchor" aria-label="anchor" href="#partial-likelihood-based-transfer-learning"></a>
+</h2>
+<p>To extract information from external risk scores, we formulate the
+censored time-to-event data as a dynamic ranking problem. Specifically,
+suppose the internal cohort comprises
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>K</mi><annotation encoding="application/x-tex">K</annotation></semantics></math>
+unique failure times
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>t</mi><mn>1</mn></msub><mo>&lt;</mo><mi>⋯</mi><mo>&lt;</mo><msub><mi>t</mi><mi>K</mi></msub></mrow><annotation encoding="application/x-tex">t_1 &lt; \cdots &lt; t_K</annotation></semantics></math>.
+Let
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>A</mi><mi>k</mi></msub><annotation encoding="application/x-tex">A_k</annotation></semantics></math>
+specify that individual
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>
+fails in
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">[</mo><msub><mi>t</mi><mi>k</mi></msub><mo>,</mo><msub><mi>t</mi><mi>k</mi></msub><mo>+</mo><mi>d</mi><msub><mi>t</mi><mi>k</mi></msub><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">[t_k, t_k + dt_k)</annotation></semantics></math>,
+and let
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>B</mi><mi>k</mi></msub><annotation encoding="application/x-tex">B_k</annotation></semantics></math>
+specify all the censoring and failure information up to time
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msubsup><mi>t</mi><mi>k</mi><mo>−</mo></msubsup><annotation encoding="application/x-tex">t_k^{-}</annotation></semantics></math>,
+together with the information that one failure occurs in
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">[</mo><msub><mi>t</mi><mi>k</mi></msub><mo>,</mo><msub><mi>t</mi><mi>k</mi></msub><mo>+</mo><mi>d</mi><msub><mi>t</mi><mi>k</mi></msub><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">[t_k, t_k + dt_k)</annotation></semantics></math>.
+Based on the external risk scores, the conditional density of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>A</mi><mi>k</mi></msub><annotation encoding="application/x-tex">A_k</annotation></semantics></math>
+given
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>B</mi><mi>k</mi></msub><annotation encoding="application/x-tex">B_k</annotation></semantics></math>
+is</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover><mi>f</mi><mo accent="true">̃</mo></mover><mo stretchy="false" form="prefix">(</mo><msub><mi>A</mi><mi>k</mi></msub><mo>∣</mo><msub><mi>B</mi><mi>k</mi></msub><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mfrac><mrow><msub><mover><mi>λ</mi><mo accent="true">̃</mo></mover><mn>0</mn></msub><mo stretchy="false" form="prefix">(</mo><msub><mi>t</mi><mi>k</mi></msub><mo stretchy="false" form="postfix">)</mo><mspace width="0.167em"></mspace><mrow><mi mathvariant="normal">exp</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">{</mo><mover><mi>g</mi><mo accent="true">̃</mo></mover><mo stretchy="false" form="prefix">(</mo><msub><mi>Z</mi><mi>k</mi></msub><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="postfix">}</mo><mspace width="0.167em"></mspace><mi>d</mi><msub><mi>t</mi><mi>k</mi></msub></mrow><mrow><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><msub><mi>Y</mi><mi>i</mi></msub><mo stretchy="false" form="prefix">(</mo><msub><mi>t</mi><mi>k</mi></msub><mo stretchy="false" form="postfix">)</mo><mspace width="0.167em"></mspace><msub><mover><mi>λ</mi><mo accent="true">̃</mo></mover><mn>0</mn></msub><mo stretchy="false" form="prefix">(</mo><msub><mi>t</mi><mi>k</mi></msub><mo stretchy="false" form="postfix">)</mo><mspace width="0.167em"></mspace><mrow><mi mathvariant="normal">exp</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">{</mo><mover><mi>g</mi><mo accent="true">̃</mo></mover><mo stretchy="false" form="prefix">(</mo><msub><mi>Z</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="postfix">}</mo><mspace width="0.167em"></mspace><mi>d</mi><msub><mi>t</mi><mi>k</mi></msub></mrow></mfrac><mo>=</mo><mfrac><mrow><mrow><mi mathvariant="normal">exp</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">{</mo><mover><mi>g</mi><mo accent="true">̃</mo></mover><mo stretchy="false" form="prefix">(</mo><msub><mi>Z</mi><mi>k</mi></msub><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="postfix">}</mo></mrow><mrow><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><msub><mi>Y</mi><mi>i</mi></msub><mo stretchy="false" form="prefix">(</mo><msub><mi>t</mi><mi>k</mi></msub><mo stretchy="false" form="postfix">)</mo><mspace width="0.167em"></mspace><mrow><mi mathvariant="normal">exp</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">{</mo><mover><mi>g</mi><mo accent="true">̃</mo></mover><mo stretchy="false" form="prefix">(</mo><msub><mi>Z</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="postfix">}</mo></mrow></mfrac><mo>,</mo></mrow><annotation encoding="application/x-tex">
+\tilde{f}(A_k \mid B_k)
+= \frac{\tilde{\lambda}_0(t_k)\,\exp\{\tilde{g}(Z_k)\}\,dt_k}
+       {\sum_{i=1}^{n} Y_i(t_k)\,\tilde{\lambda}_0(t_k)\,\exp\{\tilde{g}(Z_i)\}\,dt_k}
+= \frac{\exp\{\tilde{g}(Z_k)\}}
+       {\sum_{i=1}^{n} Y_i(t_k)\,\exp\{\tilde{g}(Z_i)\}},
+</annotation></semantics></math></p>
+<p>where the second equality follows from canceling
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>λ</mi><mo accent="true">̃</mo></mover><mn>0</mn></msub><mo stretchy="false" form="prefix">(</mo><msub><mi>t</mi><mi>k</mi></msub><mo stretchy="false" form="postfix">)</mo><mspace width="0.167em"></mspace><mi>d</mi><msub><mi>t</mi><mi>k</mi></msub></mrow><annotation encoding="application/x-tex">\tilde{\lambda}_0(t_k)\,dt_k</annotation></semantics></math>
+in the numerator and denominator. Following Wang et al. (2023), the
+partial likelihood-based KL divergence between the conditional densities
+corresponding to the external risk scores and the internal Cox model,
+contained in
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>A</mi><mi>k</mi></msub><mo>∣</mo><msub><mi>B</mi><mi>k</mi></msub></mrow><annotation encoding="application/x-tex">A_k \mid B_k</annotation></semantics></math>,
+is given by</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>d</mi><mrow><mi mathvariant="normal">K</mi><mi mathvariant="normal">L</mi></mrow></msub><mo stretchy="false" form="prefix">(</mo><mover><mi>f</mi><mo accent="true">̃</mo></mover><mo>∥</mo><mi>f</mi><mo>;</mo><mspace width="0.167em"></mspace><msub><mi>t</mi><mi>k</mi></msub><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msub><mi>𝔼</mi><mover><mi>f</mi><mo accent="true">̃</mo></mover></msub><mrow><mo stretchy="true" form="prefix">[</mo><mi mathvariant="normal">log</mi><mrow><mo stretchy="true" form="prefix">{</mo><mfrac><mrow><mover><mi>f</mi><mo accent="true">̃</mo></mover><mo stretchy="false" form="prefix">(</mo><msub><mi>A</mi><mi>k</mi></msub><mo>∣</mo><msub><mi>B</mi><mi>k</mi></msub><mo stretchy="false" form="postfix">)</mo></mrow><mrow><mi>f</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>A</mi><mi>k</mi></msub><mo>∣</mo><msub><mi>B</mi><mi>k</mi></msub><mo stretchy="false" form="postfix">)</mo></mrow></mfrac><mo stretchy="true" form="postfix">}</mo></mrow><mo stretchy="true" form="postfix">]</mo></mrow><mo>,</mo></mrow><annotation encoding="application/x-tex">
+d_{\mathrm{KL}}(\tilde{f} \parallel f;\, t_k)
+= \mathbb{E}_{\tilde{f}}
+\left[
+\log\left\{ \frac{\tilde{f}(A_k \mid B_k)}{f(A_k \mid B_k)} \right\}
+\right],
+</annotation></semantics></math></p>
+<p>where the expectation is taken with respect to the external
+conditional density
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover><mi>f</mi><mo accent="true">̃</mo></mover><mo stretchy="false" form="prefix">(</mo><msub><mi>A</mi><mi>k</mi></msub><mo>∣</mo><msub><mi>B</mi><mi>k</mi></msub><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\tilde{f}(A_k \mid B_k)</annotation></semantics></math>,
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>A</mi><mi>k</mi></msub><mo>∣</mo><msub><mi>B</mi><mi>k</mi></msub><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">f(A_k \mid B_k)</annotation></semantics></math>
+is the conditional density based on the internal Cox model,</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>A</mi><mi>k</mi></msub><mo>∣</mo><msub><mi>B</mi><mi>k</mi></msub><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mfrac><mrow><mrow><mi mathvariant="normal">exp</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">{</mo><mi>g</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>Z</mi><mi>k</mi></msub><mo>,</mo><mi>β</mi><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="postfix">}</mo></mrow><mrow><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><msub><mi>Y</mi><mi>i</mi></msub><mo stretchy="false" form="prefix">(</mo><msub><mi>t</mi><mi>k</mi></msub><mo stretchy="false" form="postfix">)</mo><mspace width="0.167em"></mspace><mrow><mi mathvariant="normal">exp</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">{</mo><mi>g</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>Z</mi><mi>i</mi></msub><mo>,</mo><mi>β</mi><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="postfix">}</mo></mrow></mfrac><mi>.</mi></mrow><annotation encoding="application/x-tex">
+f(A_k \mid B_k)
+= \frac{\exp\{g(Z_k, \beta)\}}
+       {\sum_{i=1}^{n} Y_i(t_k)\,\exp\{g(Z_i, \beta)\}}.
+</annotation></semantics></math></p>
+<p>When
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover><mi>g</mi><mo accent="true">̃</mo></mover><mo stretchy="false" form="prefix">(</mo><msub><mi>Z</mi><mi>k</mi></msub><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\tilde{g}(Z_k)</annotation></semantics></math>
+is generated from clinically derived risk groupings,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover><mi>f</mi><mo accent="true">̃</mo></mover><mo stretchy="false" form="prefix">(</mo><msub><mi>A</mi><mi>k</mi></msub><mo>∣</mo><msub><mi>B</mi><mi>k</mi></msub><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\tilde{f}(A_k \mid B_k)</annotation></semantics></math>
+does not represent a formal conditional density; instead, it can be
+viewed as a Plackett–Luce ranking metric, and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>d</mi><mrow><mi mathvariant="normal">K</mi><mi mathvariant="normal">L</mi></mrow></msub><mo stretchy="false" form="prefix">(</mo><mover><mi>f</mi><mo accent="true">̃</mo></mover><mo>∥</mo><mi>f</mi><mo>;</mo><mspace width="0.167em"></mspace><msub><mi>t</mi><mi>k</mi></msub><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">d_{\mathrm{KL}}(\tilde{f} \parallel f;\, t_k)</annotation></semantics></math>
+can be interpreted as a generalized KL divergence. The accumulated KL
+divergence across the sequence of conditional experiments
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>A</mi><mn>1</mn></msub><mo>∣</mo><msub><mi>B</mi><mn>1</mn></msub><mo>,</mo><mi>…</mi><mo>,</mo><msub><mi>A</mi><mi>K</mi></msub><mo>∣</mo><msub><mi>B</mi><mi>K</mi></msub></mrow><annotation encoding="application/x-tex">A_1 \mid B_1, \ldots, A_K \mid B_K</annotation></semantics></math>
+is</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>D</mi><mrow><mi mathvariant="normal">K</mi><mi mathvariant="normal">L</mi></mrow></msub><mo stretchy="false" form="prefix">(</mo><mover><mi>f</mi><mo accent="true">̃</mo></mover><mo>∥</mo><mi>f</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><munderover><mo>∑</mo><mrow><mi>k</mi><mo>=</mo><mn>1</mn></mrow><mi>K</mi></munderover><msub><mi>d</mi><mrow><mi mathvariant="normal">K</mi><mi mathvariant="normal">L</mi></mrow></msub><mo stretchy="false" form="prefix">(</mo><mover><mi>f</mi><mo accent="true">̃</mo></mover><mo>∥</mo><mi>f</mi><mo>;</mo><mspace width="0.167em"></mspace><msub><mi>t</mi><mi>k</mi></msub><mo stretchy="false" form="postfix">)</mo><mo>,</mo></mrow><annotation encoding="application/x-tex">
+D_{\mathrm{KL}}(\tilde{f} \parallel f)
+= \sum_{k=1}^{K} d_{\mathrm{KL}}(\tilde{f} \parallel f;\, t_k),
+</annotation></semantics></math></p>
+<p>which measures the discrepancy between the external risk scores and
+the internal Cox model. To integrate external information while
+accounting for potential disparities, we combine the internal
+log-partial likelihood with the accumulated KL divergence by
+constructing the penalized objective function</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>ℓ</mi><mi>η</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>β</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mi>ℓ</mi><mo stretchy="false" form="prefix">(</mo><mi>β</mi><mo stretchy="false" form="postfix">)</mo><mo>−</mo><mi>η</mi><mspace width="0.167em"></mspace><msub><mi>D</mi><mrow><mi mathvariant="normal">K</mi><mi mathvariant="normal">L</mi></mrow></msub><mo stretchy="false" form="prefix">(</mo><mover><mi>f</mi><mo accent="true">̃</mo></mover><mo>∥</mo><mi>f</mi><mo stretchy="false" form="postfix">)</mo><mo>,</mo></mrow><annotation encoding="application/x-tex">
+\ell_{\eta}(\beta)
+= \ell(\beta) - \eta\, D_{\mathrm{KL}}(\tilde{f} \parallel f),
+</annotation></semantics></math></p>
+<p>where
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>η</mi><mo>≥</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\eta \ge 0</annotation></semantics></math>
+is a tuning parameter that controls the trade-off between the internal
+model and the external risk scores. Setting
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>η</mi><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\eta = 0</annotation></semantics></math>
+recovers the internal-only Cox fit, whereas larger values of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>η</mi><annotation encoding="application/x-tex">\eta</annotation></semantics></math>
+place more weight on the external information.</p>
+<div style="border-left: 4px solid #6c757d; background-color: #f8f9fa;
+            padding: 1rem 1.5rem; margin: 1.5rem 0; border-radius: 0 4px 4px 0;">
+<p><strong>Equivalent weighted form.</strong> Substituting the Cox-model
+expressions and noting that the unique failure times
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>t</mi><mn>1</mn></msub><mo>&lt;</mo><mi>⋯</mi><mo>&lt;</mo><msub><mi>t</mi><mi>K</mi></msub></mrow><annotation encoding="application/x-tex">t_1 &lt; \cdots &lt; t_K</annotation></semantics></math>
+coincide with the observed internal event times, the integrated
+objective admits the equivalent weighted partial-likelihood form</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>ℓ</mi><mi>η</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>β</mi><mo stretchy="false" form="postfix">)</mo><mspace width="0.278em"></mspace><mo>∝</mo><mspace width="0.278em"></mspace><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><mrow><mo stretchy="true" form="prefix">{</mo><mfrac><mrow><msub><mi>δ</mi><mi>i</mi></msub><mo>+</mo><mi>η</mi><mspace width="0.167em"></mspace><msub><mover><mi>δ</mi><mo accent="true">̃</mo></mover><mi>i</mi></msub></mrow><mrow><mn>1</mn><mo>+</mo><mi>η</mi></mrow></mfrac><mspace width="0.167em"></mspace><mi>g</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>Z</mi><mi>i</mi></msub><mo>,</mo><mi>β</mi><mo stretchy="false" form="postfix">)</mo><mo>−</mo><msub><mi>δ</mi><mi>i</mi></msub><mi mathvariant="normal">log</mi><mrow><mo stretchy="true" form="prefix">[</mo><munderover><mo>∑</mo><mrow><mi>l</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><msub><mi>Y</mi><mi>l</mi></msub><mo stretchy="false" form="prefix">(</mo><msub><mi>T</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">)</mo><mspace width="0.167em"></mspace><mi mathvariant="normal">exp</mi><mo stretchy="false" form="prefix">{</mo><mi>g</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>Z</mi><mi>l</mi></msub><mo>,</mo><mi>β</mi><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="postfix">}</mo><mo stretchy="true" form="postfix">]</mo></mrow><mo stretchy="true" form="postfix">}</mo></mrow><mo>,</mo></mrow><annotation encoding="application/x-tex">
+\ell_{\eta}(\beta)
+\;\propto\;
+\sum_{i=1}^{n} \left\{
+\frac{\delta_i + \eta\, \tilde{\delta}_i}{1 + \eta}\, g(Z_i, \beta)
+- \delta_i \log\left[ \sum_{l=1}^{n} Y_l(T_i)\,\exp\{g(Z_l, \beta)\} \right]
+\right\},
+</annotation></semantics></math></p>
+<p>where the externally induced pseudo-event weight is defined as</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>δ</mi><mo accent="true">̃</mo></mover><mi>i</mi></msub><mo>=</mo><munderover><mo>∑</mo><mrow><mi>k</mi><mo>=</mo><mn>1</mn></mrow><mi>K</mi></munderover><mfrac><mrow><msub><mi>Y</mi><mi>i</mi></msub><mo stretchy="false" form="prefix">(</mo><msub><mi>t</mi><mi>k</mi></msub><mo stretchy="false" form="postfix">)</mo><mspace width="0.167em"></mspace><mrow><mi mathvariant="normal">exp</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">{</mo><mover><mi>g</mi><mo accent="true">̃</mo></mover><mo stretchy="false" form="prefix">(</mo><msub><mi>Z</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="postfix">}</mo></mrow><mrow><munderover><mo>∑</mo><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><msub><mi>Y</mi><mi>j</mi></msub><mo stretchy="false" form="prefix">(</mo><msub><mi>t</mi><mi>k</mi></msub><mo stretchy="false" form="postfix">)</mo><mspace width="0.167em"></mspace><mrow><mi mathvariant="normal">exp</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">{</mo><mover><mi>g</mi><mo accent="true">̃</mo></mover><mo stretchy="false" form="prefix">(</mo><msub><mi>Z</mi><mi>j</mi></msub><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="postfix">}</mo></mrow></mfrac><mi>.</mi></mrow><annotation encoding="application/x-tex">
+\tilde{\delta}_i
+= \sum_{k=1}^{K}
+\frac{Y_i(t_k)\,\exp\{\tilde{g}(Z_i)\}}
+     {\sum_{j=1}^{n} Y_j(t_k)\,\exp\{\tilde{g}(Z_j)\}}.
+</annotation></semantics></math></p>
+<p>This representation shows that the external information enters the
+internal partial likelihood by augmenting each subject’s observed event
+indicator
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>δ</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\delta_i</annotation></semantics></math>
+with a fractional pseudo-event weight
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mover><mi>δ</mi><mo accent="true">̃</mo></mover><mi>i</mi></msub><annotation encoding="application/x-tex">\tilde{\delta}_i</annotation></semantics></math>
+derived from the external risk scores, with
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>η</mi><annotation encoding="application/x-tex">\eta</annotation></semantics></math>
+governing the relative contribution of the two sources.</p>
+</div>
+</div>
+<div class="section level2">
+<h2 id="regularization-for-high-dimensional-data">Regularization for High-Dimensional Data<a class="anchor" aria-label="anchor" href="#regularization-for-high-dimensional-data"></a>
+</h2>
+<p>For high-dimensional applications, where the number of covariates
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>p</mi><annotation encoding="application/x-tex">p</annotation></semantics></math>
+may be large relative to the sample size
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>n</mi><annotation encoding="application/x-tex">n</annotation></semantics></math>,
+we extend the integrated objective by adding a regularization term. The
+resulting objective function enables simultaneous variable selection and
+parameter estimation:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>ℓ</mi><mrow><mi>η</mi><mo>,</mo><mi>λ</mi></mrow></msub><mo stretchy="false" form="prefix">(</mo><mi>β</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msub><mi>ℓ</mi><mi>η</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>β</mi><mo stretchy="false" form="postfix">)</mo><mo>−</mo><mi>λ</mi><mspace width="0.167em"></mspace><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>β</mi><mo stretchy="false" form="postfix">)</mo><mo>,</mo></mrow><annotation encoding="application/x-tex">
+\ell_{\eta, \lambda}(\beta)
+= \ell_{\eta}(\beta) - \lambda\, P(\beta),
+</annotation></semantics></math></p>
+<p>where
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>β</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">P(\beta)</annotation></semantics></math>
+is a penalty function and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>λ</mi><mo>≥</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\lambda \ge 0</annotation></semantics></math>
+is a tuning parameter controlling its strength. The package supports the
+following choices of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>β</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">P(\beta)</annotation></semantics></math>:</p>
+<ul>
+<li><p><strong>Ridge</strong> (Hoerl and Kennard, 1970):
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>β</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mstyle displaystyle="false"><mfrac><mn>1</mn><mn>2</mn></mfrac></mstyle><mspace width="0.167em"></mspace><mo stretchy="false" form="postfix">∥</mo><mi>β</mi><msubsup><mo stretchy="false" form="postfix">∥</mo><mn>2</mn><mn>2</mn></msubsup><mo>=</mo><mstyle displaystyle="false"><mfrac><mn>1</mn><mn>2</mn></mfrac></mstyle><munderover><mo>∑</mo><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><mi>p</mi></munderover><msubsup><mi>β</mi><mi>j</mi><mn>2</mn></msubsup><mo>,</mo></mrow><annotation encoding="application/x-tex">
+P(\beta) = \tfrac{1}{2}\,\|\beta\|_2^2 = \tfrac{1}{2}\sum_{j=1}^{p} \beta_j^2,
+</annotation></semantics></math> which shrinks coefficients toward zero
+and stabilizes estimation under collinearity.</p></li>
+<li><p><strong>LASSO</strong> (Tibshirani, 1997):
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>β</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mo stretchy="false" form="postfix">∥</mo><mi>β</mi><msub><mo stretchy="false" form="postfix">∥</mo><mn>1</mn></msub><mo>=</mo><munderover><mo>∑</mo><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><mi>p</mi></munderover><mo stretchy="false" form="prefix">|</mo><msub><mi>β</mi><mi>j</mi></msub><mo stretchy="false" form="prefix">|</mo><mo>,</mo></mrow><annotation encoding="application/x-tex">
+P(\beta) = \|\beta\|_1 = \sum_{j=1}^{p} |\beta_j|,
+</annotation></semantics></math> which produces sparse solutions by
+setting some coefficients exactly to zero.</p></li>
+<li><p><strong>Elastic Net</strong> (Simon et al., 2011):
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>β</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mi>α</mi><mspace width="0.167em"></mspace><mo stretchy="false" form="postfix">∥</mo><mi>β</mi><msub><mo stretchy="false" form="postfix">∥</mo><mn>1</mn></msub><mo>+</mo><mstyle displaystyle="false"><mfrac><mn>1</mn><mn>2</mn></mfrac></mstyle><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>−</mo><mi>α</mi><mo stretchy="false" form="postfix">)</mo><mspace width="0.167em"></mspace><mo stretchy="false" form="postfix">∥</mo><mi>β</mi><msubsup><mo stretchy="false" form="postfix">∥</mo><mn>2</mn><mn>2</mn></msubsup><mo>=</mo><munderover><mo>∑</mo><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><mi>p</mi></munderover><mrow><mo stretchy="true" form="prefix">[</mo><mi>α</mi><mspace width="0.167em"></mspace><mo stretchy="false" form="prefix">|</mo><msub><mi>β</mi><mi>j</mi></msub><mo stretchy="false" form="prefix">|</mo><mi>+</mi><mstyle displaystyle="false"><mfrac><mn>1</mn><mn>2</mn></mfrac></mstyle><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>−</mo><mi>α</mi><mo stretchy="false" form="postfix">)</mo><mspace width="0.167em"></mspace><msubsup><mi>β</mi><mi>j</mi><mn>2</mn></msubsup><mo stretchy="true" form="postfix">]</mo></mrow><mo>,</mo></mrow><annotation encoding="application/x-tex">
+P(\beta)
+= \alpha\,\|\beta\|_1 + \tfrac{1}{2}(1 - \alpha)\,\|\beta\|_2^2
+= \sum_{j=1}^{p}\left[ \alpha\,|\beta_j| + \tfrac{1}{2}(1 - \alpha)\,\beta_j^2 \right],
+</annotation></semantics></math> where
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>α</mi><mo>∈</mo><mo stretchy="false" form="prefix">[</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="false" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">\alpha \in [0, 1]</annotation></semantics></math>
+is a mixing parameter that blends the LASSO and ridge penalties;
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>α</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">\alpha = 1</annotation></semantics></math>
+reduces to the LASSO and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>α</mi><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\alpha = 0</annotation></semantics></math>
+to ridge.</p></li>
+</ul>
+<p>In <code>survkl</code>, ridge-penalized estimation is provided by
+<code>coxkl_ridge</code>, while the elastic-net family (including the
+LASSO as the special case
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>α</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">\alpha = 1</annotation></semantics></math>)
+is provided by <code>coxkl_enet</code>. The companion cross-validation
+routines <code>cv.coxkl</code>, <code>cv.coxkl_ridge</code>, and
+<code>cv.coxkl_enet</code> perform
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>K</mi><annotation encoding="application/x-tex">K</annotation></semantics></math>-fold
+cross-validation to select the integration weight
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>η</mi><annotation encoding="application/x-tex">\eta</annotation></semantics></math>
+and the regularization parameter
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>λ</mi><annotation encoding="application/x-tex">\lambda</annotation></semantics></math>,
+using Harrell’s C-index for discrimination and the V&amp;VH loss for
+overall model fit.</p>
+</div>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside>
 </div>
 
 

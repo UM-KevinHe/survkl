@@ -10,4 +10,204 @@ editor_options:
     wrap: sentence
 ---
 
-This vignette is under construction.
+
+The `survkl` package implements a transfer-learning procedure that integrates
+external summary information with newly collected time-to-event data under a Cox
+proportional hazards model. This vignette summarizes the underlying methodology:
+the internal Cox model, the external summary information, the partial
+likelihood-based Kullback--Leibler (KL) transfer-learning objective, and the
+regularized extension for high-dimensional data.
+
+
+## Cox Proportional Hazards Model for the Target Cohort
+
+Let $D_i$ denote the death time and $C_i$ the censoring time for patient $i$,
+$i = 1, \ldots, n$, where $n$ is the total sample size of the target (internal)
+cohort. The observed survival time is $T_i = \min\{D_i, C_i\}$, and the death
+indicator is $\delta_i = \mathbb{I}(D_i \le C_i)$. Let
+$Z_i = (Z_{i1}, \ldots, Z_{ip})^\top$ be a $p$-dimensional covariate vector for
+the $i$-th patient. We assume that, conditional on $Z_i$, $D_i$ is independently
+censored by $C_i$. Consider the Cox proportional hazards model
+
+$$
+\lambda(t \mid Z_i) = \lambda_0(t)\,\exp\{g(Z_i, \beta)\},
+$$
+
+where $\lambda_0(t)$ is an arbitrarily unspecified baseline hazard function,
+$g(Z_i, \beta)$ specifies the log-relative-risk relationship between the
+covariates $Z_i$ and the hazard function, and $\beta \in \mathbb{R}^p$ is a
+vector of regression parameters. Under the standard linear specification,
+$g(Z_i, \beta) = Z_i^\top \beta$. The log-partial likelihood is given by
+
+$$
+\ell(\beta)
+= \sum_{i=1}^{n} \delta_i
+\left[
+g(Z_i, \beta)
+- \log\left\{ \sum_{l=1}^{n} Y_l(T_i)\,\exp\{g(Z_l, \beta)\} \right\}
+\right],
+$$
+
+where $Y_l(T_i) = \mathbb{I}(T_l \ge T_i)$ is the at-risk indicator.
+
+
+## External Summary Information
+
+To account for privacy constraints, we consider scenarios where only external
+summary information is available, rather than individual-level external data.
+For example, suppose the estimated coefficients $\tilde{\beta}$ are available
+from a published Cox model; a risk score can then be computed as
+$\tilde{g}(Z_i) = Z_i^\top \tilde{\beta}$ for the $i$-th subject in the target
+cohort. The proposed transfer-learning procedure is flexible and can incorporate
+various forms of external summary information, including estimated risk scores
+from machine-learning algorithms and clinically derived risk groupings.
+
+
+## Partial Likelihood-Based Transfer Learning
+
+To extract information from external risk scores, we formulate the censored
+time-to-event data as a dynamic ranking problem. Specifically, suppose the
+internal cohort comprises $K$ unique failure times $t_1 < \cdots < t_K$. Let
+$A_k$ specify that individual $k$ fails in $[t_k, t_k + dt_k)$, and let $B_k$
+specify all the censoring and failure information up to time $t_k^{-}$, together
+with the information that one failure occurs in $[t_k, t_k + dt_k)$. Based on the
+external risk scores, the conditional density of $A_k$ given $B_k$ is
+
+$$
+\tilde{f}(A_k \mid B_k)
+= \frac{\tilde{\lambda}_0(t_k)\,\exp\{\tilde{g}(Z_k)\}\,dt_k}
+       {\sum_{i=1}^{n} Y_i(t_k)\,\tilde{\lambda}_0(t_k)\,\exp\{\tilde{g}(Z_i)\}\,dt_k}
+= \frac{\exp\{\tilde{g}(Z_k)\}}
+       {\sum_{i=1}^{n} Y_i(t_k)\,\exp\{\tilde{g}(Z_i)\}},
+$$
+
+where the second equality follows from canceling $\tilde{\lambda}_0(t_k)\,dt_k$
+in the numerator and denominator. Following Wang et al. (2023), the partial
+likelihood-based KL divergence between the conditional densities corresponding
+to the external risk scores and the internal Cox model, contained in
+$A_k \mid B_k$, is given by
+
+$$
+d_{\mathrm{KL}}(\tilde{f} \parallel f;\, t_k)
+= \mathbb{E}_{\tilde{f}}
+\left[
+\log\left\{ \frac{\tilde{f}(A_k \mid B_k)}{f(A_k \mid B_k)} \right\}
+\right],
+$$
+
+where the expectation is taken with respect to the external conditional density
+$\tilde{f}(A_k \mid B_k)$, and $f(A_k \mid B_k)$ is the conditional density based
+on the internal Cox model,
+
+$$
+f(A_k \mid B_k)
+= \frac{\exp\{g(Z_k, \beta)\}}
+       {\sum_{i=1}^{n} Y_i(t_k)\,\exp\{g(Z_i, \beta)\}}.
+$$
+
+When $\tilde{g}(Z_k)$ is generated from clinically derived risk groupings,
+$\tilde{f}(A_k \mid B_k)$ does not represent a formal conditional density;
+instead, it can be viewed as a Plackett--Luce ranking metric, and
+$d_{\mathrm{KL}}(\tilde{f} \parallel f;\, t_k)$ can be interpreted as a
+generalized KL divergence. The accumulated KL divergence across the sequence of
+conditional experiments $A_1 \mid B_1, \ldots, A_K \mid B_K$ is
+
+$$
+D_{\mathrm{KL}}(\tilde{f} \parallel f)
+= \sum_{k=1}^{K} d_{\mathrm{KL}}(\tilde{f} \parallel f;\, t_k),
+$$
+
+which measures the discrepancy between the external risk scores and the internal
+Cox model. To integrate external information while accounting for potential
+disparities, we combine the internal log-partial likelihood with the accumulated
+KL divergence by constructing the penalized objective function
+
+$$
+\ell_{\eta}(\beta)
+= \ell(\beta) - \eta\, D_{\mathrm{KL}}(\tilde{f} \parallel f),
+$$
+
+where $\eta \ge 0$ is a tuning parameter that controls the trade-off between the
+internal model and the external risk scores. Setting $\eta = 0$ recovers the
+internal-only Cox fit, whereas larger values of $\eta$ place more weight on the
+external information.
+
+<div style="border-left: 4px solid #6c757d; background-color: #f8f9fa;
+            padding: 1rem 1.5rem; margin: 1.5rem 0; border-radius: 0 4px 4px 0;">
+
+**Equivalent weighted form.** Substituting the Cox-model expressions and noting
+that the unique failure times $t_1 < \cdots < t_K$ coincide with the observed
+internal event times, the integrated objective admits the equivalent weighted
+partial-likelihood form
+
+$$
+\ell_{\eta}(\beta)
+\;\propto\;
+\sum_{i=1}^{n} \left\{
+\frac{\delta_i + \eta\, \tilde{\delta}_i}{1 + \eta}\, g(Z_i, \beta)
+- \delta_i \log\left[ \sum_{l=1}^{n} Y_l(T_i)\,\exp\{g(Z_l, \beta)\} \right]
+\right\},
+$$
+
+where the externally induced pseudo-event weight is defined as
+
+$$
+\tilde{\delta}_i
+= \sum_{k=1}^{K}
+\frac{Y_i(t_k)\,\exp\{\tilde{g}(Z_i)\}}
+     {\sum_{j=1}^{n} Y_j(t_k)\,\exp\{\tilde{g}(Z_j)\}}.
+$$
+
+This representation shows that the external information enters the internal
+partial likelihood by augmenting each subject's observed event indicator
+$\delta_i$ with a fractional pseudo-event weight $\tilde{\delta}_i$ derived from
+the external risk scores, with $\eta$ governing the relative contribution of the
+two sources.
+
+</div>
+
+
+## Regularization for High-Dimensional Data
+
+For high-dimensional applications, where the number of covariates $p$ may be
+large relative to the sample size $n$, we extend the integrated objective by
+adding a regularization term. The resulting objective function enables
+simultaneous variable selection and parameter estimation:
+
+$$
+\ell_{\eta, \lambda}(\beta)
+= \ell_{\eta}(\beta) - \lambda\, P(\beta),
+$$
+
+where $P(\beta)$ is a penalty function and $\lambda \ge 0$ is a tuning parameter
+controlling its strength. The package supports the following choices of
+$P(\beta)$:
+
+- **Ridge** (Hoerl and Kennard, 1970):
+$$
+P(\beta) = \tfrac{1}{2}\,\|\beta\|_2^2 = \tfrac{1}{2}\sum_{j=1}^{p} \beta_j^2,
+$$
+which shrinks coefficients toward zero and stabilizes estimation under
+collinearity.
+
+- **LASSO** (Tibshirani, 1997):
+$$
+P(\beta) = \|\beta\|_1 = \sum_{j=1}^{p} |\beta_j|,
+$$
+which produces sparse solutions by setting some coefficients exactly to zero.
+
+- **Elastic Net** (Simon et al., 2011):
+$$
+P(\beta)
+= \alpha\,\|\beta\|_1 + \tfrac{1}{2}(1 - \alpha)\,\|\beta\|_2^2
+= \sum_{j=1}^{p}\left[ \alpha\,|\beta_j| + \tfrac{1}{2}(1 - \alpha)\,\beta_j^2 \right],
+$$
+where $\alpha \in [0, 1]$ is a mixing parameter that blends the LASSO and ridge
+penalties; $\alpha = 1$ reduces to the LASSO and $\alpha = 0$ to ridge.
+
+In `survkl`, ridge-penalized estimation is provided by `coxkl_ridge`, while the
+elastic-net family (including the LASSO as the special case $\alpha = 1$) is
+provided by `coxkl_enet`. The companion cross-validation routines `cv.coxkl`,
+`cv.coxkl_ridge`, and `cv.coxkl_enet` perform $K$-fold cross-validation to select
+the integration weight $\eta$ and the regularization parameter $\lambda$, using
+Harrell's C-index for discrimination and the V&VH loss for overall model fit.

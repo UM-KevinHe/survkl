@@ -60,7 +60,7 @@ nearest `eta` present in the results).
 
 ``` r
 data(Exampledata_lowdim)
-#> Warning: data set 'Exampledata_lowdim' not found
+#> Warning: data set ‘Exampledata_lowdim’ not found
 
 train_dat_lowdim <- ExampleData_lowdim$train
 beta_external_good_lowdim <- ExampleData_lowdim$beta_external_good
