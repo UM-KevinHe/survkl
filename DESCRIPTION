@@ -1,6 +1,6 @@
 Package: survkl
 Title: Estimate Survival Data with Data Integration
-Version: 1.0.0
+Version: 1.0.1
 URL: https://um-kevinhe.github.io/survkl/
 Authors@R: c(
     person("Yubo","Shao",role=c("aut","cre"),email="ybshao@umich.edu"),
@@ -18,8 +18,7 @@ RoxygenNote: 7.3.3
 License: GPL-3
 LinkingTo:
     Rcpp,
-    RcppArmadillo,
-    RcppParallel
+    RcppArmadillo
 Imports:
     Rcpp,
     ggplot2,
