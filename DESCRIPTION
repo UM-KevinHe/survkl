@@ -1,6 +1,6 @@
 Package: survkl
 Title: Estimate Survival Data with Data Integration
-Version: 1.0.1
+Version: 1.0.2
 URL: https://um-kevinhe.github.io/survkl/
 Authors@R: c(
     person("Yubo","Shao",role=c("aut","cre"),email="ybshao@umich.edu"),
