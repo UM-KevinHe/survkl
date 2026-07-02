@@ -316,12 +316,13 @@ plot.coxkl_ridge <- function(x, test_z = NULL, test_time = NULL, test_delta = NU
 #' @return A \code{ggplot} object showing the performance curve.
 #' 
 #' @examples
-#' data(ExampleData_highdim) 
-#' 
+#' \donttest{
+#' data(ExampleData_highdim)
+#'
 #' train_dat_highdim <- ExampleData_highdim$train
 #' test_dat_highdim <- ExampleData_highdim$test
 #' beta_external_highdim <- ExampleData_highdim$beta_external
-#' 
+#'
 #' model_enet <- coxkl_enet(z = train_dat_highdim$z,
 #'                          delta = train_dat_highdim$status,
 #'                          time = train_dat_highdim$time,
@@ -334,6 +335,7 @@ plot.coxkl_ridge <- function(x, test_z = NULL, test_time = NULL, test_delta = NU
 #'      test_delta = test_dat_highdim$status,
 #'      test_stratum = test_dat_highdim$stratum,
 #'      criteria = "loss")
+#' }
 #'
 #' @importFrom ggplot2 ggplot aes geom_segment geom_line geom_point labs coord_cartesian scale_x_reverse theme_minimal theme element_blank element_line element_text
 #' @importFrom grid unit

@@ -44,7 +44,8 @@ performance is computed via \code{test_eval(..., criteria)}. The x-axis is shown
 in decreasing \code{lambda} with a reversed log10 scale.
 }
 \examples{
-data(ExampleData_highdim) 
+\donttest{
+data(ExampleData_highdim)
 
 train_dat_highdim <- ExampleData_highdim$train
 test_dat_highdim <- ExampleData_highdim$test
@@ -62,5 +63,6 @@ plot(model_enet,
      test_delta = test_dat_highdim$status,
      test_stratum = test_dat_highdim$stratum,
      criteria = "loss")
+}
 
 }
